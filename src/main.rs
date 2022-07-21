@@ -2,7 +2,10 @@ mod project_compiler;
 mod file_compiler;
 mod parser;
 mod tokeniser;
+mod errs;
 
-fn main() {
-    project_compiler::compile_project(&std::env::current_dir().unwrap());
+use crate::errs::*;
+
+fn main() -> Result<(), CompilationError> {
+    return project_compiler::compile_project(&std::env::current_dir().unwrap(), false);
 }

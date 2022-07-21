@@ -3,12 +3,12 @@ enum TokeniserState {
     ReadingTagContent,
 }
 
-pub enum TokenType {
+pub enum Token {
     Tag { name: String, is_start: bool },
     Content { value: String },
 }
 
-pub fn tokenise_element(element: &str) -> Vec<TokenType> {
+pub fn tokenise_element(element: &str) -> Vec<Token> {
     let mut state = TokeniserState::ReadingTag;
     let mut remaining_chars: Vec<char> = element.chars().collect();
 
@@ -24,14 +24,14 @@ pub fn tokenise_element(element: &str) -> Vec<TokenType> {
                     tag_name.remove(0); // (for the slash)
                 }
 
-                tokens.push(TokenType::Tag { name: tag_name, is_start });
+                tokens.push(Token::Tag { name: tag_name, is_start });
                 state = TokeniserState::ReadingTagContent;
             },
             TokeniserState::ReadingTagContent => {
                 let content: String = remaining_chars.clone().into_iter().take_while(|c| *c != '<').collect();
                 remaining_chars.drain(..content.len());
                 if content.len() > 0 {
-                    tokens.push(TokenType::Content { value: content });
+                    tokens.push(Token::Content { value: content });
                 }
                 state = TokeniserState::ReadingTag;
             }

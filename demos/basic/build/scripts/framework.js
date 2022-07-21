@@ -1,7 +1,9 @@
 class SpallElement {
-    constructor(id, parentId) {
-        this.id = id;
-        this.parentId = parentId;
+    constructor(elementName, id, parentId) {
+        this.elementName = elementName;
+        // this.id = id;
+        // this.parentId = parentId;
+        // this.children = [];
     }
 
     generateRenderables() {
@@ -26,13 +28,30 @@ class SpallRootElement extends SpallElement {
 class SpallRenderer {
     constructor() {
         this.idToHtml = {};
+        this.rendering = false;
+        this.pageTree = {}; // 
     }
     
     renderPage() {
+        this._throwIfRendering();
         this.renderElement(new __SpallCompiledRoot());
+    }
+
+    renderPath(element, path) {
+        this._throwIfRendering();
+
+        var fullPath = '';
+
+    }
+
+    renderSimple(element) {
+
     }
     
     renderElement(element) {
+        this._throwIfRendering();
+
+
         var htmlElement = this.idToHtml[element.id];
         // existingHtml.parentElement.removeChild(existingHtml);
         if (htmlElement == null) {
@@ -44,6 +63,15 @@ class SpallRenderer {
 
         var renderables = element.generateRenderables();
         htmlElement.innerHTML = renderables.join('');
+    }
+
+
+    _throwIfRendering() {
+        if (this.rendering) throw new Exception("Already rendering");
+    }
+
+    _getElemFromPath(path) {
+
     }
 
     _numericIdToHtmlId(id) {
