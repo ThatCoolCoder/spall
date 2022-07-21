@@ -1,6 +1,8 @@
-mod compile_project;
-mod compile_file;
+mod project_compiler;
+mod file_compiler;
+mod parser;
+mod tokeniser;
 
 fn main() {
-    compile_project::compile_project(&std::env::current_dir().unwrap());
+    project_compiler::compile_project(&std::env::current_dir().unwrap());
 }

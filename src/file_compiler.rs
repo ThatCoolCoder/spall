@@ -2,6 +2,7 @@
 
 use std::path::Path;
 use std::fs;
+use crate::tokeniser;
 
 const ROOT_ELEMENT_NAME: &str = "Root";
 
@@ -19,10 +20,22 @@ pub fn compile_element(file_content: &str, element_name: &str) -> String {
     let compiled_element_name = generate_compiled_element_name(element_name);
     let base_class = if element_name == ROOT_ELEMENT_NAME { "SpallRootElement" } else { "SpallElement" };
 
+    let tokens = tokeniser::tokenise_element(file_content);
+    for token in tokens {
+        match token {
+            tokeniser::TokenType::Tag {name, is_start} => {
+                println!("Token tag, name is {name} and is start is {is_start}");
+            }
+            tokeniser::TokenType::Content {value} => {
+                println!("Content tag, value is {value}");
+            }
+        }
+    }
+
     let result = format!(r#"
         class {compiled_element_name} extends {base_class} {{
             generateRenderables() {{
-                return ["{uncompiled}"];
+                return [`{uncompiled}`];
             }}
         }}
     "#);
@@ -32,4 +45,4 @@ pub fn compile_element(file_content: &str, element_name: &str) -> String {
 
 fn generate_compiled_element_name(element_name: &str) -> String {
     return format!("__SpallCompiled{element_name}");
-} 
+}

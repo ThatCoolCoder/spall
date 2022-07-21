@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use crate::compile_file;
+use crate::file_compiler;
 
 struct ProjectPaths {
     root_dir: PathBuf,
@@ -55,7 +55,7 @@ fn compile_elements(project_paths: &ProjectPaths) -> Vec<String> {
     let mut compiled_elements = Vec::new();
 
     for entry in element_files {
-        let compiled = compile_file::compile_element_file(&entry.unwrap().path().as_path());
+        let compiled = file_compiler::compile_element_file(&entry.unwrap().path().as_path());
         compiled_elements.push(compiled);
     }
     return compiled_elements;
