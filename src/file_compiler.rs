@@ -3,7 +3,7 @@
 use std::path::Path;
 use std::fs;
 use crate::errs::*;
-use crate::tokeniser;
+use crate::{tokeniser, parser};
 
 const ROOT_ELEMENT_NAME: &str = "Root";
 
@@ -25,17 +25,9 @@ pub fn compile_element(file_content: &str, element_name: &str) -> Result<String,
     let compiled_element_name = generate_compiled_element_name(element_name);
     let base_class = if element_name == ROOT_ELEMENT_NAME { "SpallRootElement" } else { "SpallElement" };
 
+    // testing_stuff(file_content);
     let tokens = tokeniser::tokenise_element(file_content);
-    for token in tokens {
-        match token {
-            tokeniser::Token::Tag {name, is_start} => {
-                println!("Token tag, name is {name} and is start is {is_start}");
-            }
-            tokeniser::Token::Content {value} => {
-                println!("Content tag, value is {value}");
-            }
-        }
-    }
+    let tree = parser::parse_element(&tokens);
 
     let escaped = escape_quotes(&uncompiled, '`', '\\');
 
@@ -54,6 +46,27 @@ pub fn compile_element(file_content: &str, element_name: &str) -> Result<String,
     "#);
 
     return Ok(result);
+}
+
+fn testing_stuff(file_content: &str) {
+    let tokens = tokeniser::tokenise_element(file_content);
+    for token in &tokens {
+        match token {
+            tokeniser::Token::Tag {name, is_start} => {
+                println!("Token tag, name is {name} and is start is {is_start}");
+            }
+            tokeniser::Token::Content {value} => {
+                println!("Content tag, value is {value}");
+            }
+        }
+    }
+
+    let tree = parser::parse_element(&tokens);
+    for node in tree.nodes {
+        let tag_name = node.tag_name;
+        let content = node.inner_text;
+        println!("Node, tag is {tag_name} and content is {content}");
+    }
 }
 
 fn generate_compiled_element_name(element_name: &str) -> String {
