@@ -1,24 +1,26 @@
 
         class __SpallCompiledButton extends SpallElement {
-            constructor() {
-                super('Button');
+            constructor(id, parentId) {
+                super('Button', id, parentId);
             }
 
             generateRenderables() {
-                return [`<button>I'm a button</button>`];
+                return [new SpallMarkupRenderable(`<button>`), new SpallMarkupRenderable(`<span>I'm a button`), new SpallMarkupRenderable(`</span>`), new SpallMarkupRenderable(`</button>`)];
             }
         }
     
 
         class __SpallCompiledRoot extends SpallRootElement {
-            constructor() {
-                super('Root');
+            constructor(id, parentId) {
+                super('Root', id, parentId);
             }
 
             generateRenderables() {
-                return [`<h1>Hello world!</h1>
-<Button></Button>
-\`haha\`\\`];
+                return [new SpallMarkupRenderable(`<h1>`), new SpallMarkupRenderable(`<span>Hello world!`), new SpallMarkupRenderable(`</span>`), new SpallMarkupRenderable(`</h1>`), new SpallMarkupRenderable(`<span>
+`), new SpallMarkupRenderable(`</span>`), new SpallMarkupRenderable(`<div>`), new SpallMarkupRenderable(`<span>
+    `), new SpallMarkupRenderable(`</span>`), new SpallElementRenderable("Button", __SpallCompiledButton), new SpallMarkupRenderable(`<span>
+    Look, I'm about to break the escaper: "\`haha\`\\ 
+`), new SpallMarkupRenderable(`</span>`), new SpallMarkupRenderable(`</div>`)];
             }
         }
     

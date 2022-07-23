@@ -6,8 +6,12 @@ pub type NodeIndex = usize;
 
 pub struct Node {
     pub tag_name: String,
+
+    // The inner text of a node goes before its children when it is rendered. If you want to intersperse text and children then you can just use spans to hold the text.
     pub inner_text: String,
-    pub children: Vec<NodeIndex>
+
+    pub children: Vec<NodeIndex>,
+    pub parent: Option<NodeIndex>
 }
 
 pub struct Tree {
@@ -20,7 +24,8 @@ impl Tree {
         let node = Node {
             tag_name: "".to_string(),
             inner_text: "".to_string(),
-            children: vec!()
+            children: vec!(),
+            parent: None
         };
         return Tree {
             nodes: vec!(node),
@@ -30,13 +35,14 @@ impl Tree {
 
     pub fn add_node(&mut self, parent: NodeIndex, tag_name: String, inner_text: String) -> NodeIndex {
         let index = self.nodes.len();
-        let parent = &mut self.nodes[parent];
-        parent.children.push(index);
+        let parent_node = &mut self.nodes[parent];
+        parent_node.children.push(index);
 
         self.nodes.push(Node {
             tag_name: tag_name,
             inner_text: inner_text,
-            children: vec!()
+            children: vec!(),
+            parent: Some(parent)
         });
         return index;
     }
@@ -56,8 +62,20 @@ impl Tree {
     pub fn get_root_mut(&mut self) -> &mut Node {
         return &mut self.nodes[self.root];
     }
-}
 
+    pub fn depth_first_map<T>(&self, enter_func: &mut T) where T: FnMut(&Node, bool) {
+        self.inner_depth_first_map(self.root, enter_func);
+    }
+
+    fn inner_depth_first_map<T>(&self, node: NodeIndex, enter_func: &mut T) where T: FnMut(&Node, bool) {
+        let node = self.get_node(node);
+        enter_func(node, true);
+        for child in &node.children {
+            self.inner_depth_first_map(*child, enter_func);
+        }
+        enter_func(node, false);
+    }
+}
 
 pub fn parse_element(tokens: &Vec<tokeniser::Token>) -> Tree {
     // Arrange tokens in a hierarchy.
@@ -81,10 +99,7 @@ pub fn parse_element(tokens: &Vec<tokeniser::Token>) -> Tree {
                 }
             }
             tokeniser::Token::Content { value } => {
-                // let node = Node::new_span(value);
-                // node_stack.last().unwrap().children.push(node);
-                // tree.add_node(*node_stack.last().unwrap(), "span".to_string(), value.clone());
-                tree.get_node_mut(*node_stack.last().unwrap()).inner_text = value.clone();
+                tree.add_node(*node_stack.last().unwrap(), "span".to_string(), value.to_string());
             }
         }
     }
