@@ -8,9 +8,9 @@ use std::path::Path;
 const ROOT_ELEMENT_NAME: &str = "Root";
 // const HTML_TAGS: Vec<&str> = vec!["html", "head", "body", "h1", "p", "html", "html", "html", "html", "html", "html"];
 
-enum RenderableType {
-    PlainMarkup,
-    Element,
+enum Renderable {
+    Markup(String),
+    Element{ tag_name: String, compiled_element_name: String, path: String },
 }
 
 pub fn compile_element_file(file_path: &Path) -> Result<String, CompilationError> {
@@ -74,7 +74,7 @@ pub fn compile_element(file_content: &str, element_name: &str) -> Result<String,
         None => (),
     });
 
-    let joined_renderables = renderables.join(", ");
+    let stringified_renderables = renderables_to_string(&renderables);
 
     let result = format!(
         r#"
@@ -84,7 +84,7 @@ pub fn compile_element(file_content: &str, element_name: &str) -> Result<String,
             }}
 
             generateRenderables() {{
-                return [{joined_renderables}];
+                return [{stringified_renderables}];
             }}
         }}
     "#
@@ -93,7 +93,7 @@ pub fn compile_element(file_content: &str, element_name: &str) -> Result<String,
     return Ok(result);
 }
 
-fn renderable_from_node_visit(node: &parser::Node, is_entering: bool, path: &str) -> Option<String> {
+fn renderable_from_node_visit(node: &parser::Node, is_entering: bool, path: &str) -> Option<Renderable> {
     let is_element = node.tag_name.chars().next().unwrap().is_uppercase();
 
     if is_element {
@@ -120,6 +120,23 @@ fn renderable_from_node_visit(node: &parser::Node, is_entering: bool, path: &str
             escape_quotes(&markup_string, '`', '\\')
         ));
     }
+}
+
+fn renderables_to_string(renderables: &Vec<Renderable>) -> String {
+    let stringified_renderables = vec!();
+    for renderable in renderables {
+        match renderable {
+            Renderable::Markup(value) => format!(
+                "new SpallMarkupRenderable(`{}`)",
+                escape_quotes(&value, '`', '\\')
+            ),
+            Renderable::Element{tag_name, compiled_element_name, path} => format!(
+                r#"new SpallElementRenderable("{tag_name}", {compiled_element_name}, "{path}")"#
+            )
+        }
+    }
+
+    return stringified_renderables.join(", ");
 }
 
 fn generate_compiled_element_name(element_name: &str) -> String {
