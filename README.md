@@ -1,6 +1,6 @@
 # Spall - A chip off the old block
 
-> (noun) A chip or splinter of stone
+> Spall: (noun) A chip or splinter of stone
 
 Unremarkable JS framework for the benefit of my learning, is probably very similar to some other frameworks. I've build this before using a JS framework so that I'm not influenced by the design of others, although I have used C# Blazor extensively. Compiler is built in Rust. Very WIP.
 
