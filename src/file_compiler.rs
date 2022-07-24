@@ -46,12 +46,26 @@ pub fn compile_element(file_content: &str, element_name: &str) -> Result<String,
     let tree = parser::parse_element(&tokens);
 
     // Building
+
     let mut renderables = vec![];
+    // I don't know why the code for tracking the path stack works, but it does
+    let mut path_stack = vec![0];
 
     tree.depth_first_map(&mut |node, is_entering| match node.parent {
         // (Ignore root node)
         Some(_) => {
-            let renderable = renderable_from_node_visit(node, is_entering);
+            let path = path_stack.iter().map(|x: &i32| x.to_string()).collect::<Vec<String>>().join("/");
+            if is_entering {
+                path_stack.push(0);
+            }
+            else {
+                path_stack.pop();
+                if path_stack.len() > 0 {
+                    let idx = path_stack.len() - 1;
+                    path_stack[idx] += 1;
+                }
+            }
+            let renderable = renderable_from_node_visit(node, is_entering, &path);
             match renderable {
                 Some(v) => renderables.push(v),
                 _ => ()
@@ -61,8 +75,6 @@ pub fn compile_element(file_content: &str, element_name: &str) -> Result<String,
     });
 
     let joined_renderables = renderables.join(", ");
-
-    // let renderables = tokens.match()
 
     let result = format!(
         r#"
@@ -81,24 +93,27 @@ pub fn compile_element(file_content: &str, element_name: &str) -> Result<String,
     return Ok(result);
 }
 
-fn renderable_from_node_visit(node: &parser::Node, is_entering: bool) -> Option<String> {
+fn renderable_from_node_visit(node: &parser::Node, is_entering: bool, path: &str) -> Option<String> {
     let is_element = node.tag_name.chars().next().unwrap().is_uppercase();
 
     if is_element {
         if is_entering {
             return Some(format!(
-                r#"new SpallElementRenderable("{}", {})"#,
+                r#"new SpallElementRenderable("{}", {}, "{}")"#,
                 node.tag_name,
-                generate_compiled_element_name(&node.tag_name)
+                generate_compiled_element_name(&node.tag_name),
+                path
             ));
         }
         else {
             return None;
         }
     } else {
-        let markup_string = match is_entering {
-            true => format!("<{}>{}", node.tag_name, node.inner_text),
-            false => format!("</{}>", node.tag_name),
+        let markup_string = match (node.is_standalone, is_entering) {
+            (true, true) => format!("<{} />", node.tag_name),
+            (true, false) => return None,
+            (false, true) => format!("<{}>{}", node.tag_name, node.inner_text),
+            (false, false) => format!("</{}>", node.tag_name),
         };
         return Some(format!(
             "new SpallMarkupRenderable(`{}`)",

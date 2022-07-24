@@ -1,6 +1,8 @@
-# spall
+# Spall - A chip of the old block
 
-Unremarkable JS framework for the benefit of my learning. Compiler is built in Rust. Very WIP;
+> (noun) A chip or splinter of stone
+
+Unremarkable JS framework for the benefit of my learning, is probably very similar to some other frameworks. I've build this before using a JS framework so that I'm not influenced by the design of others, although I have used C# Blazor extensively. Compiler is built in Rust. Very WIP.
 
 ## Misc notes:
 
@@ -10,4 +12,4 @@ The `meta/` dir of a project contains stuff that is not the app itself. `index.h
 
 When an app is built, lots of files are created in the `build/` directory, which can then be used in a regular server like Apache.
 
-The `runtime/` dir contains the stuff that runs in the browser, currently a single JS file.
+The `runtime/` dir contains the stuff that runs in the browser, currently a single JS file. I should organise it better and compile the separate files into the bundle.

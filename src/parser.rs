@@ -1,13 +1,16 @@
 // use std::rc::Rc;
 
 use crate::tokeniser;
+use crate::tag_type::TagType;
 
 pub type NodeIndex = usize;
 
 pub struct Node {
     pub tag_name: String,
+    pub is_standalone: bool,
 
-    // The inner text of a node goes before its children when it is rendered. If you want to intersperse text and children then you can just use spans to hold the text.
+    // The inner text of a node goes before its children when it is rendered.
+    // If you want to intersperse text and children then you can just use spans as children to hold the text.
     pub inner_text: String,
 
     pub children: Vec<NodeIndex>,
@@ -23,6 +26,7 @@ impl Tree {
     pub fn new() -> Tree {
         let node = Node {
             tag_name: "".to_string(),
+            is_standalone: false,
             inner_text: "".to_string(),
             children: vec!(),
             parent: None
@@ -33,14 +37,15 @@ impl Tree {
         }
     }
 
-    pub fn add_node(&mut self, parent: NodeIndex, tag_name: String, inner_text: String) -> NodeIndex {
+    pub fn add_node(&mut self, parent: NodeIndex, tag_name: String, is_standalone: bool, inner_text: String) -> NodeIndex {
         let index = self.nodes.len();
         let parent_node = &mut self.nodes[parent];
         parent_node.children.push(index);
 
         self.nodes.push(Node {
-            tag_name: tag_name,
-            inner_text: inner_text,
+            tag_name,
+            is_standalone,
+            inner_text,
             children: vec!(),
             parent: Some(parent)
         });
@@ -89,17 +94,22 @@ pub fn parse_element(tokens: &Vec<tokeniser::Token>) -> Tree {
 
     for token in tokens {
         match token {
-            tokeniser::Token::Tag { name, is_start } => {
-                if *is_start {
-                    let new_node_idx = tree.add_node(*node_stack.last().unwrap(), name.clone(), "".to_string());
-                    node_stack.push(new_node_idx);
-                }
-                else {
-                    node_stack.pop();
+            tokeniser::Token::Tag { name, tag_type } => {
+                match tag_type {
+                    TagType::Start => {
+                        let new_node_idx = tree.add_node(*node_stack.last().unwrap(), name.clone(), false, "".to_string());
+                        node_stack.push(new_node_idx);
+                    }
+                    TagType::End => {
+                        node_stack.pop();
+                    }
+                    TagType::Standalone => {
+                        tree.add_node(*node_stack.last().unwrap(), name.clone(), true, "".to_string());
+                    }
                 }
             }
             tokeniser::Token::Content { value } => {
-                tree.add_node(*node_stack.last().unwrap(), "span".to_string(), value.to_string());
+                tree.add_node(*node_stack.last().unwrap(), "span".to_string(), false, value.to_string());
             }
         }
     }

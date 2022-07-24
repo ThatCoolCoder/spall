@@ -1,5 +1,12 @@
 <h1>Hello world!</h1>
 <div>
+    Before the button
     <Button></Button>
-    Look, I'm about to break the escaper: "`haha`\ 
+    After the button
+    <br />
+    Another button
+    <Button></Button>
+    <p>Look, I'm about to break the escaper: "`haha`\ </p>
+
+    And look, there's a line<br /> break right in the middle of this sentence.
 </div>

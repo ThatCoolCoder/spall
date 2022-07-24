@@ -1,6 +1,7 @@
 mod project_compiler;
 mod file_compiler;
 mod parser;
+mod tag_type;
 mod tokeniser;
 mod errs;
 
