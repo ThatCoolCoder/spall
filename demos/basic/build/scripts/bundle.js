@@ -1,7 +1,7 @@
 
         class __SpallCompiledButton extends SpallElement {
-            constructor(id, parentId) {
-                super('Button', id, parentId);
+            constructor(id, parentId, rendererInstance) {
+                super('Button', id, parentId, rendererInstance);
             }
 
             generateRenderables() {
@@ -11,8 +11,8 @@
     
 
         class __SpallCompiledRoot extends SpallRootElement {
-            constructor(id, parentId) {
-                super('Root', id, parentId);
+            constructor(id, parentId, rendererInstance) {
+                super('Root', id, parentId, rendererInstance);
             }
 
             generateRenderables() {

@@ -58,8 +58,8 @@ pub fn compile_element(file_content: &str, element_name: &str) -> Result<String,
     let result = format!(
         r#"
         class {compiled_element_name} extends {base_class} {{
-            constructor(id, parentId) {{
-                super('{element_name}', id, parentId);
+            constructor(id, parentId, rendererInstance) {{
+                super('{element_name}', id, parentId, rendererInstance);
             }}
 
             generateRenderables() {{

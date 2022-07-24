@@ -16,11 +16,12 @@ class SpallUtils {
 
 class SpallElement {
     // Represents an element that's actually on the page and has a state and such. Is extended by compiled files.
-    constructor(elementName, id, parentId) {
+    constructor(elementName, id, parentId, rendererInstance) {
         this.elementName = elementName;
         this.id = id;
         this.parentId = parentId;
         this.children = [];
+        this.rendererInstance = rendererInstance;
     }
 
     // Should return an array of SpallRenderables
@@ -130,13 +131,13 @@ class SpallRenderer {
                 this._logger.logAddMarkup(renderable.markup);
             }
             else {
-                var child = new renderable.elementClass(this._newElementId(), element.id);
+                var child = new renderable.elementClass(this._newElementId(), element.id, this);
 
                 var childContainer = document.createElement('div');
                 childContainer.id = this._numericIdToHtmlId(child.id);
                 this._idToHtml[child.id] = childContainer;
 
-                this._registerElement(element, this._idToPath[element.id] + '/' + renderable.relativePath);
+                this._registerElement(child, this._idToPath[element.id] + '/' + renderable.relativePath);
 
                 this.renderElement(child, childContainer);
 
