@@ -10,7 +10,11 @@ const ROOT_ELEMENT_NAME: &str = "Root";
 
 enum Renderable {
     Markup(String),
-    Element{ tag_name: String, compiled_element_name: String, path: String },
+    Element {
+        tag_name: String,
+        compiled_element_name: String,
+        path: String,
+    },
 }
 
 pub fn compile_element_file(file_path: &Path) -> Result<String, CompilationError> {
@@ -54,11 +58,14 @@ pub fn compile_element(file_content: &str, element_name: &str) -> Result<String,
     tree.depth_first_map(&mut |node, is_entering| match node.parent {
         // (Ignore root node)
         Some(_) => {
-            let path = path_stack.iter().map(|x: &i32| x.to_string()).collect::<Vec<String>>().join("/");
+            let path = path_stack
+                .iter()
+                .map(|x: &i32| x.to_string())
+                .collect::<Vec<String>>()
+                .join("/");
             if is_entering {
                 path_stack.push(0);
-            }
-            else {
+            } else {
                 path_stack.pop();
                 if path_stack.len() > 0 {
                     let idx = path_stack.len() - 1;
@@ -68,7 +75,7 @@ pub fn compile_element(file_content: &str, element_name: &str) -> Result<String,
             let renderable = renderable_from_node_visit(node, is_entering, &path);
             match renderable {
                 Some(v) => renderables.push(v),
-                _ => ()
+                _ => (),
             }
         }
         None => (),
@@ -93,19 +100,21 @@ pub fn compile_element(file_content: &str, element_name: &str) -> Result<String,
     return Ok(result);
 }
 
-fn renderable_from_node_visit(node: &parser::Node, is_entering: bool, path: &str) -> Option<Renderable> {
+fn renderable_from_node_visit(
+    node: &parser::Node,
+    is_entering: bool,
+    path: &str,
+) -> Option<Renderable> {
     let is_element = node.tag_name.chars().next().unwrap().is_uppercase();
 
     if is_element {
         if is_entering {
-            return Some(format!(
-                r#"new SpallElementRenderable("{}", {}, "{}")"#,
-                node.tag_name,
-                generate_compiled_element_name(&node.tag_name),
-                path
-            ));
-        }
-        else {
+            return Some(Renderable::Element {
+                tag_name: node.tag_name.clone(),
+                compiled_element_name: generate_compiled_element_name(&node.tag_name),
+                path: path.to_string(),
+            });
+        } else {
             return None;
         }
     } else {
@@ -115,25 +124,27 @@ fn renderable_from_node_visit(node: &parser::Node, is_entering: bool, path: &str
             (false, true) => format!("<{}>{}", node.tag_name, node.inner_text),
             (false, false) => format!("</{}>", node.tag_name),
         };
-        return Some(format!(
-            "new SpallMarkupRenderable(`{}`)",
-            escape_quotes(&markup_string, '`', '\\')
-        ));
+        return Some(Renderable::Markup(markup_string));
     }
 }
 
 fn renderables_to_string(renderables: &Vec<Renderable>) -> String {
-    let stringified_renderables = vec!();
+    let mut stringified_renderables = vec![];
     for renderable in renderables {
-        match renderable {
+        let string_val = match renderable {
             Renderable::Markup(value) => format!(
                 "new SpallMarkupRenderable(`{}`)",
                 escape_quotes(&value, '`', '\\')
             ),
-            Renderable::Element{tag_name, compiled_element_name, path} => format!(
+            Renderable::Element {
+                tag_name,
+                compiled_element_name,
+                path,
+            } => format!(
                 r#"new SpallElementRenderable("{tag_name}", {compiled_element_name}, "{path}")"#
-            )
-        }
+            ),
+        };
+        stringified_renderables.push(string_val);
     }
 
     return stringified_renderables.join(", ");
