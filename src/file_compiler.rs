@@ -44,13 +44,35 @@ pub fn compile_element(file_content: &str, element_name: &str) -> Result<String,
         "SpallElement"
     };
 
-    // Processing
+    // Reading/ parsing
 
     let tokens = tokeniser::tokenise_element(file_content);
     let tree = parser::parse_element(&tokens);
 
-    // Building
+    // Building/writing
 
+    let mut renderables = renderables_from_tree(&tree);
+    renderables = simplify_renderables(&renderables);
+    let stringified_renderables = renderables_to_string(&renderables);
+
+    let result = format!(
+        r#"
+        class {compiled_element_name} extends {base_class} {{
+            constructor(id, parentId) {{
+                super('{element_name}', id, parentId);
+            }}
+
+            generateRenderables() {{
+                return [{stringified_renderables}];
+            }}
+        }}
+    "#
+    );
+
+    return Ok(result);
+}
+
+fn renderables_from_tree(tree: &parser::Tree) -> Vec<Renderable> {
     let mut renderables = vec![];
     // I don't know why the code for tracking the path stack works, but it does
     let mut path_stack = vec![0];
@@ -80,24 +102,7 @@ pub fn compile_element(file_content: &str, element_name: &str) -> Result<String,
         }
         None => (),
     });
-
-    let stringified_renderables = renderables_to_string(&renderables);
-
-    let result = format!(
-        r#"
-        class {compiled_element_name} extends {base_class} {{
-            constructor(id, parentId) {{
-                super('{element_name}', id, parentId);
-            }}
-
-            generateRenderables() {{
-                return [{stringified_renderables}];
-            }}
-        }}
-    "#
-    );
-
-    return Ok(result);
+    return renderables;
 }
 
 fn renderable_from_node_visit(
@@ -126,6 +131,41 @@ fn renderable_from_node_visit(
         };
         return Some(Renderable::Markup(markup_string));
     }
+}
+
+fn simplify_renderables(renderables: &Vec<Renderable>) -> Vec<Renderable> {
+    return join_successive_markup_renderables(renderables);
+}
+
+fn join_successive_markup_renderables(renderables: &Vec<Renderable>) -> Vec<Renderable> {
+    let mut new_renderables = vec![];
+    let mut crnt_markup_string = "".to_string();
+    for renderable in renderables {
+        match renderable {
+            Renderable::Markup(markup_string) => {
+                crnt_markup_string += markup_string;
+            }
+            // Surely there's got to be a better way than deconstructing and reconstructing the whole enum if we don't want to modify it
+            Renderable::Element {
+                tag_name,
+                compiled_element_name,
+                path,
+            } => {
+                new_renderables.push(Renderable::Markup(crnt_markup_string));
+                crnt_markup_string = "".to_string();
+                new_renderables.push(Renderable::Element {
+                    tag_name: tag_name.clone(),
+                    compiled_element_name: compiled_element_name.clone(),
+                    path: path.clone(),
+                });
+            }
+        }
+    }
+    if crnt_markup_string.len() > 0 {
+        new_renderables.push(Renderable::Markup(crnt_markup_string));
+    }
+
+    return new_renderables;
 }
 
 fn renderables_to_string(renderables: &Vec<Renderable>) -> String {

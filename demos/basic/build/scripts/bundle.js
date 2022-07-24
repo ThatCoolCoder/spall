@@ -5,7 +5,7 @@
             }
 
             generateRenderables() {
-                return [new SpallMarkupRenderable(`<button>`), new SpallMarkupRenderable(`<span>I'm a button`), new SpallMarkupRenderable(`</span>`), new SpallMarkupRenderable(`</button>`)];
+                return [new SpallMarkupRenderable(`<button><span>I'm a button</span></button>`)];
             }
         }
     
@@ -16,18 +16,18 @@
             }
 
             generateRenderables() {
-                return [new SpallMarkupRenderable(`<h1>`), new SpallMarkupRenderable(`<span>Hello world!`), new SpallMarkupRenderable(`</span>`), new SpallMarkupRenderable(`</h1>`), new SpallMarkupRenderable(`<span>
-`), new SpallMarkupRenderable(`</span>`), new SpallMarkupRenderable(`<div>`), new SpallMarkupRenderable(`<span>
+                return [new SpallMarkupRenderable(`<h1><span>Hello world!</span></h1><span>
+</span><div><span>
     Before the button
-    `), new SpallMarkupRenderable(`</span>`), new SpallElementRenderable("Button", __SpallCompiledButton, "2/1"), new SpallMarkupRenderable(`<span>
+    </span>`), new SpallElementRenderable("Button", __SpallCompiledButton, "2/1"), new SpallMarkupRenderable(`<span>
     After the button
-    `), new SpallMarkupRenderable(`</span>`), new SpallMarkupRenderable(`<br />`), new SpallMarkupRenderable(`<span>
+    </span><br /><span>
     Another button
-    `), new SpallMarkupRenderable(`</span>`), new SpallElementRenderable("Button", __SpallCompiledButton, "2/5"), new SpallMarkupRenderable(`<span>
-    `), new SpallMarkupRenderable(`</span>`), new SpallMarkupRenderable(`<p>`), new SpallMarkupRenderable(`<span>Look, I'm about to break the escaper: "\`haha\`\\ `), new SpallMarkupRenderable(`</span>`), new SpallMarkupRenderable(`</p>`), new SpallMarkupRenderable(`<span>
+    </span>`), new SpallElementRenderable("Button", __SpallCompiledButton, "2/5"), new SpallMarkupRenderable(`<span>
+    </span><p><span>Look, I'm about to break the escaper: "\`haha\`\\ </span></p><span>
 
-    And look, there's a line`), new SpallMarkupRenderable(`</span>`), new SpallMarkupRenderable(`<br />`), new SpallMarkupRenderable(`<span> break right in the middle of this sentence.
-`), new SpallMarkupRenderable(`</span>`), new SpallMarkupRenderable(`</div>`)];
+    And look, there's a line</span><br /><span> break right in the middle of this sentence.
+</span></div>`)];
             }
         }
     
