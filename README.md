@@ -1,4 +1,4 @@
-# Spall - A chip of the old block
+# Spall - A chip off the old block
 
 > (noun) A chip or splinter of stone
 
