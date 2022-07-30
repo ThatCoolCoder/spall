@@ -114,7 +114,7 @@ class SpallRenderer {
     }
 
     _numericIdToHtmlId(id) {
-        return `spallElement${id}`;
+        return `__sp${id}`;
     }
 
     _getElementByPath(path, baseElement=document.body) {
