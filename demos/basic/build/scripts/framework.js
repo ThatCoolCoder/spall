@@ -11,95 +11,27 @@ class SpallUtils {
         } else {
             element.insertBefore(child, element.children[index])
         }
-    }   
-}
-
-class SpallElement {
-    // Represents an element that's actually on the page and has a state and such. Is extended by compiled files.
-    constructor(elementName, id, parentId, rendererInstance) {
-        this.elementName = elementName;
-        this.id = id;
-        this.parentId = parentId;
-        this.children = [];
-        this.rendererInstance = rendererInstance;
     }
 
-    // Should return an array of SpallRenderables
-    generateRenderables() {
-        SpallUtils.fatalRenderError(`generateRenderables was not overridden in ${this.constructor.name}`);
-    }
-}
-
-class SpallRootElement extends SpallElement {
-
-}
-
-// class __CompiledExampleElement extends SpallElement {
-//     generateRenderables() {
-//         return ['<h1>', 55, '</h1>'];
-//     }
-// }
-
-class SpallRenderable {
-    // (abstract class thingy)
-}
-
-class SpallMarkupRenderable extends SpallRenderable {
-    constructor(markup) {
-        super();
-        this.markup = markup;
-    }
-}
-
-class SpallElementRenderable extends SpallRenderable {
-    constructor(elementName, elementClass, relativePath) {
-        super();
-        this.elementName = elementName;
-        this.elementClass = elementClass;
-        this.relativePath = relativePath;
-    }
-}
-
-class SpallRenderLogger {
-    constructor() {
-        this.indent = 0;
-        this.indentIncrement = 3;
-    }
-
-    logStartRender(element) {
-        console.log(`${this._generateIndent()}-- Start render ${element.elementName}`);
-        this.indent += this.indentIncrement;
-    }
-
-    logAddMarkup(markup) {
-        console.log(`${this._generateIndent()}Rendering ${markup}`);
-    }
-
-    logFinishRender(element) {
-        this.indent -= this.indentIncrement;
-        console.log(`${this._generateIndent()}-- Finish render ${element.elementName}`);
-    }
-
-    logCreatedElement(element) {
-        console.log(`${this._generateIndent()}Creating element for ${element.elementName}. Id is ${element.id}`)
-    }
-
-    _generateIndent() {
-        return ' '.repeat(this.indent);
+    static abstractNotOverridden() {
+        // Put this in your abstract methods so it throws if it's not overridden.
+        var functionName = new Error().stack.split('\n')[1].split('@')[0];
+        throw new Error(`Abstract function "${functionName}" not overridden`);
     }
 }
 
 class SpallRenderer {
-    constructor() {
+    constructor(logger) {
         this._idToHtml = {}; // d
         this._lastUsedId = 0;
         this.rendering = false;
-        this._logger = new SpallRenderLogger();
+        this._logger = logger;
 
         this._idToPath = {}; // these two are relative to document.body
         this._pathToId = {};
         this._idToElement = {};
     }
+    
     renderPage() {
         this._throwIfRendering();
         var root = new __SpallCompiledRoot(this._lastUsedId, -1);
@@ -201,5 +133,123 @@ class SpallRenderer {
         return crntElement;
     }
 }
+class SpallRenderable {
+    // (abstract class thingy)
+}
 
-SpallRenderer.instance = new SpallRenderer();
+class SpallMarkupRenderable extends SpallRenderable {
+    constructor(markup) {
+        super();
+        this.markup = markup;
+    }
+}
+
+class SpallElementRenderable extends SpallRenderable {
+    constructor(elementName, elementClass, relativePath) {
+        super();
+        this.elementName = elementName;
+        this.elementClass = elementClass;
+        this.relativePath = relativePath;
+    }
+}
+// Interface for render loggers
+class ISpallRenderLogger {
+    logStartRender(element) {
+        SpallUtils.abstractNotOverridden();
+    }
+
+    logAddMarkup(markup) {
+        SpallUtils.abstractNotOverridden();
+    }
+
+    logFinishRender(element) {
+        SpallUtils.abstractNotOverridden();
+    }
+
+    logCreatedElement(element) {
+        SpallUtils.abstractNotOverridden();
+    }
+}
+
+// Render logger that does nothing, for production
+class SpallMockRenderLogger {
+    constructor() {
+    }
+
+    logStartRender(element) {
+
+    }
+
+    logAddMarkup(markup) {
+
+    }
+
+    logFinishRender(element) {
+
+    }
+
+    logCreatedElement(element) {
+
+    }
+}
+
+// Render logger that logs everything, for development
+class SpallDebugRenderLogger {
+    constructor() {
+        this.indent = 0;
+        this.indentIncrement = 3;
+    }
+
+    logStartRender(element) {
+        console.log(`${this._generateIndent()}-- Start render ${element.elementName}`);
+        this.indent += this.indentIncrement;
+    }
+
+    logAddMarkup(markup) {
+        console.log(`${this._generateIndent()}Rendering ${markup}`);
+    }
+
+    logFinishRender(element) {
+        this.indent -= this.indentIncrement;
+        console.log(`${this._generateIndent()}-- Finish render ${element.elementName}`);
+    }
+
+    logCreatedElement(element) {
+        console.log(`${this._generateIndent()}Creating element for ${element.elementName}. Id is ${element.id}`)
+    }
+
+    _generateIndent() {
+        return ' '.repeat(this.indent);
+    }
+}
+class SpallElement {
+    // Represents an element that's actually on the page and has a state and such. Is extended by compiled files.
+    constructor(elementName, id, parentId, rendererInstance) {
+        this.elementName = elementName;
+        this.id = id;
+        this.parentId = parentId;
+        this.children = [];
+        this.rendererInstance = rendererInstance;
+    }
+
+    // Should return an array of SpallRenderables
+    generateRenderables() {
+        SpallUtils.fatalRenderError(`generateRenderables was not overridden in ${this.constructor.name}`);
+    }
+
+    needsRender() {
+        this.rendererInstance.renderElement(this);
+    }
+}
+
+// Compiled project creates a bunch of classes like this one:
+
+// class __CompiledExampleElement extends SpallElement {
+//     generateRenderables() {
+//         return ['<h1>', new SpallElementRenderable(...), '</h1>'];
+//     }
+// }
+
+class SpallRootElement extends SpallElement {
+
+}
