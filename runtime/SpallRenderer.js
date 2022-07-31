@@ -1,104 +1,9 @@
-class SpallUtils {
-    static fatalRenderError(message) {
-        console.error(`Fatal renderer error: ${message}`);
-    }
-
-    static addChildAtIndex(element, child, index) {
-        // Based on https://stackoverflow.com/a/39181175/12650706
-        if (!index) index = 0
-        if (index >= element.children.length) {
-            element.appendChild(child)
-        } else {
-            element.insertBefore(child, element.children[index])
-        }
-    }   
-}
-
-class SpallElement {
-    // Represents an element that's actually on the page and has a state and such. Is extended by compiled files.
-    constructor(elementName, id, parentId, rendererInstance) {
-        this.elementName = elementName;
-        this.id = id;
-        this.parentId = parentId;
-        this.children = [];
-        this.rendererInstance = rendererInstance;
-    }
-
-    // Should return an array of SpallRenderables
-    generateRenderables() {
-        SpallUtils.fatalRenderError(`generateRenderables was not overridden in ${this.constructor.name}`);
-    }
-
-    needsRender() {
-        this.rendererInstance.renderElement(this);
-    }
-}
-
-class SpallRootElement extends SpallElement {
-
-}
-
-// class __CompiledExampleElement extends SpallElement {
-//     generateRenderables() {
-//         return ['<h1>', 55, '</h1>'];
-//     }
-// }
-
-class SpallRenderable {
-    // (abstract class thingy)
-}
-
-class SpallMarkupRenderable extends SpallRenderable {
-    constructor(markup) {
-        super();
-        this.markup = markup;
-    }
-}
-
-class SpallElementRenderable extends SpallRenderable {
-    constructor(elementName, elementClass, relativePath) {
-        super();
-        this.elementName = elementName;
-        this.elementClass = elementClass;
-        this.relativePath = relativePath;
-    }
-}
-
-class SpallRenderLogger {
-    constructor() {
-        this.indent = 0;
-        this.indentIncrement = 3;
-    }
-
-    logStartRender(element) {
-        console.log(`${this._generateIndent()}-- Start render ${element.elementName}`);
-        this.indent += this.indentIncrement;
-    }
-
-    logAddMarkup(markup) {
-        console.log(`${this._generateIndent()}Rendering ${markup}`);
-    }
-
-    logFinishRender(element) {
-        this.indent -= this.indentIncrement;
-        console.log(`${this._generateIndent()}-- Finish render ${element.elementName}`);
-    }
-
-    logCreatedElement(element) {
-        console.log(`${this._generateIndent()}Creating element for ${element.elementName}. Id is ${element.id}`)
-    }
-
-    _generateIndent() {
-        return ' '.repeat(this.indent);
-    }
-}
-
 class SpallRenderer {
-    constructor() {
+    constructor(logger) {
         this._idToHtml = {}; // d
         this._lastUsedId = 0;
         this.rendering = false;
-        this._logger = new SpallRenderLogger();
+        this._logger = logger;
 
         this._idToPath = {}; // these two are relative to document.body
         this._pathToId = {};
@@ -187,7 +92,7 @@ class SpallRenderer {
     }
 
     _numericIdToHtmlId(id) {
-        return `spallElement${id}`;
+        return `__sp${id}`;
     }
 
     _getElementByPath(path, baseElement=document.body) {
@@ -206,5 +111,3 @@ class SpallRenderer {
         return crntElement;
     }
 }
-
-SpallRenderer.instance = new SpallRenderer();

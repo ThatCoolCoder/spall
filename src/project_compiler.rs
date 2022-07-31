@@ -1,6 +1,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use include_dir::{include_dir, Dir, DirEntry};
 use minifier;
 
 use crate::errs::*;
@@ -14,13 +15,14 @@ struct ProjectPaths {
     elements_dir: PathBuf,
 }
 
-const FRAMEWORK_RUNTIME: &str = include_str!("../runtime/framework.js");
+const FRAMEWORK_RUNTIME_FILES: Dir = include_dir!("runtime");
 
 pub fn compile_project(project_dir: &Path, should_minify_bundle: bool) -> Result<(), CompilationError> {
     let project_paths = find_project_paths(project_dir);
     setup_build_dir(&project_paths);
     copy_index_file(&project_paths);
-    copy_framework_runtime(&project_paths);
+    let runtime = build_framework_runtime();
+    write_framework_runtime(&project_paths, &runtime);
 
     let compiled_elements = compile_elements(&project_paths)?;
     
@@ -56,8 +58,23 @@ fn copy_index_file(project_paths: &ProjectPaths) {
     fs::copy(project_paths.meta_dir.join("index.html"), project_paths.build_dir.join("index.html")).expect("Error copying index file");
 }
 
-fn copy_framework_runtime(project_paths: &ProjectPaths) {
-    fs::write(project_paths.build_dir.join("scripts/framework.js"), FRAMEWORK_RUNTIME).expect("Error copying framework scripts");
+fn build_framework_runtime() -> String {
+    // Yes I know it's not efficient to build it each time, but it would be very painful to do this through macros.
+
+    return FRAMEWORK_RUNTIME_FILES.find("**/*.js").unwrap()
+        // Convert entries to none if they are a dir
+        .filter_map(|entry| match entry {
+            DirEntry::File(f) => Some(f.contents_utf8()),
+            _ => None,
+        })
+        // 
+        .map(|x| x.unwrap())
+        .collect::<Vec<&str>>()
+        .join("\n");
+}
+
+fn write_framework_runtime(project_paths: &ProjectPaths, framework_runtime: &str) {
+    fs::write(project_paths.build_dir.join("scripts/framework.js"), framework_runtime).expect("Error copying framework scripts");
 }
 
 fn compile_elements(project_paths: &ProjectPaths) -> Result<Vec<String>, CompilationError> {

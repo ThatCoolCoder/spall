@@ -17,6 +17,10 @@ enum Renderable {
     },
 }
 
+enum CompiledRenderableLiteral {
+    // Literal JS of what the renderable says
+}
+
 pub fn compile_element_file(file_path: &Path) -> Result<String, CompilationError> {
     // todo: if is not a .spall file: crash
 
@@ -94,10 +98,12 @@ fn renderables_from_tree(tree: &parser::Tree) -> Vec<Renderable> {
                     path_stack[idx] += 1;
                 }
             }
-            let renderable = renderable_from_node_visit(node, is_entering, &path);
-            match renderable {
-                Some(v) => renderables.push(v),
-                _ => (),
+            if let parser::NodeData::MarkupData(ref inside_data) = node.data {
+                let renderable = renderable_from_node_visit(inside_data, is_entering, &path);
+                match renderable {
+                    Some(v) => renderables.push(v),
+                    _ => (),
+                }
             }
         }
         None => (),
@@ -106,28 +112,28 @@ fn renderables_from_tree(tree: &parser::Tree) -> Vec<Renderable> {
 }
 
 fn renderable_from_node_visit(
-    node: &parser::Node,
+    node_data: &parser::NodeMarkupData,
     is_entering: bool,
     path: &str,
 ) -> Option<Renderable> {
-    let is_element = node.tag_name.chars().next().unwrap().is_uppercase();
+    let is_element = node_data.tag_name.chars().next().unwrap().is_uppercase();
 
     if is_element {
         if is_entering {
             return Some(Renderable::Element {
-                tag_name: node.tag_name.clone(),
-                compiled_element_name: generate_compiled_element_name(&node.tag_name),
+                tag_name: node_data.tag_name.clone(),
+                compiled_element_name: generate_compiled_element_name(&node_data.tag_name),
                 path: path.to_string(),
             });
         } else {
             return None;
         }
     } else {
-        let markup_string = match (node.is_standalone, is_entering) {
-            (true, true) => format!("<{} />", node.tag_name),
+        let markup_string = match (node_data.is_standalone, is_entering) {
+            (true, true) => format!("<{} />", node_data.tag_name),
             (true, false) => return None,
-            (false, true) => format!("<{}>{}", node.tag_name, node.inner_text),
-            (false, false) => format!("</{}>", node.tag_name),
+            (false, true) => format!("<{}>{}", node_data.tag_name, node_data.inner_text),
+            (false, false) => format!("</{}>", node_data.tag_name),
         };
         return Some(Renderable::Markup(markup_string));
     }
