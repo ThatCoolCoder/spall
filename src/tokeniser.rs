@@ -49,15 +49,12 @@ pub fn tokenise_element(element: &str) -> Vec<Token> {
                     .collect();
                 remaining_chars.drain(..tag.len());
                 tag.push(remaining_chars.remove(0)); // add last angle bracket
-
-                // Remove the angle brackets
+                                                     // Remove the angle brackets
                 let mut tag_content = tag.clone();
                 tag_content.pop();
                 tag_content.remove(0);
-
                 let tag_type = find_tag_type(&tag_content);
                 let tag_name = find_tag_name(&tag_content);
-
                 tokens.push(Token::Tag(TagToken {
                     name: tag_name,
                     tag_type,
@@ -76,15 +73,16 @@ pub fn tokenise_element(element: &str) -> Vec<Token> {
                         value: content.clone(),
                     }));
                 }
-                state = TokeniserState::Unknown
+                state = TokeniserState::Unknown;
             }
             TokeniserState::ReadingJavascript => {
                 let content: String = remaining_chars
                     .clone()
                     .iter()
-                    .take_while(|c| **c != '~')
+                    .skip(1)
+                    .take_while(|c| **c != '~' && **c != '\n')
                     .collect();
-                remaining_chars.drain(..content.len());
+                remaining_chars.drain(..content.len() + 2);
                 if content.len() > 0 {
                     let javascript_type = find_javascript_type(&content);
                     tokens.push(Token::Javascript(JavascriptToken {

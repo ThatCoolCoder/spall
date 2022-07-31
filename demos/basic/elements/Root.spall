@@ -9,4 +9,10 @@
     <p>Look, I'm about to break the escaper: "`haha`\ </p>
 
     And look, there's a line<br /> break right in the middle of this sentence.
+
+    ~if (Math.random() > 0.5) {
+        <p>I'm here!</p>
+    ~} else {
+        <p>I'm not here!</p>
+    ~}
 </div>

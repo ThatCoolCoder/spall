@@ -1,6 +1,8 @@
 // Converts a .spall file into a javascript file
 
+use crate::compilation_settings::*;
 use crate::errs::*;
+use crate::logging;
 use crate::{parser, tokeniser};
 use std::fs;
 use std::path::Path;
@@ -8,6 +10,13 @@ use std::path::Path;
 const ROOT_ELEMENT_NAME: &str = "Root";
 // const HTML_TAGS: Vec<&str> = vec!["html", "head", "body", "h1", "p", "html", "html", "html", "html", "html", "html"];
 
+enum CompileChunk {
+    // Chunk of stuff that we need to compile
+    Javascript(String),
+    Renderable(Vec<Renderable>),
+}
+
+#[derive(Clone)]
 enum Renderable {
     Markup(String),
     Element {
@@ -17,11 +26,10 @@ enum Renderable {
     },
 }
 
-enum CompiledRenderableLiteral {
-    // Literal JS of what the renderable says
-}
-
-pub fn compile_element_file(file_path: &Path) -> Result<String, CompilationError> {
+pub fn compile_element_file(
+    file_path: &Path,
+    compilation_settings: &CompilationSettings,
+) -> Result<String, CompilationError> {
     // todo: if is not a .spall file: crash
 
     let file_content = fs::read_to_string(file_path).expect(&format!(
@@ -29,11 +37,20 @@ pub fn compile_element_file(file_path: &Path) -> Result<String, CompilationError
         file_path.to_string_lossy()
     ));
     let element_name = file_path.file_stem().unwrap().to_str().unwrap();
-    return compile_element(&file_content, &element_name);
+    return compile_element(&file_content, &element_name, compilation_settings);
 }
 
-pub fn compile_element(file_content: &str, element_name: &str) -> Result<String, CompilationError> {
+pub fn compile_element(
+    file_content: &str,
+    element_name: &str,
+    compilation_settings: &CompilationSettings,
+) -> Result<String, CompilationError> {
     // Preparation
+
+    logging::log_brief(
+        format!("Compiling element {}", element_name).as_str(),
+        compilation_settings.log_level,
+    );
 
     if !element_name_valid(element_name) {
         return Err(CompilationError::InvalidElementName {
@@ -50,14 +67,17 @@ pub fn compile_element(file_content: &str, element_name: &str) -> Result<String,
 
     // Reading/ parsing
 
+    logging::log_per_step("Tokenising", compilation_settings.log_level);
     let tokens = tokeniser::tokenise_element(file_content);
+    logging::log_per_step("Parsing", compilation_settings.log_level);
     let tree = parser::parse_element(&tokens);
 
     // Building/writing
 
-    let mut renderables = renderables_from_tree(&tree);
-    renderables = simplify_renderables(&renderables);
-    let stringified_renderables = renderables_to_string(&renderables);
+    logging::log_per_step("Actually compiling", compilation_settings.log_level);
+    let mut chunks = compile_chunks_from_tree(&tree);
+    chunks = concat_successive_compile_chunks(&chunks);
+    let compiled_render_func = compile_chunks(&chunks);
 
     let result = format!(
         r#"
@@ -67,7 +87,7 @@ pub fn compile_element(file_content: &str, element_name: &str) -> Result<String,
             }}
 
             generateRenderables() {{
-                return [{stringified_renderables}];
+                {compiled_render_func}
             }}
         }}
     "#
@@ -76,14 +96,38 @@ pub fn compile_element(file_content: &str, element_name: &str) -> Result<String,
     return Ok(result);
 }
 
-fn renderables_from_tree(tree: &parser::Tree) -> Vec<Renderable> {
-    let mut renderables = vec![];
+fn generate_compiled_element_name(element_name: &str) -> String {
+    return format!("__SpallCompiled{element_name}");
+}
+
+fn element_name_valid(element_name: &str) -> bool {
+    if element_name.len() == 0 {
+        return false;
+    }
+    if !element_name.chars().next().unwrap().is_alphabetic() {
+        return false;
+    }
+    if element_name.chars().any(|c| !c.is_alphanumeric()) {
+        return false;
+    }
+    return true;
+}
+
+fn escape_quotes(data: &str, quote_char: char, escape_char: char) -> String {
+    return data
+        .replace(escape_char, format!("{escape_char}{escape_char}").as_str())
+        .replace(quote_char, format!("{escape_char}{quote_char}").as_str());
+}
+
+fn compile_chunks_from_tree(tree: &parser::Tree) -> Vec<CompileChunk> {
+    let mut chunks = vec![];
     // I don't know why the code for tracking the path stack works, but it does
     let mut path_stack = vec![0];
 
-    tree.depth_first_map(&mut |node, is_entering| match node.parent {
+    tree.depth_first_map(&mut |node, is_entering| {
         // (Ignore root node)
-        Some(_) => {
+        if node.parent.is_some() {
+            // Keep track of path stack
             let path = path_stack
                 .iter()
                 .map(|x: &i32| x.to_string())
@@ -98,17 +142,36 @@ fn renderables_from_tree(tree: &parser::Tree) -> Vec<Renderable> {
                     path_stack[idx] += 1;
                 }
             }
-            if let parser::NodeData::MarkupData(ref inside_data) = node.data {
-                let renderable = renderable_from_node_visit(inside_data, is_entering, &path);
-                match renderable {
-                    Some(v) => renderables.push(v),
-                    _ => (),
+
+            // generate a compile chunk
+            match &node.data {
+                parser::NodeData::Markup(inner_data) => {
+                    let renderable = renderable_from_node_visit(inner_data, is_entering, &path);
+                    match renderable {
+                        Some(v) => chunks.push(CompileChunk::Renderable(vec![v])),
+                        _ => (),
+                    }
+                }
+                parser::NodeData::JavascriptBlock(inner_data) => {
+                    println!(
+                        "s:{}e:{}i:{is_entering}",
+                        inner_data.start_value, inner_data.end_value
+                    );
+                    if is_entering {
+                        chunks.push(CompileChunk::Javascript(inner_data.start_value.clone()));
+                    } else {
+                        chunks.push(CompileChunk::Javascript(inner_data.end_value.clone()));
+                    }
+                }
+                parser::NodeData::JavascriptStandalone(inner_data) => {
+                    if is_entering {
+                        chunks.push(CompileChunk::Javascript(inner_data.value.clone()));
+                    }
                 }
             }
         }
-        None => (),
     });
-    return renderables;
+    return chunks;
 }
 
 fn renderable_from_node_visit(
@@ -137,6 +200,62 @@ fn renderable_from_node_visit(
         };
         return Some(Renderable::Markup(markup_string));
     }
+}
+
+fn concat_successive_compile_chunks(chunks: &Vec<CompileChunk>) -> Vec<CompileChunk> {
+    // Simplifies compile chunks by concatenating values of ones of same type.
+
+    let mut crnt_renderable_values = vec![];
+    let mut crnt_javascript_value = "".to_string();
+    let mut result = vec![];
+
+    for chunk in chunks {
+        match chunk {
+            CompileChunk::Renderable(ref renderables) => {
+                if crnt_javascript_value != "" {
+                    result.push(CompileChunk::Javascript(crnt_javascript_value));
+                    crnt_javascript_value = "".to_string();
+                }
+                crnt_renderable_values.append(&mut renderables.clone());
+            }
+            CompileChunk::Javascript(javascript) => {
+                if &crnt_renderable_values.len() > &0 {
+                    result.push(CompileChunk::Renderable(crnt_renderable_values.clone()));
+                    crnt_renderable_values = vec![];
+                }
+                crnt_javascript_value += &javascript;
+            }
+        }
+    }
+
+    if crnt_javascript_value != "" {
+        result.push(CompileChunk::Javascript(crnt_javascript_value));
+    }
+    if crnt_renderable_values.len() > 0 {
+        result.push(CompileChunk::Renderable(crnt_renderable_values));
+    }
+
+    return result;
+}
+
+fn compile_chunks(chunks: &Vec<CompileChunk>) -> String {
+    // The var name is specialified because we don't want someone to call their variable "renderables" then break everything.
+    let mut result = "var __spallRenderables = [];\n".to_string();
+
+    for chunk in chunks {
+        match chunk {
+            CompileChunk::Renderable(renderables) => {
+                let simple_renderables = simplify_renderables(&renderables);
+                let string_renderables = renderables_to_string(&simple_renderables);
+                result += format!("__spallRenderables.push(...[{string_renderables}]);\n").as_str();
+            }
+            CompileChunk::Javascript(javascript) => {
+                result += format!("{javascript}\n").as_str();
+            }
+        }
+    }
+    result += "return __spallRenderables;";
+    return result;
 }
 
 fn simplify_renderables(renderables: &Vec<Renderable>) -> Vec<Renderable> {
@@ -194,27 +313,4 @@ fn renderables_to_string(renderables: &Vec<Renderable>) -> String {
     }
 
     return stringified_renderables.join(", ");
-}
-
-fn generate_compiled_element_name(element_name: &str) -> String {
-    return format!("__SpallCompiled{element_name}");
-}
-
-fn element_name_valid(element_name: &str) -> bool {
-    if element_name.len() == 0 {
-        return false;
-    }
-    if !element_name.chars().next().unwrap().is_alphabetic() {
-        return false;
-    }
-    if element_name.chars().any(|c| !c.is_alphanumeric()) {
-        return false;
-    }
-    return true;
-}
-
-fn escape_quotes(data: &str, quote_char: char, escape_char: char) -> String {
-    return data
-        .replace(escape_char, format!("{escape_char}{escape_char}").as_str())
-        .replace(quote_char, format!("{escape_char}{quote_char}").as_str());
 }

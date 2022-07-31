@@ -7,17 +7,15 @@ use crate::tokeniser;
 pub type NodeIndex = usize;
 
 pub struct Node {
+    // The inner text of a node goes before its children when it is rendered.
+    // If you want to intersperse text and children then you can just use spans as children to hold the text.
     pub data: NodeData,
-
     pub children: Vec<NodeIndex>,
     pub parent: Option<NodeIndex>,
 }
 
 pub enum NodeData {
-    // The inner text of a node goes before its children when it is rendered.
-    // If you want to intersperse text and children then you can just use spans as children to hold the text.
-    MarkupData(NodeMarkupData),
-
+    Markup(NodeMarkupData),
     JavascriptBlock(NodeJavascriptBlockData),
     JavascriptStandalone(NodeJavascriptStandaloneData),
 }
@@ -44,7 +42,7 @@ pub struct Tree {
 impl Tree {
     pub fn new() -> Tree {
         let node = Node {
-            data: NodeData::MarkupData(NodeMarkupData {
+            data: NodeData::Markup(NodeMarkupData {
                 tag_name: "".to_string(),
                 is_standalone: false,
                 inner_text: "".to_string(),
@@ -136,13 +134,15 @@ pub fn read_tag_token(
     node_stack: &mut Vec<NodeIndex>,
     token: &tokeniser::TagToken,
 ) {
+    // read a HTML tag token and use it to update the node tree
+
     match token.tag_type {
         // Open tag
         TagType::Start => {
             let new_node_idx = tree.add_node(
                 *node_stack.last().unwrap(),
                 Node {
-                    data: NodeData::MarkupData(NodeMarkupData {
+                    data: NodeData::Markup(NodeMarkupData {
                         tag_name: token.name.clone(),
                         is_standalone: false,
                         inner_text: "".to_string(),
@@ -162,7 +162,7 @@ pub fn read_tag_token(
             tree.add_node(
                 *node_stack.last().unwrap(),
                 Node {
-                    data: NodeData::MarkupData(NodeMarkupData {
+                    data: NodeData::Markup(NodeMarkupData {
                         tag_name: token.name.clone(),
                         is_standalone: true,
                         inner_text: "".to_string(),
@@ -180,10 +180,12 @@ pub fn read_content_token(
     node_stack: &mut Vec<NodeIndex>,
     token: &tokeniser::ContentToken,
 ) {
+    // Transform a content token into a span node
+
     tree.add_node(
         *node_stack.last().unwrap(),
         Node {
-            data: NodeData::MarkupData(NodeMarkupData {
+            data: NodeData::Markup(NodeMarkupData {
                 tag_name: "span".to_string(),
                 is_standalone: false,
                 inner_text: token.value.to_string(),
@@ -199,6 +201,9 @@ pub fn read_javascript_token(
     node_stack: &mut Vec<NodeIndex>,
     token: &tokeniser::JavascriptToken,
 ) {
+    // Read a javascript token and modify the node tree based on it
+    // (yes is very similar to the code for tag tokens, but on different types)
+
     match token.javascript_type {
         // Javascript open block
         JavascriptType::BlockStart => {
