@@ -23,6 +23,7 @@ pub enum NodeData {
 // We can't pass specific enum variants around so just make structs that the enum wraps
 pub struct NodeMarkupData {
     pub tag_name: String,
+    pub tag_attributes: String,
     pub is_standalone: bool,
     pub inner_text: String,
 }
@@ -44,6 +45,7 @@ impl Tree {
         let node = Node {
             data: NodeData::Markup(NodeMarkupData {
                 tag_name: "".to_string(),
+                tag_attributes: "".to_string(),
                 is_standalone: false,
                 inner_text: "".to_string(),
             }),
@@ -144,6 +146,7 @@ pub fn read_tag_token(
                 Node {
                     data: NodeData::Markup(NodeMarkupData {
                         tag_name: token.name.clone(),
+                        tag_attributes: token.attributes.clone(),
                         is_standalone: false,
                         inner_text: "".to_string(),
                     }),
@@ -164,6 +167,7 @@ pub fn read_tag_token(
                 Node {
                     data: NodeData::Markup(NodeMarkupData {
                         tag_name: token.name.clone(),
+                        tag_attributes: token.attributes.clone(),
                         is_standalone: true,
                         inner_text: "".to_string(),
                     }),
@@ -187,6 +191,7 @@ pub fn read_content_token(
         Node {
             data: NodeData::Markup(NodeMarkupData {
                 tag_name: "span".to_string(),
+                tag_attributes: "".to_string(),
                 is_standalone: false,
                 inner_text: token.value.to_string(),
             }),

@@ -16,6 +16,7 @@ pub enum Token {
 
 pub struct TagToken {
     pub name: String,
+    pub attributes: String, // eg style or id
     pub tag_type: TagType,
 }
 pub struct ContentToken {
@@ -49,14 +50,20 @@ pub fn tokenise_element(element: &str) -> Vec<Token> {
                     .collect();
                 remaining_chars.drain(..tag.len());
                 tag.push(remaining_chars.remove(0)); // add last angle bracket
-                                                     // Remove the angle brackets
+
+                // Remove the angle brackets
                 let mut tag_content = tag.clone();
                 tag_content.pop();
                 tag_content.remove(0);
+
                 let tag_type = find_tag_type(&tag_content);
-                let tag_name = find_tag_name(&tag_content);
+                let content_sections = tag_content.splitn(2, ' ').collect::<Vec<&str>>();
+                let tag_name = content_sections[0];
+                let tag_attributes = if content_sections.len() >= 2 { content_sections[1] } else { "" };
+
                 tokens.push(Token::Tag(TagToken {
-                    name: tag_name,
+                    name: tag_name.to_string(),
+                    attributes: tag_attributes.to_string(),
                     tag_type,
                 }));
                 state = TokeniserState::Unknown;
@@ -113,12 +120,6 @@ fn find_tag_type(tag_content: &str) -> TagType {
     else {
         return TagType::Start;
     }
-}
-
-fn find_tag_name(tag_content: &str) -> String {
-    // Tag content should not include angle brackets
-
-    return tag_content.replace('/', "").replace(' ', "");
 }
 
 fn find_javascript_type(javascript: &str) -> JavascriptType {

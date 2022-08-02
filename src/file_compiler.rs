@@ -153,10 +153,6 @@ fn compile_chunks_from_tree(tree: &parser::Tree) -> Vec<CompileChunk> {
                     }
                 }
                 parser::NodeData::JavascriptBlock(inner_data) => {
-                    println!(
-                        "s:{}e:{}i:{is_entering}",
-                        inner_data.start_value, inner_data.end_value
-                    );
                     if is_entering {
                         chunks.push(CompileChunk::Javascript(inner_data.start_value.clone()));
                     } else {
@@ -193,9 +189,9 @@ fn renderable_from_node_visit(
         }
     } else {
         let markup_string = match (node_data.is_standalone, is_entering) {
-            (true, true) => format!("<{} />", node_data.tag_name),
+            (true, true) => format!("<{} {}/>", node_data.tag_name, node_data.tag_attributes),
             (true, false) => return None,
-            (false, true) => format!("<{}>{}", node_data.tag_name, node_data.inner_text),
+            (false, true) => format!("<{} {}>{}", node_data.tag_name, node_data.tag_attributes, node_data.inner_text),
             (false, false) => format!("</{}>", node_data.tag_name),
         };
         return Some(Renderable::Markup(markup_string));

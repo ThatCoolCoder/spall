@@ -5,7 +5,7 @@
     After the button
     <br />
     Another button
-    <Button></Button>
+    <StyledButton></StyledButton>
     <p>Look, I'm about to break the escaper: "`haha`\ </p>
 
     And look, there's a line<br /> break right in the middle of this sentence.
