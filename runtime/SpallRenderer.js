@@ -43,7 +43,7 @@ class SpallRenderer {
             else {
                 var child = new renderable.elementClass(this._newElementId(), element.id, this);
 
-                var childContainer = document.createElement('div');
+                var childContainer = document.createElement('span');
                 childContainer.id = this._numericIdToHtmlId(child.id);
                 this._idToHtml[child.id] = childContainer;
 

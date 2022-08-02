@@ -1,18 +1,13 @@
-<h1>Hello world!</h1>
+<h1>Basic Spall Demo</h1>
 <div>
-    Before the button
-    <Button></Button>
-    After the button
-    <br />
-    Another button
-    <StyledButton></StyledButton>
-    <p>Look, I'm about to break the escaper: "`haha`\ </p>
+    <p>So here we have some text</p>
+    <p>And here is an instantiated element: <Button></Button></p>
+    <p>This instantiated button has some styling: <StyledButton></StyledButton></p>
 
-    And look, there's a line<br /> break right in the middle of this sentence.
-
+    <p>The next sentence is generated on the fly with an if-statement</p>
     ~if (Math.random() > 0.5) {
-        <p>I'm here!</p>
+        <p>Math.random() was lower than 0.5</p>
     ~} else {
-        <p>I'm not here!</p>
+        <p>Math.random() was greater than 0.5</p>
     ~}
 </div>

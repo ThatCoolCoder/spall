@@ -6,24 +6,19 @@
 
             generateRenderables() {
                 var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<h1 ><span >Hello world!</span></h1><span >
+__spallRenderables.push(...[new SpallMarkupRenderable(`<h1 ><span >Basic Spall Demo</span></h1><span >
 </span><div ><span >
-    Before the button
-    </span>`), new SpallElementRenderable("Button", __SpallCompiledButton, "2/1"), new SpallMarkupRenderable(`<span >
-    After the button
-    </span><br //><span >
-    Another button
-    </span>`), new SpallElementRenderable("StyledButton", __SpallCompiledStyledButton, "2/5"), new SpallMarkupRenderable(`<span >
-    </span><p ><span >Look, I'm about to break the escaper: "\`haha\`\\ </span></p><span >
+    </span><p ><span >So here we have some text</span></p><span >
+    </span><p ><span >And here is an instantiated element: </span>`), new SpallElementRenderable("Button", __SpallCompiledButton, "2/3/1"), new SpallMarkupRenderable(`</p><span >
+    </span><p ><span >This instantiated button has some styling: </span>`), new SpallElementRenderable("StyledButton", __SpallCompiledStyledButton, "2/5/1"), new SpallMarkupRenderable(`</p><span >
 
-    And look, there's a line</span><br //><span > break right in the middle of this sentence.
-
+    </span><p ><span >The next sentence is generated on the fly with an if-statement</span></p><span >
     </span>`)]);
 if (Math.random() > 0.5) {
-__spallRenderables.push(...[new SpallMarkupRenderable(`<span >        </span><p ><span >I'm here!</span></p><span >
+__spallRenderables.push(...[new SpallMarkupRenderable(`<span >        </span><p ><span >Math.random() was lower than 0.5</span></p><span >
     </span>`)]);
 } else {
-__spallRenderables.push(...[new SpallMarkupRenderable(`<span >        </span><p ><span >I'm not here!</span></p><span >
+__spallRenderables.push(...[new SpallMarkupRenderable(`<span >        </span><p ><span >Math.random() was greater than 0.5</span></p><span >
     </span>`)]);
 }
 __spallRenderables.push(...[new SpallMarkupRenderable(`</div>`)]);

@@ -4,6 +4,11 @@
 
 Unremarkable JS framework for the benefit of my learning, is probably very similar to some other frameworks. I've build this before using a JS framework so that I'm not influenced by the design of others, although I have used C# Blazor extensively. Compiler is built in Rust. Very WIP.
 
+Current status:
+- Can compile projects, which can consist of multiple files.
+- Supports basic HTML, including styling elements.
+- Can instance your spall elements inside other pages.
+
 ## Misc notes:
 
 An app is made up of elements, which are stored in the `elements/` directory. They're basically components but with a better name. Element file names are in format `{element name}.spall`. There must be an element called `Root` which is the root of your app. Calling them elements is somewhat confusing because HTML elements also exist. Maybe I should change the name.

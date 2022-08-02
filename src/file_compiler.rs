@@ -8,7 +8,6 @@ use std::fs;
 use std::path::Path;
 
 const ROOT_ELEMENT_NAME: &str = "Root";
-// const HTML_TAGS: Vec<&str> = vec!["html", "head", "body", "h1", "p", "html", "html", "html", "html", "html", "html"];
 
 enum CompileChunk {
     // Chunk of stuff that we need to compile
@@ -18,6 +17,7 @@ enum CompileChunk {
 
 #[derive(Clone)]
 enum Renderable {
+    // Thing that can be rendered by the runtime.
     Markup(String),
     Element {
         tag_name: String,
