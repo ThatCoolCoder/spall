@@ -10,4 +10,5 @@
     ~} else {
         <p>Math.random() was greater than 0.5</p>
     ~}
+    <RenderCounter></RenderCounter>
 </div>

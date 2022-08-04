@@ -4,6 +4,9 @@ use crate::javascript_type::JavascriptType;
 use crate::tag_type::TagType;
 use crate::tokeniser;
 
+// Spans are not used to contain the inner text of these tags
+static SPANLESS_INNER_TEXTS: [&'static str; 1] = ["script"];
+
 pub type NodeIndex = usize;
 
 pub struct Node {
@@ -186,19 +189,29 @@ pub fn read_content_token(
 ) {
     // Transform a content token into a span node
 
-    tree.add_node(
-        *node_stack.last().unwrap(),
-        Node {
-            data: NodeData::Markup(NodeMarkupData {
-                tag_name: "span".to_string(),
-                tag_attributes: "".to_string(),
-                is_standalone: false,
-                inner_text: token.value.to_string(),
-            }),
-            parent: None,
-            children: vec![],
-        },
-    );
+    let mut wrap_in_span = true;
+    let parent = tree.get_node_mut(*node_stack.last().unwrap());
+    if let NodeData::Markup(inner_data) = &parent.data {
+        wrap_in_span = ! SPANLESS_INNER_TEXTS.contains(&inner_data.tag_name.as_str())
+    }
+    if wrap_in_span {
+        tree.add_node(
+            *node_stack.last().unwrap(),
+            Node {
+                data: NodeData::Markup(NodeMarkupData {
+                    tag_name: "span".to_string(),
+                    tag_attributes: "".to_string(),
+                    is_standalone: false,
+                    inner_text: token.value.to_string(),
+                }),
+                parent: None,
+                children: vec![],
+            },
+        );
+    }
+    else if let NodeData::Markup(inner_data) = &mut parent.data {
+        inner_data.inner_text = token.value.clone();
+    }
 }
 
 pub fn read_javascript_token(

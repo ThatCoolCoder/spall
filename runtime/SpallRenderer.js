@@ -1,10 +1,10 @@
 class SpallRenderer {
     constructor(logger) {
-        this._idToHtml = {}; // d
         this._lastUsedId = 0;
         this.rendering = false;
         this._logger = logger;
-
+        
+        this._idToHtml = {};
         this._idToPath = {}; // these two are relative to document.body
         this._pathToId = {};
         this._idToElement = {};
@@ -51,11 +51,11 @@ class SpallRenderer {
 
                 this.renderElement(child, childContainer);
 
-
                 this._logger.logCreatedElement(child);
 
                 needsAppending[renderable.relativePath] = childContainer;
 
+                child.onInitialized();
             }
         }
 
@@ -68,6 +68,12 @@ class SpallRenderer {
         }
         
         this._logger.logFinishRender(element);
+
+        element.onRender();
+    }
+
+    getElementContainer(elementId) {
+        return this._idToHtml[elementId];
     }
 
     _registerElement(element, path) {

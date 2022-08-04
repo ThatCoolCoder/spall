@@ -8,6 +8,7 @@ use std::fs;
 use std::path::Path;
 
 const ROOT_ELEMENT_NAME: &str = "Root";
+const SCRIPT_ELEMENT_NAME: &str = "script";
 
 enum CompileChunk {
     // Chunk of stuff that we need to compile
@@ -75,6 +76,7 @@ pub fn compile_element(
     // Building/writing
 
     logging::log_per_step("Actually compiling", compilation_settings.log_level);
+    let class_body = find_class_body(&tree).unwrap_or("".to_string());
     let mut chunks = compile_chunks_from_tree(&tree);
     chunks = concat_successive_compile_chunks(&chunks);
     let compiled_render_func = compile_chunks(&chunks);
@@ -89,6 +91,8 @@ pub fn compile_element(
             generateRenderables() {{
                 {compiled_render_func}
             }}
+
+            {class_body}
         }}
     "#
     );
@@ -117,6 +121,18 @@ fn escape_quotes(data: &str, quote_char: char, escape_char: char) -> String {
     return data
         .replace(escape_char, format!("{escape_char}{escape_char}").as_str())
         .replace(quote_char, format!("{escape_char}{quote_char}").as_str());
+}
+
+fn find_class_body(tree: &parser::Tree) -> Option<String> {
+    let mut result = None;
+    tree.depth_first_map(&mut |node, _is_entering| {
+        if let parser::NodeData::Markup(inner_data) = &node.data {
+            if inner_data.tag_name == SCRIPT_ELEMENT_NAME {
+                result = Some(inner_data.inner_text.clone());
+            }
+        }
+    });
+    return result;
 }
 
 fn compile_chunks_from_tree(tree: &parser::Tree) -> Vec<CompileChunk> {
@@ -175,6 +191,10 @@ fn renderable_from_node_visit(
     is_entering: bool,
     path: &str,
 ) -> Option<Renderable> {
+    if node_data.tag_name == SCRIPT_ELEMENT_NAME {
+        return None;
+    }
+
     let is_element = node_data.tag_name.chars().next().unwrap().is_uppercase();
 
     if is_element {

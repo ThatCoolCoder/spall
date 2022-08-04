@@ -14,7 +14,15 @@ class SpallElement {
     }
 
     needsRender() {
-        this.rendererInstance.renderElement(this);
+        this.rendererInstance.renderElement(this, this.rendererInstance.getElementContainer(this.id));
+    }
+
+    onInitialized() {
+
+    }
+
+    onRender() {
+        
     }
 }
 
