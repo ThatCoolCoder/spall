@@ -1,0 +1,7 @@
+<button onclick=myfunc>Scripted button</button>
+
+<script>
+    myfunc() {
+        alert('wow it worked!');
+    }
+</script>

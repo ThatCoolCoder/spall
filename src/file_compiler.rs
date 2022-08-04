@@ -227,7 +227,17 @@ fn renderable_from_node_visit(
 fn compile_tag_attributes(tag_attributes: &Vec<TagAttribute>, tag_path: &str) -> String {
     return tag_attributes
         .iter()
-        .map(|x| format!("{}={}", x.name, x.value))
+        .map(|x| {
+            let value = if CALLBACK_ATTRIBUTE_NAMES.contains(&x.name.as_str()) {
+                format!(
+                    r#" "(function() {{ SpallRenderer.instance.getElementByPath('{}').{}(...arguments) }})()" "#,
+                    tag_path, &x.value
+                )
+            } else {
+                x.value.to_string()
+            };
+            format!("{}={}", x.name, value)
+        })
         .collect::<Vec<String>>()
         .join(" ");
 }

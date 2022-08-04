@@ -63,13 +63,14 @@ class SpallRenderer {
                 this._logger.logAddMarkup(renderable.markup);
             }
             else {
-                var child = new renderable.elementClass(this._newElementId(), element.id, this);
+                var path = this._idToPath[element.id] + '/' + renderable.relativePath;
+                var child = new renderable.elementClass(this._newElementId(), element.id, this, path);
 
                 var childContainer = document.createElement('span');
                 childContainer.id = this._numericIdToHtmlId(child.id);
                 this._idToHtml[child.id] = childContainer;
 
-                this._registerElement(child, this._idToPath[element.id] + '/' + renderable.relativePath);
+                this._registerElement(child, child.path);
 
                 this.renderElement(child, childContainer);
 
@@ -85,7 +86,7 @@ class SpallRenderer {
 
         for (var renderablePath of Object.keys(needsAppending)) {
             var parentPath = renderablePath.split('/').slice(0, -1).join('/');
-            var parent = this._getElementByPath(parentPath, container);
+            var parent = this._getHtmlElementByPath(parentPath, container);
             SpallUtils.addChildAtIndex(parent, needsAppending[renderablePath], parseInt(renderablePath.split('/').slice(-1)));
         }
         
@@ -96,6 +97,10 @@ class SpallRenderer {
 
     getElementContainer(elementId) {
         return this._idToHtml[elementId];
+    }
+
+    getElementByPath(elementPath) {
+        return this._idToElement[this._pathToId[elementPath]];
     }
 
     _registerElement(element, path) {
@@ -123,10 +128,11 @@ class SpallRenderer {
         return `__sp${id}`;
     }
 
-    _getElementByPath(path, baseElement=document.body) {
+    _getHtmlElementByPath(path, baseElement=document.body) {
         // Path is relative to base element, which defaults to root of app
         // (this corresponds to the commented out lines) Paths are in the format of /div.2/p.1/b.1 
         // (this is correct) Paths are in the format of /0/4/2 - just child index
+        // note that this refers to HTML elements
 
         var sections = path.split('/');
         var crntElement = baseElement;
@@ -230,12 +236,13 @@ class SpallDebugRenderLogger {
 }
 class SpallElement {
     // Represents an element that's actually on the page and has a state and such. Is extended by compiled files.
-    constructor(elementName, id, parentId, rendererInstance) {
+    constructor(elementName, id, parentId, rendererInstance, path) {
         this.elementName = elementName;
         this.id = id;
         this.parentId = parentId;
         this.children = [];
         this.rendererInstance = rendererInstance;
+        this.path = path;
     }
 
     // Should return an array of SpallRenderables

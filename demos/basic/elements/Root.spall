@@ -11,4 +11,6 @@
         <p>Math.random() was greater than 0.5</p>
     ~}
     <RenderCounter></RenderCounter>
+    <br />
+    <ScriptedButton></ScriptedButton>
 </div>
