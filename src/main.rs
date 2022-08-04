@@ -5,6 +5,7 @@ mod javascript_type;
 mod logging;
 mod parser;
 mod project_compiler;
+mod tag_attribute;
 mod tag_type;
 mod tokeniser;
 

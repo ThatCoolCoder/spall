@@ -53,7 +53,7 @@ return __spallRenderables;
 
             generateRenderables() {
                 var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<button style="background-color: black; color: white"><span >I'm a styled button</span></button>`)]);
+__spallRenderables.push(...[new SpallMarkupRenderable(`<button style="background-color:black;color:white"><span >I'm a styled button</span></button>`)]);
 return __spallRenderables;
             }
 
@@ -68,7 +68,7 @@ return __spallRenderables;
 
             generateRenderables() {
                 var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<div style="width: 50px; height: 50px; background-color: red"><span >Render counter</span></div><span >
+__spallRenderables.push(...[new SpallMarkupRenderable(`<div style="width:50px;height:50px;background-color:red"><span >Render counter</span></div><span >
 
 </span>`)]);
 return __spallRenderables;

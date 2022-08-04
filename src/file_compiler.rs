@@ -3,6 +3,7 @@
 use crate::compilation_settings::*;
 use crate::errs::*;
 use crate::logging;
+use crate::tag_attribute::TagAttribute;
 use crate::{parser, tokeniser};
 use std::fs;
 use std::path::Path;
@@ -208,14 +209,26 @@ fn renderable_from_node_visit(
             return None;
         }
     } else {
+        let tag_attributes = compile_tag_attributes(&node_data.tag_attributes);
         let markup_string = match (node_data.is_standalone, is_entering) {
-            (true, true) => format!("<{} {}/>", node_data.tag_name, node_data.tag_attributes),
+            (true, true) => format!("<{} {}/>", node_data.tag_name, tag_attributes),
             (true, false) => return None,
-            (false, true) => format!("<{} {}>{}", node_data.tag_name, node_data.tag_attributes, node_data.inner_text),
+            (false, true) => format!(
+                "<{} {}>{}",
+                node_data.tag_name, tag_attributes, node_data.inner_text
+            ),
             (false, false) => format!("</{}>", node_data.tag_name),
         };
         return Some(Renderable::Markup(markup_string));
     }
+}
+
+fn compile_tag_attributes(tag_attributes: &Vec<TagAttribute>) -> String {
+    return tag_attributes
+        .iter()
+        .map(|x| format!("{}={}", x.name, x.value))
+        .collect::<Vec<String>>()
+        .join(" ");
 }
 
 fn concat_successive_compile_chunks(chunks: &Vec<CompileChunk>) -> Vec<CompileChunk> {

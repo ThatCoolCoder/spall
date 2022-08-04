@@ -1,4 +1,5 @@
 use crate::javascript_type::JavascriptType;
+use crate::tag_attribute::TagAttribute;
 use crate::tag_type::TagType;
 
 enum TokeniserState {
@@ -16,7 +17,7 @@ pub enum Token {
 
 pub struct TagToken {
     pub name: String,
-    pub attributes: String, // eg style or id
+    pub attributes: Vec<TagAttribute>, // eg style or id
     pub tag_type: TagType,
 }
 pub struct ContentToken {
@@ -59,11 +60,15 @@ pub fn tokenise_element(element: &str) -> Vec<Token> {
                 let tag_type = find_tag_type(&tag_content);
                 let content_sections = tag_content.splitn(2, ' ').collect::<Vec<&str>>();
                 let tag_name = content_sections[0];
-                let tag_attributes = if content_sections.len() >= 2 { content_sections[1] } else { "" };
+                let raw_tag_attributes = if content_sections.len() >= 2 {
+                    content_sections[1]
+                } else {
+                    ""
+                };
 
                 tokens.push(Token::Tag(TagToken {
                     name: tag_name.to_string(),
-                    attributes: tag_attributes.to_string(),
+                    attributes: parse_tag_attributes(raw_tag_attributes),
                     tag_type,
                 }));
                 state = TokeniserState::Unknown;
@@ -130,4 +135,20 @@ fn find_javascript_type(javascript: &str) -> JavascriptType {
     } else {
         return JavascriptType::Standalone;
     }
+}
+
+fn parse_tag_attributes(raw_data: &str) -> Vec<TagAttribute> {
+    return raw_data
+        .split(" ")
+        .filter_map(|x| {
+            let sections = x.split("=").collect::<Vec<&str>>();
+            match sections.len() {
+                2 => Some(TagAttribute {
+                    name: sections[0].to_string(),
+                    value: sections[1].to_string(),
+                }),
+                _ => None,
+            }
+        })
+        .collect::<Vec<TagAttribute>>();
 }

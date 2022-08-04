@@ -3,6 +3,7 @@
 use crate::javascript_type::JavascriptType;
 use crate::tag_type::TagType;
 use crate::tokeniser;
+use crate::tag_attribute::TagAttribute;
 
 // Spans are not used to contain the inner text of these tags
 static SPANLESS_INNER_TEXTS: [&'static str; 1] = ["script"];
@@ -26,7 +27,7 @@ pub enum NodeData {
 // We can't pass specific enum variants around so just make structs that the enum wraps
 pub struct NodeMarkupData {
     pub tag_name: String,
-    pub tag_attributes: String,
+    pub tag_attributes: Vec<TagAttribute>,
     pub is_standalone: bool,
     pub inner_text: String,
 }
@@ -48,7 +49,7 @@ impl Tree {
         let node = Node {
             data: NodeData::Markup(NodeMarkupData {
                 tag_name: "".to_string(),
-                tag_attributes: "".to_string(),
+                tag_attributes: vec!(),
                 is_standalone: false,
                 inner_text: "".to_string(),
             }),
@@ -134,7 +135,7 @@ pub fn parse_element(tokens: &Vec<tokeniser::Token>) -> Tree {
     return tree;
 }
 
-pub fn read_tag_token(
+fn read_tag_token(
     tree: &mut Tree,
     node_stack: &mut Vec<NodeIndex>,
     token: &tokeniser::TagToken,
@@ -182,7 +183,7 @@ pub fn read_tag_token(
     }
 }
 
-pub fn read_content_token(
+fn read_content_token(
     tree: &mut Tree,
     node_stack: &mut Vec<NodeIndex>,
     token: &tokeniser::ContentToken,
@@ -200,7 +201,7 @@ pub fn read_content_token(
             Node {
                 data: NodeData::Markup(NodeMarkupData {
                     tag_name: "span".to_string(),
-                    tag_attributes: "".to_string(),
+                    tag_attributes: vec!(),
                     is_standalone: false,
                     inner_text: token.value.to_string(),
                 }),
@@ -214,7 +215,7 @@ pub fn read_content_token(
     }
 }
 
-pub fn read_javascript_token(
+fn read_javascript_token(
     tree: &mut Tree,
     node_stack: &mut Vec<NodeIndex>,
     token: &tokeniser::JavascriptToken,

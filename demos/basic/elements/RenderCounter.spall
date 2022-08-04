@@ -1,4 +1,4 @@
-<div style="width: 50px; height: 50px; background-color: red">Render counter</div>
+<div style="width:50px;height:50px;background-color:red">Render counter</div>
 
 <script>
     onInitialized() {
