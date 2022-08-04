@@ -41,13 +41,14 @@ class SpallRenderer {
                 this._logger.logAddMarkup(renderable.markup);
             }
             else {
-                var child = new renderable.elementClass(this._newElementId(), element.id, this);
+                var path = this._idToPath[element.id] + '/' + renderable.relativePath;
+                var child = new renderable.elementClass(this._newElementId(), element.id, this, path);
 
                 var childContainer = document.createElement('span');
                 childContainer.id = this._numericIdToHtmlId(child.id);
                 this._idToHtml[child.id] = childContainer;
 
-                this._registerElement(child, this._idToPath[element.id] + '/' + renderable.relativePath);
+                this._registerElement(child, child.path);
 
                 this.renderElement(child, childContainer);
 

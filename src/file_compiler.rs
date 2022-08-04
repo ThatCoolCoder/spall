@@ -10,6 +10,7 @@ use std::path::Path;
 
 const ROOT_ELEMENT_NAME: &str = "Root";
 const SCRIPT_ELEMENT_NAME: &str = "script";
+const CALLBACK_ATTRIBUTE_NAMES: [&'static str; 1] = ["onclick"];
 
 enum CompileChunk {
     // Chunk of stuff that we need to compile
@@ -209,7 +210,7 @@ fn renderable_from_node_visit(
             return None;
         }
     } else {
-        let tag_attributes = compile_tag_attributes(&node_data.tag_attributes);
+        let tag_attributes = compile_tag_attributes(&node_data.tag_attributes, path);
         let markup_string = match (node_data.is_standalone, is_entering) {
             (true, true) => format!("<{} {}/>", node_data.tag_name, tag_attributes),
             (true, false) => return None,
@@ -223,7 +224,7 @@ fn renderable_from_node_visit(
     }
 }
 
-fn compile_tag_attributes(tag_attributes: &Vec<TagAttribute>) -> String {
+fn compile_tag_attributes(tag_attributes: &Vec<TagAttribute>, tag_path: &str) -> String {
     return tag_attributes
         .iter()
         .map(|x| format!("{}={}", x.name, x.value))

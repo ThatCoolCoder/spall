@@ -1,11 +1,12 @@
 class SpallElement {
     // Represents an element that's actually on the page and has a state and such. Is extended by compiled files.
-    constructor(elementName, id, parentId, rendererInstance) {
+    constructor(elementName, id, parentId, rendererInstance, path) {
         this.elementName = elementName;
         this.id = id;
         this.parentId = parentId;
         this.children = [];
         this.rendererInstance = rendererInstance;
+        this.path = path;
     }
 
     // Should return an array of SpallRenderables
