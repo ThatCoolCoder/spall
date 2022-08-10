@@ -1,4 +1,8 @@
-<div style="width:50px;height:50px;background-color:red">Render counter</div>
+<div style="width:200px;height:100px;background-color:red">
+Render counter
+<br />
+I've rendered ${this.renderCounter + 1} times
+</div>
 
 <script>
     onInitialized() {
@@ -8,6 +12,5 @@
 
     onRender() {
         this.renderCounter ++;
-        console.log(`Rendered ${this.renderCounter} times`);
     }
 </script>

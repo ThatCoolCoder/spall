@@ -72,13 +72,13 @@ class SpallRenderer {
 
                 this._registerElement(child, child.path);
 
+                child.onInitialized();
                 this.renderElement(child, childContainer);
 
                 this._logger.logCreatedElement(child);
 
                 needsAppending[renderable.relativePath] = childContainer;
 
-                child.onInitialized();
             }
         }
 
