@@ -1,4 +1,64 @@
 
+        class __SpallCompiledRenderCounter extends SpallElement {
+            constructor(id, parentId, rendererInstance) {
+                super('RenderCounter', id, parentId, rendererInstance);
+            }
+
+            generateRenderables() {
+                var __spallRenderables = [];
+__spallRenderables.push(...[new SpallMarkupRenderable(`<div style="width:200px;height:100px;background-color:red"><span >
+Render counter
+</span><br /><span >
+I've rendered ${this.renderCounter + 1} times
+</span></div><span >
+
+</span>`)]);
+return __spallRenderables;
+            }
+
+            
+    onInitialized() {
+        this.renderCounter = 0;
+        setInterval(() => this.needsRender(), 5000);
+    }
+
+    onRender() {
+        this.renderCounter ++;
+    }
+
+        }
+    
+
+        class __SpallCompiledButton extends SpallElement {
+            constructor(id, parentId, rendererInstance) {
+                super('Button', id, parentId, rendererInstance);
+            }
+
+            generateRenderables() {
+                var __spallRenderables = [];
+__spallRenderables.push(...[new SpallMarkupRenderable(`<button ><span >I'm a button</span></button>`)]);
+return __spallRenderables;
+            }
+
+            
+        }
+    
+
+        class __SpallCompiledStyledButton extends SpallElement {
+            constructor(id, parentId, rendererInstance) {
+                super('StyledButton', id, parentId, rendererInstance);
+            }
+
+            generateRenderables() {
+                var __spallRenderables = [];
+__spallRenderables.push(...[new SpallMarkupRenderable(`<button style="background-color:black;color:white"><span >I'm a styled button</span></button>`)]);
+return __spallRenderables;
+            }
+
+            
+        }
+    
+
         class __SpallCompiledScriptedButton extends SpallElement {
             constructor(id, parentId, rendererInstance) {
                 super('ScriptedButton', id, parentId, rendererInstance);
@@ -17,21 +77,6 @@ return __spallRenderables;
         alert('wow it worked!');
     }
 
-        }
-    
-
-        class __SpallCompiledButton extends SpallElement {
-            constructor(id, parentId, rendererInstance) {
-                super('Button', id, parentId, rendererInstance);
-            }
-
-            generateRenderables() {
-                var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<button ><span >I'm a button</span></button>`)]);
-return __spallRenderables;
-            }
-
-            
         }
     
 
@@ -66,50 +111,5 @@ return __spallRenderables;
             }
 
             
-        }
-    
-
-        class __SpallCompiledStyledButton extends SpallElement {
-            constructor(id, parentId, rendererInstance) {
-                super('StyledButton', id, parentId, rendererInstance);
-            }
-
-            generateRenderables() {
-                var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<button style="background-color:black;color:white"><span >I'm a styled button</span></button>`)]);
-return __spallRenderables;
-            }
-
-            
-        }
-    
-
-        class __SpallCompiledRenderCounter extends SpallElement {
-            constructor(id, parentId, rendererInstance) {
-                super('RenderCounter', id, parentId, rendererInstance);
-            }
-
-            generateRenderables() {
-                var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<div style="width:200px;height:100px;background-color:red"><span >
-Render counter
-</span><br /><span >
-I've rendered ${this.renderCounter + 1} times
-</span></div><span >
-
-</span>`)]);
-return __spallRenderables;
-            }
-
-            
-    onInitialized() {
-        this.renderCounter = 0;
-        setInterval(() => this.needsRender(), 5000);
-    }
-
-    onRender() {
-        this.renderCounter ++;
-    }
-
         }
     

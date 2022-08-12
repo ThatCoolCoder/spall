@@ -1,5 +1,6 @@
 // WIP new tokeniser that actually parses things well.
-// I've decided to not use iterators since that doesn't scale well
+// The previous implementation used iterators and lambdas but I've decided to use plain for-loops this time,
+// as the iterators became too complex when implementing complex patterns
 
 use crate::javascript_type::JavascriptType;
 use crate::tag_attribute::TagAttribute;
@@ -38,7 +39,7 @@ pub struct InlineJavascriptToken {
 //     Curly,
 // }
 
-fn read_markup(markup: &str) -> Vec<Token> {
+pub fn read_markup(markup: &str) -> Vec<Token> {
     let mut remaining = markup.to_string();
     let mut inside_script_tag = false;
     let mut result = vec![];
@@ -52,12 +53,9 @@ fn read_markup(markup: &str) -> Vec<Token> {
         }
         // Read inline javascript
         else if remaining.chars().next().unwrap() == '~' {
-            let inline_js = read_inline_javascript(&remaining);
-            remaining.drain(..inline_js.len());
-            result.push(Token::InlineJavascript(InlineJavascriptToken {
-                value: inline_js,
-                javascript_type: find_javascript_type(inline_js),
-            }))
+            let (inline_js, size) = read_inline_javascript(&remaining);
+            remaining.drain(..size);
+            result.push(Token::InlineJavascript(inline_js));
         }
         // Read script tag content
         else if inside_script_tag {
@@ -76,14 +74,70 @@ fn read_markup(markup: &str) -> Vec<Token> {
 fn read_html_tag(markup: &str) -> (TagToken, usize) {
     // Read an open/close/standalone tag. Second return value is tag length
 
+    let mut tag_name = "".to_string();
+    let mut idx = 1; // start at 1 to skip the opening "<"
+    let mut tag_type = TagType::Start;
+
+    // Read tag name
+    while idx < markup.len() {
+        let char = get_char_unwrap(markup, idx);
+        idx += 1;
+        match char {
+            ' ' | '>' => {
+                break;
+            }
+            '/' => {
+                if idx == 1 {
+                    tag_type = TagType::End;
+                } else {
+                    tag_type = TagType::Standalone;
+                }
+            }
+            _ => {
+                tag_name.push(char);
+            }
+        }
+    }
+
+    // Read tag attributes
+    let mut tag_attributes = vec![];
+    while idx < markup.len() {
+        // Read until equals sign
+        let mut char = get_char_unwrap(markup, idx);
+        let mut attribute_name = "".to_string();
+        while char != '=' {
+            idx += 1;
+            attribute_name.push(char);
+            char = get_char_unwrap(markup, idx);
+        }
+        idx += 1; // jump past equals sign
+
+        // Read attribute value
+        let mut attribute_value = read_string('"', '\\', &markup[idx..]);
+        idx += attribute_value.len();
+
+        // Remove quotes
+        attribute_value.pop();
+        attribute_value.remove(0);
+
+        tag_attributes.push(TagAttribute {
+            name: attribute_name,
+            value: attribute_value,
+        })
+    }
+
     return (
         TagToken {
-            name: "".to_string(),
-            attributes: vec![],
-            tag_type: TagType::Start,
+            name: tag_name,
+            attributes: tag_attributes,
+            tag_type: tag_type,
         },
-        5,
+        idx,
     );
+}
+
+fn get_char_unwrap(data: &str, idx: usize) -> char {
+    return data.chars().nth(idx).unwrap();
 }
 
 fn read_tag_content(markup: &str) -> String {
@@ -161,7 +215,7 @@ fn read_inline_javascript(markup: &str) -> (InlineJavascriptToken, usize) {
     let javascript_type = find_javascript_type(&result);
     return (
         InlineJavascriptToken {
-            value: result,
+            value: result.clone(),
             javascript_type: javascript_type,
         },
         result.len(),
