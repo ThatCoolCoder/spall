@@ -8,7 +8,7 @@ mod project_compiler;
 mod tag_attribute;
 mod tag_type;
 mod tokeniser;
-mod tokeniser_new;
+// mod tokeniser_new;
 
 fn main() -> Result<(), errs::CompilationError> {
     return project_compiler::compile_project(
@@ -16,6 +16,7 @@ fn main() -> Result<(), errs::CompilationError> {
         compilation_settings::CompilationSettings {
             log_level: compilation_settings::CompilationLogLevel::PerStep,
             minify_bundle: false,
+            debug_tokens: true,
         },
     );
 }

@@ -6,17 +6,13 @@
 
             generateRenderables() {
                 var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<div style="width:200px;height:100px;background-color:red"><span >
+__spallRenderables.push(...[new SpallMarkupRenderable(`<div ttyle=idth:200px;height:100px;background-color:red">
 Render counter
-</span><br /><span >
+<br />
 I've rendered ${this.renderCounter + 1} times
-</span></div><span >
+</div>
 
-</span>`)]);
-return __spallRenderables;
-            }
-
-            
+<script>
     onInitialized() {
         this.renderCounter = 0;
         setInterval(() => this.needsRender(), 5000);
@@ -25,7 +21,11 @@ return __spallRenderables;
     onRender() {
         this.renderCounter ++;
     }
+</script></div>`)]);
+return __spallRenderables;
+            }
 
+            
         }
     
 
@@ -36,7 +36,7 @@ return __spallRenderables;
 
             generateRenderables() {
                 var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<button ><span >I'm a button</span></button>`)]);
+__spallRenderables.push(...[new SpallMarkupRenderable(`<button ></button>`)]);
 return __spallRenderables;
             }
 
@@ -51,7 +51,7 @@ return __spallRenderables;
 
             generateRenderables() {
                 var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<button style="background-color:black;color:white"><span >I'm a styled button</span></button>`)]);
+__spallRenderables.push(...[new SpallMarkupRenderable(`<button ttyle=ackground-color:black;color:white">I'm a styled button</button></button>`)]);
 return __spallRenderables;
             }
 
@@ -66,17 +66,17 @@ return __spallRenderables;
 
             generateRenderables() {
                 var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<button onclick= "(function() { SpallRenderer.instance.getElementByPath('0').myfunc(...arguments) })()" ><span >Scripted button</span></button><span >
+__spallRenderables.push(...[new SpallMarkupRenderable(`<button nnclick=func>Scripted button</button>
 
-</span>`)]);
+<script>
+    myfunc() {
+        alert('wow it worked!');
+    }
+</script></button>`)]);
 return __spallRenderables;
             }
 
             
-    myfunc() {
-        alert('wow it worked!');
-    }
-
         }
     
 
@@ -87,26 +87,7 @@ return __spallRenderables;
 
             generateRenderables() {
                 var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<h1 ><span >Basic Spall Demo</span></h1><span >
-</span><div ><span >
-    </span><p ><span >So here we have some text</span></p><span >
-    </span><p ><span >And here is an instantiated element: </span>`), new SpallElementRenderable("Button", __SpallCompiledButton, "2/3/1"), new SpallMarkupRenderable(`</p><span >
-    </span><p ><span >This instantiated button has some styling: </span>`), new SpallElementRenderable("StyledButton", __SpallCompiledStyledButton, "2/5/1"), new SpallMarkupRenderable(`</p><span >
-
-    </span><p ><span >The next sentence is generated on the fly with an if-statement</span></p><span >
-    </span><span ><span >
-        </span>`)]);
-if (Math.random() > 0.5) {
-__spallRenderables.push(...[new SpallMarkupRenderable(`<span >            </span><p ><span >Math.random() was lower than 0.5</span></p><span >
-        </span>`)]);
-} else {
-__spallRenderables.push(...[new SpallMarkupRenderable(`<span >            </span><p ><span >Math.random() was greater than 0.5</span></p><span >
-        </span>`)]);
-}
-__spallRenderables.push(...[new SpallMarkupRenderable(`<span >    </span>`)]);
-__spallRenderables.push(...[new SpallMarkupRenderable(`<span >
-    </span>`), new SpallElementRenderable("RenderCounter", __SpallCompiledRenderCounter, "2/9/3"), new SpallMarkupRenderable(`<span >
-</span></span></div>`)]);
+__spallRenderables.push(...[new SpallMarkupRenderable(`<h1 ></h1>`)]);
 return __spallRenderables;
             }
 

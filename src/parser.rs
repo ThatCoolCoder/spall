@@ -1,9 +1,9 @@
 // use std::rc::Rc;
 
 use crate::javascript_type::JavascriptType;
+use crate::tag_attribute::TagAttribute;
 use crate::tag_type::TagType;
 use crate::tokeniser;
-use crate::tag_attribute::TagAttribute;
 
 // Spans are not used to contain the inner text of these tags
 static SPANLESS_INNER_TEXTS: [&'static str; 1] = ["script"];
@@ -49,7 +49,7 @@ impl Tree {
         let node = Node {
             data: NodeData::Markup(NodeMarkupData {
                 tag_name: "".to_string(),
-                tag_attributes: vec!(),
+                tag_attributes: vec![],
                 is_standalone: false,
                 inner_text: "".to_string(),
             }),
@@ -126,7 +126,7 @@ pub fn parse_element(tokens: &Vec<tokeniser::Token>) -> Tree {
             tokeniser::Token::Content(inner_token) => {
                 read_content_token(&mut tree, &mut node_stack, &inner_token)
             }
-            tokeniser::Token::Javascript(inner_token) => {
+            tokeniser::Token::InlineJavascript(inner_token) => {
                 read_javascript_token(&mut tree, &mut node_stack, &inner_token)
             }
         }
@@ -135,11 +135,7 @@ pub fn parse_element(tokens: &Vec<tokeniser::Token>) -> Tree {
     return tree;
 }
 
-fn read_tag_token(
-    tree: &mut Tree,
-    node_stack: &mut Vec<NodeIndex>,
-    token: &tokeniser::TagToken,
-) {
+fn read_tag_token(tree: &mut Tree, node_stack: &mut Vec<NodeIndex>, token: &tokeniser::TagToken) {
     // read a HTML tag token and use it to update the node tree
 
     match token.tag_type {
@@ -193,7 +189,7 @@ fn read_content_token(
     let mut wrap_in_span = true;
     let parent = tree.get_node_mut(*node_stack.last().unwrap());
     if let NodeData::Markup(inner_data) = &parent.data {
-        wrap_in_span = ! SPANLESS_INNER_TEXTS.contains(&inner_data.tag_name.as_str())
+        wrap_in_span = !SPANLESS_INNER_TEXTS.contains(&inner_data.tag_name.as_str())
     }
     if wrap_in_span {
         tree.add_node(
@@ -201,7 +197,7 @@ fn read_content_token(
             Node {
                 data: NodeData::Markup(NodeMarkupData {
                     tag_name: "span".to_string(),
-                    tag_attributes: vec!(),
+                    tag_attributes: vec![],
                     is_standalone: false,
                     inner_text: token.value.to_string(),
                 }),
@@ -209,8 +205,7 @@ fn read_content_token(
                 children: vec![],
             },
         );
-    }
-    else if let NodeData::Markup(inner_data) = &mut parent.data {
+    } else if let NodeData::Markup(inner_data) = &mut parent.data {
         inner_data.inner_text = token.value.clone();
     }
 }
@@ -218,7 +213,7 @@ fn read_content_token(
 fn read_javascript_token(
     tree: &mut Tree,
     node_stack: &mut Vec<NodeIndex>,
-    token: &tokeniser::JavascriptToken,
+    token: &tokeniser::InlineJavascriptToken,
 ) {
     // Read a javascript token and modify the node tree based on it
     // (yes is very similar to the code for tag tokens, but on different types)

@@ -71,7 +71,10 @@ pub fn compile_element(
     // Reading/ parsing
 
     logging::log_per_step("Tokenising", compilation_settings.log_level);
-    let tokens = tokeniser::tokenise_element(file_content);
+    let tokens = tokeniser::read_element(file_content);
+    if compilation_settings.debug_tokens {
+        debug_tokens(&tokens);
+    }
     logging::log_per_step("Parsing", compilation_settings.log_level);
     let tree = parser::parse_element(&tokens);
 
@@ -117,6 +120,19 @@ fn element_name_valid(element_name: &str) -> bool {
         return false;
     }
     return true;
+}
+
+fn debug_tokens(tokens: &Vec<tokeniser::Token>) {
+    let data = tokens
+        .iter()
+        .map(|token| match token {
+            tokeniser::Token::Tag(inner_data) => inner_data.to_string(),
+            tokeniser::Token::Content(inner_data) => inner_data.to_string(),
+            tokeniser::Token::InlineJavascript(inner_data) => inner_data.to_string(),
+        })
+        .collect::<Vec<String>>()
+        .join(" ");
+    println!("{data}");
 }
 
 fn escape_quotes(data: &str, quote_char: char, escape_char: char) -> String {

@@ -1,6 +1,7 @@
 pub struct CompilationSettings {
     pub log_level: CompilationLogLevel,
     pub minify_bundle: bool,
+    pub debug_tokens: bool,
 }
 
 #[allow(dead_code)]
