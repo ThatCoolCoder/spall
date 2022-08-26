@@ -10,7 +10,6 @@ use std::path::Path;
 
 const ROOT_ELEMENT_NAME: &str = "Root";
 const SCRIPT_ELEMENT_NAME: &str = "script";
-const CALLBACK_ATTRIBUTE_NAMES: [&'static str; 1] = ["onclick"];
 
 enum CompileChunk {
     // Chunk of stuff that we need to compile
@@ -42,6 +41,15 @@ pub fn compile_element_file(
     let element_name = file_path.file_stem().unwrap().to_str().unwrap();
     return compile_element(&file_content, &element_name, compilation_settings);
 }
+
+// How the general flow of compilation works:
+// First, we do a bit of set up like figuring out the element name and checking it.
+// Then we tokenise the element and then we turn the element into a node tree.
+// We try to extract the class body (main script) from the element.
+// We turn the tree into a group of compile chunks, which are either javascript or renderables.
+// We simplify the chunks since otherwise it's stupidly inneficient.
+// We then compile the chunks into a single string of javascript - javascript chunks are pasted directly in,
+// while renderable chunks are converted into javascript code to generate renderables in the runtime.
 
 pub fn compile_element(
     file_content: &str,
@@ -240,20 +248,10 @@ fn renderable_from_node_visit(
     }
 }
 
-fn compile_tag_attributes(tag_attributes: &Vec<TagAttribute>, tag_path: &str) -> String {
+fn compile_tag_attributes(tag_attributes: &Vec<TagAttribute>, _tag_path: &str) -> String {
     return tag_attributes
         .iter()
-        .map(|x| {
-            let value = if CALLBACK_ATTRIBUTE_NAMES.contains(&x.name.as_str()) {
-                format!(
-                    r#" "(function() {{ SpallRenderer.instance.getElementByPath('{}').{}(...arguments) }})()" "#,
-                    tag_path, &x.value
-                )
-            } else {
-                x.value.to_string()
-            };
-            format!("{}={}", x.name, value)
-        })
+        .map(|x| format!("{x}"))
         .collect::<Vec<String>>()
         .join(" ");
 }
@@ -275,7 +273,7 @@ fn concat_successive_compile_chunks(chunks: &Vec<CompileChunk>) -> Vec<CompileCh
                 crnt_renderable_values.append(&mut renderables.clone());
             }
             CompileChunk::Javascript(javascript) => {
-                if &crnt_renderable_values.len() > &0 {
+                if crnt_renderable_values.len() > 0 {
                     result.push(CompileChunk::Renderable(crnt_renderable_values.clone()));
                     crnt_renderable_values = vec![];
                 }

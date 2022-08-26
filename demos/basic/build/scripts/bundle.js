@@ -6,7 +6,7 @@
 
             generateRenderables() {
                 var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<div style=width:200px;height:100px;background-color:red><span >
+__spallRenderables.push(...[new SpallMarkupRenderable(`<div style="width:200px;height:100px;background-color:red"><span >
 Render counter
 </span><br /><span >
 I've rendered ${this.renderCounter + 1} times
@@ -36,7 +36,7 @@ return __spallRenderables;
 
             generateRenderables() {
                 var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<button ><span >Im a button</span></button>`)]);
+__spallRenderables.push(...[new SpallMarkupRenderable(`<button onclick="alert(\\"You have clicked me!\\")"><span >Im a button</span></button>`)]);
 return __spallRenderables;
             }
 
@@ -51,7 +51,7 @@ return __spallRenderables;
 
             generateRenderables() {
                 var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<button style=background-color:black;color:white><span >I'm a styled button</span></button>`)]);
+__spallRenderables.push(...[new SpallMarkupRenderable(`<button style="background-color:black;color:white"><span >I'm a styled button</span></button>`)]);
 return __spallRenderables;
             }
 

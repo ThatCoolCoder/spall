@@ -3,6 +3,7 @@
 // as the iterators became too complex when implementing complex patterns
 
 use std::collections::HashMap;
+use std::fmt;
 
 use derive_more::Display;
 
@@ -18,12 +19,31 @@ pub enum Token {
 }
 
 // Represents a single html tag - <opening>, </closing> or <standalone />
-#[derive(Display)]
-#[display(fmt = "[{tag_type} {name} tag]")]
+// #[derive(Display)]
+// #[display(fmt = "[{tag_type} {name} tag with attributes {attributes:?}]")]
 pub struct TagToken {
     pub name: String,
     pub attributes: Vec<TagAttribute>, // eg style or id
     pub tag_type: TagType,
+}
+impl fmt::Display for TagToken {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        if self.attributes.len() > 0 {
+            let attributes_str = self
+                .attributes
+                .iter()
+                .map(|x| format!("{x}"))
+                .collect::<Vec<String>>()
+                .join(" ");
+            write!(
+                f,
+                "[{} {} tag with {}]",
+                self.tag_type, self.name, attributes_str
+            )
+        } else {
+            write!(f, "[{} {} tag", self.tag_type, self.name)
+        }
+    }
 }
 // Represents (content) inner text of a html node.
 #[derive(Display)]
