@@ -16,7 +16,7 @@ fn main() -> Result<(), errs::CompilationError> {
         compilation_settings::CompilationSettings {
             log_level: compilation_settings::CompilationLogLevel::PerStep,
             minify_bundle: false,
-            debug_tokens: true,
+            debug_tokens: false,
         },
     );
 }

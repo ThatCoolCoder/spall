@@ -1,6 +1,6 @@
 use derive_more::Display;
 
-#[derive(Display)]
+#[derive(Display, Debug, PartialEq)]
 pub enum JavascriptType {
     BlockStart, // like if (true) {
     BlockEnd,   // like }

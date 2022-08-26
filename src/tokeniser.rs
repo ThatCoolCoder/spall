@@ -46,35 +46,29 @@ pub fn read_element(markup: &str) -> Vec<Token> {
     while remaining.len() > 0 {
         // Read tag
         if remaining.chars().next().unwrap() == '<' {
-            println!("open tag");
             let (tag, chars) = read_html_tag(&remaining);
-            remaining.drain(chars..);
+            remaining.drain(..chars);
             inside_script_tag = tag.name == "<script>" && tag.tag_type == TagType::Start;
-            println!("{}", chars);
             result.push(Token::Tag(tag));
         }
         // Read inline javascript
         else if remaining.chars().next().unwrap() == '~' {
-            println!("tilde");
             let (inline_js, size) = read_inline_javascript(&remaining);
             remaining.drain(..size);
             result.push(Token::InlineJavascript(inline_js));
         }
         // Read script tag content
         else if inside_script_tag {
-            println!("script");
-            let js = read_javascript(markup);
+            let js = read_javascript(&remaining);
             remaining.drain(..js.len());
             result.push(Token::Content(ContentToken { value: js }));
         }
         // Read normal tag content
         else {
-            println!("content");
-            let content = read_tag_content(markup);
+            let content = read_tag_content(&remaining);
             remaining.drain(..content.len());
             result.push(Token::Content(ContentToken { value: content }));
         }
-        break;
     }
     return result;
 }
@@ -85,13 +79,19 @@ fn read_html_tag(markup: &str) -> (TagToken, usize) {
     let mut tag_name = "".to_string();
     let mut idx = 1; // start at 1 to skip the opening "<"
     let mut tag_type = TagType::Start;
+    let mut found_end_tag = false;
 
     // Read tag name
     while idx < markup.len() {
         let char = get_char_unwrap(markup, idx);
-        idx += 1;
         match char {
-            ' ' | '>' => {
+            ' ' => {
+                idx += 1;
+                break;
+            }
+            '>' => {
+                idx += 1;
+                found_end_tag = true;
                 break;
             }
             '/' => {
@@ -105,51 +105,93 @@ fn read_html_tag(markup: &str) -> (TagToken, usize) {
                 tag_name.push(char);
             }
         }
+        idx += 1;
     }
 
-    println!("I read a tag called {tag_name} and it was {idx} chars long");
+    tag_name = tag_name.trim().to_string();
 
-    // Read tag attributes
     let mut tag_attributes = vec![];
-    while idx < markup.len() {
-        // Read until equals sign
-        let mut char = get_char_unwrap(markup, idx);
+    if !found_end_tag {
+        let (_tag_attributes, len) = read_tag_attributes(&markup[idx..]);
+        tag_attributes = _tag_attributes;
+        idx += len;
 
-        if char == '>' {
-            break;
-        }
-        let mut attribute_name = "".to_string();
-
-        while char != '=' && idx < markup.len() {
-            attribute_name.push(char);
-            char = get_char_unwrap(markup, idx);
+        while idx < markup.len() {
+            let char = get_char_unwrap(&markup, idx);
             idx += 1;
+            match char {
+                '/' => {
+                    tag_type = TagType::Standalone;
+                }
+                '>' => {
+                    break;
+                }
+                _ => (),
+            }
         }
-        idx += 1; // jump past equals sign
-        if idx >= markup.len() {
-            idx = markup.len() - 1;
-            break;
-        }
-
-        // Read attribute value
-        let mut attribute_value = read_string('"', '\\', &markup[idx..]);
-        idx += attribute_value.len();
-
-        // Remove quotes
-        attribute_value.pop();
-        attribute_value.remove(0);
-
-        tag_attributes.push(TagAttribute {
-            name: attribute_name,
-            value: attribute_value,
-        })
     }
-
     return (
         TagToken {
             name: tag_name,
             attributes: tag_attributes,
             tag_type: tag_type,
+        },
+        idx,
+    );
+}
+
+fn read_tag_attributes(data: &str) -> (Vec<TagAttribute>, usize) {
+    // Read tag attributes until the end of a html tag.
+
+    let mut idx: usize = 0;
+    let mut tag_attributes = vec![];
+    while idx < data.len() {
+        // skip forward if there are any spaces
+        idx += read_whitespace(&data[idx..]).len();
+
+        // check if we are at end of tag
+        let char = get_char_unwrap(data, idx);
+        if char == '/' || char == '>' {
+            break;
+        }
+
+        // read a tag attribute using the other func
+        let (attribute, len) = read_tag_attribute(&data[idx..]);
+        tag_attributes.push(attribute);
+        idx += len;
+    }
+    return (tag_attributes, idx);
+}
+
+fn read_tag_attribute(data: &str) -> (TagAttribute, usize) {
+    // Read a tag attribute up until the string value finishes
+
+    let mut idx: usize = 0;
+    let mut attribute_name = "".to_string();
+    while idx < data.len() {
+        let char = get_char_unwrap(&data, idx);
+        if char == ' ' || char == '=' {
+            break;
+        } else {
+            attribute_name.push(char);
+        }
+        idx += 1;
+    }
+
+    idx += read_whitespace(&data[idx..]).len();
+    // if idx > len: err(you messed up)
+    idx += 1; // jump over equals sign
+              // if idx > len: err(you messed up)
+    idx += read_whitespace(&data[idx..]).len();
+
+    let mut attribute_value = read_string(get_char_unwrap(data, idx), '\\', &data[idx..]);
+    idx += attribute_value.len();
+    attribute_value.pop();
+    attribute_value.remove(0);
+    return (
+        TagAttribute {
+            name: attribute_name,
+            value: attribute_value,
         },
         idx,
     );
@@ -163,7 +205,7 @@ fn read_tag_content(markup: &str) -> String {
     // Read the content (inner text) of a tag.
     let mut result = "".to_string();
     for char in markup.chars() {
-        if char == '<' {
+        if char == '<' || char == '~' {
             break;
         }
         result.push(char);
@@ -191,9 +233,9 @@ fn read_javascript(data: &str) -> String {
 
     let mut result = "".to_string();
     let mut bracket_stack = vec![];
-    // let mut bracket_stack = vec![];
     let mut char_idx = 0;
-    for char in data.chars() {
+    while char_idx < data.len() {
+        let char = data.chars().nth(char_idx).unwrap();
         match brackets.get(&char) {
             Some(is_opening) => {
                 if *is_opening {
@@ -213,7 +255,7 @@ fn read_javascript(data: &str) -> String {
             result.push(char);
             char_idx += 1;
         }
-        if bracket_stack.len() == 0 && &data[char_idx..] == "</script>" {
+        if bracket_stack.len() == 0 && data[char_idx..].starts_with("</script>") {
             break;
         }
     }
@@ -226,10 +268,10 @@ fn read_inline_javascript(markup: &str) -> (InlineJavascriptToken, usize) {
 
     let mut result = "".to_string();
     for char in markup.chars().skip(1) {
-        result.push(char);
         if char == '~' || char == '\n' {
             break;
         }
+        result.push(char);
     }
     let javascript_type = find_javascript_type(&result);
     return (
@@ -237,7 +279,7 @@ fn read_inline_javascript(markup: &str) -> (InlineJavascriptToken, usize) {
             value: result.clone(),
             javascript_type: javascript_type,
         },
-        result.len(),
+        result.len() + 2, // + 2 to account for start and end tilde
     );
 }
 
@@ -259,28 +301,34 @@ fn read_string(quote_char: char, escape_char: char, data: &str) -> String {
             break;
         }
 
-        if char == escape_char {
+        if char == escape_char && !last_char_is_escape {
             last_char_is_escape = true;
+        } else {
+            last_char_is_escape = false;
         }
     }
     return result;
 }
 
-fn find_tag_type(tag_content: &str) -> TagType {
-    // Tag content should not include angle brackets
+fn read_whitespace(data: &str) -> String {
+    // Read whitespace until another character occurs.
+    // Currently counts spaces, tabs and newlines as whitespace
 
-    // </tag>
-    if tag_content.chars().skip(1).next().unwrap() == '/' {
-        return TagType::End;
+    let mut idx: usize = 0;
+    let mut result = "".to_string();
+    while idx < data.len() {
+        let char = get_char_unwrap(data, idx);
+        match char {
+            ' ' | '\t' | '\n' | '\r' => {
+                result.push(char);
+            }
+            _ => {
+                break;
+            }
+        }
+        idx += 1;
     }
-    // <tag />
-    else if tag_content.chars().last().unwrap() == '/' {
-        return TagType::Standalone;
-    }
-    // <tag>
-    else {
-        return TagType::Start;
-    }
+    return result;
 }
 
 fn find_javascript_type(javascript: &str) -> JavascriptType {
@@ -290,5 +338,123 @@ fn find_javascript_type(javascript: &str) -> JavascriptType {
         return JavascriptType::BlockEnd;
     } else {
         return JavascriptType::Standalone;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_read_html_tag() {
+        let mut data = read_html_tag("<h1>");
+        assert_eq!(data.0.name, "h1");
+        assert_eq!(data.0.tag_type, TagType::Start);
+        assert_eq!(data.1, 4);
+
+        data = read_html_tag("</paragraph>this bit won't be there");
+        assert_eq!(data.0.name, "paragraph");
+        assert_eq!(data.0.tag_type, TagType::End);
+        assert_eq!(data.1, 12);
+
+        data = read_html_tag("<input />");
+        assert_eq!(data.0.name, "input");
+        assert_eq!(data.0.tag_type, TagType::Standalone);
+        assert_eq!(data.1, 9);
+
+        data = read_html_tag("<input style='red' />");
+        assert_eq!(data.0.name, "input");
+        assert_eq!(data.0.tag_type, TagType::Standalone);
+        assert_eq!(data.1, 21);
+
+        data = read_html_tag("<input/>");
+        assert_eq!(data.0.name, "input");
+        assert_eq!(data.0.tag_type, TagType::Standalone);
+        assert_eq!(data.1, 8);
+    }
+
+    #[test]
+    fn test_read_tag_attribute() {
+        let mut data = read_tag_attribute("style='color: blue'");
+        assert_eq!(data.0.name, "style");
+        assert_eq!(data.0.value, "color: blue");
+        assert_eq!(data.1, 19);
+
+        data = read_tag_attribute("style='color: blue'  ");
+        assert_eq!(data.0.name, "style");
+        assert_eq!(data.0.value, "color: blue");
+        assert_eq!(data.1, 19);
+
+        data = read_tag_attribute(r#"style="color: blue\""  "#);
+        assert_eq!(data.0.name, "style");
+        assert_eq!(data.0.value, r#"color: blue\""#);
+        assert_eq!(data.1, 21);
+    }
+
+    #[test]
+    fn test_read_tag_content() {
+        assert_eq!(read_tag_content("Hello world</h1>"), "Hello world");
+    }
+
+    #[test]
+    fn test_read_javascript() {
+        assert_eq!(read_javascript("var x = 5;</script>"), "var x = 5;");
+        assert_eq!(
+            read_javascript("var x = '</script>';</script>"),
+            "var x = '</script>';"
+        );
+    }
+
+    #[test]
+    fn test_read_inline_javascript() {
+        let mut data = read_inline_javascript("~if (x == 5) {\n");
+        assert_eq!(data.0.value, "if (x == 5) {");
+        assert_eq!(data.0.javascript_type, JavascriptType::BlockStart);
+        assert_eq!(data.1, 15);
+
+        data = read_inline_javascript("~}~");
+        assert_eq!(data.0.value, "}");
+        assert_eq!(data.0.javascript_type, JavascriptType::BlockEnd);
+        assert_eq!(data.1, 3);
+
+        data = read_inline_javascript("~var x = 5~");
+        assert_eq!(data.0.value, "var x = 5");
+        assert_eq!(data.0.javascript_type, JavascriptType::Standalone);
+        assert_eq!(data.1, 11);
+
+        data = read_inline_javascript("~var x = 5\n");
+        assert_eq!(data.0.value, "var x = 5");
+        assert_eq!(data.1, 11);
+    }
+
+    #[test]
+    fn test_read_string() {
+        assert_eq!(
+            read_string('\'', '\\', "'this in quotes' end"),
+            "'this in quotes'"
+        );
+        assert_eq!(
+            read_string('\'', '\\', r#"'Hello world, don\'t \\' end"#),
+            r#"'Hello world, don\'t \\'"#
+        );
+    }
+
+    #[test]
+    fn test_read_whitespace() {
+        assert_eq!(read_whitespace("      hello"), "      ");
+        assert_eq!(read_whitespace("      \t\n  hello"), "      \t\n  ");
+    }
+
+    #[test]
+    fn test_find_javascript_type() {
+        assert_eq!(
+            find_javascript_type("if (x == 5) {"),
+            JavascriptType::BlockStart
+        );
+        assert_eq!(find_javascript_type("}"), JavascriptType::BlockEnd);
+        assert_eq!(
+            find_javascript_type("var x = 10;"),
+            JavascriptType::Standalone
+        );
     }
 }

@@ -44,6 +44,7 @@ pub struct Tree {
     pub root: NodeIndex,
 }
 
+#[allow(dead_code)]
 impl Tree {
     pub fn new() -> Tree {
         let node = Node {

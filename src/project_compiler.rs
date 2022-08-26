@@ -9,6 +9,7 @@ use crate::errs::*;
 use crate::file_compiler;
 use crate::logging;
 
+#[allow(dead_code)]
 struct ProjectPaths {
     root_dir: PathBuf,
     build_dir: PathBuf,
