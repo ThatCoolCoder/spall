@@ -5,6 +5,7 @@
     <p>This instantiated button has some styling: <StyledButton></StyledButton></p>
 
     <p>The next sentence is generated on the fly with an if-statement</p>
+    <RenderCounter></RenderCounter>
     <span>
         ~if (Math.random() > 0.5) {
             <p>Math.random() was lower than 0.5</p>
@@ -12,5 +13,4 @@
             <p>Math.random() was greater than 0.5</p>
         ~}
     </span>
-    <RenderCounter></RenderCounter>
 </div>

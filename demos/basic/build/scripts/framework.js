@@ -54,8 +54,8 @@ class SpallRenderer {
         var renderables = element.generateRenderables();
 
         var finalHtml = '';
-        // dictionary of relative path to html element
-        var needsAppending = {};
+        // dictionary of html id to spall element
+        var createdElements = {};
 
         for (var renderable of renderables) {
             if (renderable instanceof SpallMarkupRenderable) {
@@ -66,28 +66,25 @@ class SpallRenderer {
                 var path = this._idToPath[element.id] + '/' + renderable.relativePath;
                 var child = new renderable.elementClass(this._newElementId(), element.id, this, path);
 
-                var childContainer = document.createElement('span');
-                childContainer.id = this._numericIdToHtmlId(child.id);
-                this._idToHtml[child.id] = childContainer;
+                var id = "__sp" + child.id;
+                finalHtml += `<span style="display: contents" id="${id}"></span>`;
 
+                createdElements[id] = child;
                 this._registerElement(child, child.path);
-
-                child.onInitialized();
-                this.renderElement(child, childContainer);
 
                 this._logger.logCreatedElement(child);
 
-                needsAppending[renderable.relativePath] = childContainer;
-
             }
         }
-
         container.innerHTML = finalHtml;
 
-        for (var renderablePath of Object.keys(needsAppending)) {
-            var parentPath = renderablePath.split('/').slice(0, -1).join('/');
-            var parent = this._getHtmlElementByPath(parentPath, container);
-            SpallUtils.addChildAtIndex(parent, needsAppending[renderablePath], parseInt(renderablePath.split('/').slice(-1)));
+        for (var elementId in createdElements) {
+            var child = createdElements[elementId];
+            var childContainer = document.getElementById(elementId);
+
+            this._idToHtml[child.id] = childContainer;
+            child.onInitialized();
+            this.renderElement(child, childContainer);
         }
         
         this._logger.logFinishRender(element);
