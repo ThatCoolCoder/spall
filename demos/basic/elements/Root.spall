@@ -3,6 +3,7 @@
     <p>So here we have some text</p>
     <p>And here is an instantiated element: <Button></Button></p>
     <p>This instantiated button has some styling: <StyledButton></StyledButton></p>
+    <p>This instantiated button has a callback to itself, which changes the state: <CounterButton></CounterButton></p>
 
     <p>The next sentence is generated on the fly with an if-statement</p>
     <RenderCounter></RenderCounter>

@@ -8,7 +8,6 @@ mod project_compiler;
 mod tag_attribute;
 mod tag_type;
 mod tokeniser;
-// mod tokeniser_new;
 
 fn main() {
     let result = project_compiler::compile_project(
@@ -16,7 +15,7 @@ fn main() {
         compilation_settings::CompilationSettings {
             log_level: compilation_settings::CompilationLogLevel::Minimal,
             minify_bundle: false,
-            debug_tokens: false,
+            debug_tokens: true,
         },
     );
     if let Err(e) = result {

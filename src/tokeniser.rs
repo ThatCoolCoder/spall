@@ -188,6 +188,12 @@ fn read_tag_attribute(data: &str) -> (TagAttribute, usize) {
 
     let mut idx: usize = 0;
     let mut attribute_name = "".to_string();
+
+    let is_callback = data.chars().next().unwrap() == '!'; // todo: throw EOF error instead of unwrap
+    if is_callback {
+        idx += 1;
+    }
+
     while idx < data.len() {
         let char = get_char_unwrap(&data, idx);
         if char == ' ' || char == '=' {
@@ -212,6 +218,7 @@ fn read_tag_attribute(data: &str) -> (TagAttribute, usize) {
         TagAttribute {
             name: attribute_name,
             value: attribute_value,
+            is_callback: is_callback,
         },
         idx,
     );

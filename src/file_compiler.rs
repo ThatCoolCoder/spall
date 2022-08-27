@@ -266,7 +266,18 @@ fn renderable_from_node_visit(
 fn compile_tag_attributes(tag_attributes: &Vec<TagAttribute>, _tag_path: &str) -> String {
     return tag_attributes
         .iter()
-        .map(|x| format!("{x}"))
+        .map(|x| {
+            // for this.x() callbacks, get context for the "this" by lookups through the renderer
+            if x.is_callback && x.value.starts_with("this.") {
+                let this_removed = x.value.replacen("this.", "", 1);
+                format!(
+                    "{}=\"SpallRenderer.instance.getElementById(${{this.id}}).{}\"",
+                    x.name, this_removed
+                ) // take advantage of the way that strings are inserted into js to inject some stuff from runtime into the html
+            } else {
+                format!("{x}")
+            }
+        })
         .collect::<Vec<String>>()
         .join(" ");
 }

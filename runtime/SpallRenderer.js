@@ -74,6 +74,10 @@ class SpallRenderer {
         return this._idToHtml[elementId];
     }
 
+    getElementById(elementId) {
+        return this._idToElement[elementId];
+    }
+
     getElementByPath(elementPath) {
         return this._idToElement[this._pathToId[elementPath]];
     }
