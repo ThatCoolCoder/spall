@@ -3,10 +3,11 @@
     <p>So here we have some text</p>
     <p>And here is an instantiated element: <Button></Button></p>
     <p>This instantiated button has some styling: <StyledButton></StyledButton></p>
-    <p>This instantiated button has a callback to itself, which changes the state: <CounterButton></CounterButton></p>
+    <p>This instantiated button has a callback to itself, which changes the state: <CounterButton counter="5"></CounterButton></p>
+
+    <RenderCounter></RenderCounter>
 
     <p>The next sentence is generated on the fly with an if-statement</p>
-    <RenderCounter></RenderCounter>
     <span>
         ~if (Math.random() > 0.5) {
             <p>Math.random() was lower than 0.5</p>

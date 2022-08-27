@@ -11,6 +11,7 @@
     <script>
         SpallRenderer.instance = new SpallRenderer(new SpallDebugRenderLogger());
         SpallRouter.instance = new SpallRouter(SpallRenderer);
-        SpallRouter.navigateTo("/");
+        // SpallRouter.navigateTo("/");
+        SpallRenderer.instance.renderPage();
     </script>
 </html>

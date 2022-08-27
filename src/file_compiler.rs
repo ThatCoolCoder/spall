@@ -1,13 +1,14 @@
 // Converts a .spall file into a javascript file
 
+use std::fs;
+use std::path::Path;
+
 use crate::compilation_settings::*;
 use crate::errs::*;
 use crate::logging;
 use crate::tag_attribute::TagAttribute;
 use crate::tag_type::TagType;
 use crate::{parser, tokeniser};
-use std::fs;
-use std::path::Path;
 
 const ROOT_ELEMENT_NAME: &str = "Root";
 const SCRIPT_ELEMENT_NAME: &str = "script";
@@ -26,6 +27,7 @@ enum Renderable {
         tag_name: String,
         compiled_element_name: String,
         path: String,
+        parameters: Vec<(String, String)>,
     },
 }
 
@@ -244,6 +246,11 @@ fn renderable_from_node_visit(
                 tag_name: node_data.tag_name.clone(),
                 compiled_element_name: generate_compiled_element_name(&node_data.tag_name),
                 path: path.to_string(),
+                parameters: node_data
+                    .tag_attributes
+                    .iter()
+                    .map(|attr| (attr.name.clone(), attr.value.clone()))
+                    .collect(),
             });
         } else {
             return None;
@@ -355,6 +362,7 @@ fn join_successive_markup_renderables(renderables: &Vec<Renderable>) -> Vec<Rend
                 tag_name,
                 compiled_element_name,
                 path,
+                parameters,
             } => {
                 new_renderables.push(Renderable::Markup(crnt_markup_string));
                 crnt_markup_string = "".to_string();
@@ -362,6 +370,7 @@ fn join_successive_markup_renderables(renderables: &Vec<Renderable>) -> Vec<Rend
                     tag_name: tag_name.clone(),
                     compiled_element_name: compiled_element_name.clone(),
                     path: path.clone(),
+                    parameters: parameters.clone(),
                 });
             }
         }
@@ -385,8 +394,14 @@ fn renderables_to_string(renderables: &Vec<Renderable>) -> String {
                 tag_name,
                 compiled_element_name,
                 path,
+                parameters,
             } => format!(
-                r#"new SpallElementRenderable("{tag_name}", {compiled_element_name}, "{path}")"#
+                r#"new SpallElementRenderable("{tag_name}", {compiled_element_name}, "{path}", {{ {} }})"#,
+                parameters
+                    .iter()
+                    .map(|p| format!("{}:() => {}", p.0, p.1))
+                    .collect::<Vec<String>>()
+                    .join(",")
             ),
         };
         stringified_renderables.push(string_val);

@@ -31,10 +31,10 @@ To interpolate/template values just do it like Javascript template literals: `<p
 You can do conditionals and loops like this:
 ```
 ~if (Math.random() > 0.5) {~
-<p>It's a big number</p>
+    <p>It's a big number</p>
 ~}~
 ~else {~
-<p>It's a small number</p>
+    <p>It's a small number</p>
 ~}~
 ```
 Note that a closing tilde is optional if the Javascript ends at the end of a line. You can also run arbitrary JS code mid-render by writing something other than a conditional inside the tildes. This is useful for calculating intermediate values in complex calculations. The context of this code is inside a method of the generated class.
@@ -61,18 +61,22 @@ Of course, attributes like `style` work on tags.
 
 Callbacks like `onclick="..."` can also be used in the normal way if you don't want any context for your execution: `<button onclick="alert('hello')">Button</button>`.
 
-If you want a callback to call a function in your element class, put an exclamation mark in front of the callback name: `<button !onclick="this.someCustomFunction()">Button</button>`
+If you want a callback to call a function in your element class, put an exclamation mark in front of the callback name: `<button !onclick="this.someCustomFunction()">Button</button>`.
+
+You can give parameters to instantiated elements as if it was a normal element. For example, `<MyElem number="5"></MyElem>` will set `this.number` on the `MyElem` instance. I'm not sure what context the parameters are evaluated in.
 
 ## Roadmap
 
 #### Public changes
 
 - Consistent "special chars" - don't use a tilde over here and a exclamation mark over there, and ${} string interpolation here. Make the markup consistent (like Blazor with the @ sign).
-- Add parameters so that elements can pass stuff down to their children
 - Make pages so that you don't manually have to route with a big case or something
     - Make `Root.spall` act like a layout page
-    - Make route parameters
+    - Make route parameters like `product/{id}`. 
 - Ability to keep references to html elements
+- Move to typescript, attach some sort of package manager
+    - Build a standard library of components
+- Allow subdirectories of elements, something namespace-like
 
 #### Internal changes
 

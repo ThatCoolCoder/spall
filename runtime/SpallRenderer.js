@@ -12,7 +12,7 @@ class SpallRenderer {
     
     renderPage() {
         this._throwIfRendering();
-        var root = new __SpallCompiledRoot(this._lastUsedId, -1);
+        var root = new __SpallCompiledRoot(this._lastUsedId, -1, this);
         this._idToHtml[root.id] = document.body;
 
         this._registerElement(root, '');
@@ -32,8 +32,8 @@ class SpallRenderer {
         var renderables = element.generateRenderables();
 
         var finalHtml = '';
-        // dictionary of html id to spall element
-        var createdElements = {};
+        // list of [{htmlId: "", child: someSpallElem, parameters: {}}]
+        var createdElements = [];
 
         for (var renderable of renderables) {
             if (renderable instanceof SpallMarkupRenderable) {
@@ -47,7 +47,7 @@ class SpallRenderer {
                 var id = "__sp" + child.id;
                 finalHtml += `<span style="display: contents" id="${id}"></span>`;
 
-                createdElements[id] = child;
+                createdElements.push({htmlId: id, child: child, parameters: renderable.parameters});
                 this._registerElement(child, child.path);
 
                 this._logger.logCreatedElement(child);
@@ -56,13 +56,17 @@ class SpallRenderer {
         }
         container.innerHTML = finalHtml;
 
-        for (var elementId in createdElements) {
-            var child = createdElements[elementId];
-            var childContainer = document.getElementById(elementId);
+        for (var toRender of createdElements) {
+            var childContainer = document.getElementById(toRender.htmlId);
 
-            this._idToHtml[child.id] = childContainer;
-            child.onInitialized();
-            this.renderElement(child, childContainer);
+            this._idToHtml[toRender.child.id] = childContainer;
+            toRender.child.onInitialized();
+
+            for (var parameterName in toRender.parameters) {
+                toRender.child[parameterName] = toRender.parameters[parameterName]();
+            }
+
+            this.renderElement(toRender.child, childContainer);
         }
         
         this._logger.logFinishRender(element);
