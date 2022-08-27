@@ -19,6 +19,17 @@ class SpallUtils {
         throw new Error(`Abstract function "${functionName}" not overridden`);
     }
 }
+class SpallRouter {
+    // Handles switching between pages I guess
+    constructor(renderer) {
+        this.renderer = renderer;
+        this.routeToPageClass = {};
+    }
+
+    navigateTo(url) {
+        // todo: look up in registry of pages, somehow splat an element inside of Root.spall
+    }
+}
 
 class SpallRenderer {
     constructor(logger) {
@@ -233,6 +244,12 @@ class SpallDebugRenderLogger {
 
     _generateIndent() {
         return ' '.repeat(this.indent);
+    }
+}
+class SpallPage extends SpallElement {
+    constructor(title, elementName, id, parentId, rendererInstance, path) {
+        super(elementName, id, parentId, rendererInstance, path);
+        this.title = title;
     }
 }
 class SpallElement {
