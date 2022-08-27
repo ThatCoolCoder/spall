@@ -92,25 +92,16 @@ return __spallRenderables;
 
             generateRenderables() {
                 var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<h1 ><span >Basic Spall Demo</span></h1><div ><p ><span >So here we have some text</span></p><p ><span >And here is an instantiated element: </span>`), new SpallElementRenderable("Button", __SpallCompiledButton, "1/1/1", {  }), new SpallMarkupRenderable(`</p><p ><span >This instantiated button has some styling: </span>`), new SpallElementRenderable("StyledButton", __SpallCompiledStyledButton, "1/2/1", {  }), new SpallMarkupRenderable(`</p><p ><span >This instantiated button has a callback to itself, which changes the state: </span>`), new SpallElementRenderable("CounterButton", __SpallCompiledCounterButton, "1/3/1", { counter:() => this.counterOverride }), new SpallMarkupRenderable(`</p>`), new SpallElementRenderable("RenderCounter", __SpallCompiledRenderCounter, "1/4", {  }), new SpallMarkupRenderable(`<p ><span >The next sentence is generated on the fly with an if-statement</span></p><span >`)]);
+__spallRenderables.push(...[new SpallMarkupRenderable(`<h1 ><span >Basic Spall Demo</span></h1><div ><p ><span >So here we have some text</span></p><p ><span >And here is an instantiated element: </span>`), new SpallElementRenderable("Button", __SpallCompiledButton, "1/1/1", {  }), new SpallMarkupRenderable(`</p><p ><span >This instantiated button has some styling: </span>`), new SpallElementRenderable("StyledButton", __SpallCompiledStyledButton, "1/2/1", {  }), new SpallMarkupRenderable(`</p><p ><span >This instantiated button has a callback to itself, which changes the state: </span>`), new SpallElementRenderable("CounterButton", __SpallCompiledCounterButton, "1/3/1", { counter:() => 5 }), new SpallMarkupRenderable(`</p>`), new SpallElementRenderable("RenderCounter", __SpallCompiledRenderCounter, "1/4", {  }), new SpallMarkupRenderable(`<p ><span >The next sentence is generated on the fly with an if-statement</span></p><span >`)]);
 if (Math.random() > 0.5) {
 __spallRenderables.push(...[new SpallMarkupRenderable(`<p ><span >Math.random() was lower than 0.5</span></p>`)]);
 } else {
 __spallRenderables.push(...[new SpallMarkupRenderable(`<p ><span >Math.random() was greater than 0.5</span></p>`)]);
 }
-__spallRenderables.push(...[new SpallMarkupRenderable(`<button onclick="SpallRenderer.instance.getElementById(${this.id}).randomizeCounter()"><span >Randomize counter through parameter magic</span></button></span></div>`)]);
+__spallRenderables.push(...[new SpallMarkupRenderable(`</span></div>`)]);
 return __spallRenderables;
             }
 
             
-    onInitialized() {
-        this.counterOverride = 0;
-    }
-
-    randomizeCounter() {
-        this.counterOverride = Math.floor(Math.random() * 10);
-        this.needsRender();
-    }
-
         }
     

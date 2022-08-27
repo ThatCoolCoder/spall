@@ -1,11 +1,11 @@
 <h1>Basic Spall Demo</h1>
 <div>
     <p>So here we have some text</p>
-    <p>And here is an instantiated element: <Button></Button></p>
-    <p>This instantiated button has some styling: <StyledButton></StyledButton></p>
-    <p>This instantiated button has a callback to itself, which changes the state: <CounterButton counter="5"></CounterButton></p>
+    <p>And here is an instantiated element: <Button /></p>
+    <p>This instantiated button has some styling: <StyledButton /></p>
+    <p>This instantiated button has a callback to itself, which changes the state: <CounterButton counter="5" /></p>
 
-    <RenderCounter></RenderCounter>
+    <RenderCounter />
 
     <p>The next sentence is generated on the fly with an if-statement</p>
     <span>

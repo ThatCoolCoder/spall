@@ -42,8 +42,9 @@ Note that a closing tilde is optional if the Javascript ends at the end of a lin
 To add functions and state, add a script tag. Treat the script tag like an ES5 class wrapper, contents should look like:
 ```javascript
 <script>
+
     onInitialized() {
-        // code to be called when element is first created
+        // code to be called when element is first created, before first render
         this.value = 100;
     }
 
@@ -63,13 +64,13 @@ Callbacks like `onclick="..."` can also be used in the normal way if you don't w
 
 If you want a callback to call a function in your element class, put an exclamation mark in front of the callback name: `<button !onclick="this.someCustomFunction()">Button</button>`.
 
-You can give parameters to instantiated elements as if it was a normal element. For example, `<MyElem number="5"></MyElem>` will set `this.number` on the `MyElem` instance. I'm not sure what context the parameters are evaluated in.
+You can give parameters to instantiated elements as if it was a normal element. For example, `<MyElem number="5" />` will set `this.number` on the `MyElem` instance. I'm not sure what context the parameters are evaluated in.
 
 ## Roadmap
 
 #### Public changes
 
-- Consistent "special chars" - don't use a tilde over here and a exclamation mark over there, and ${} string interpolation here. Make the markup consistent (like Blazor with the @ sign).
+- Consistent "special chars" - don't use a tilde over here and a exclamation mark over there, and ${} string interpolation here. Make the markup consistent (like how Razor uses the @ sign for everything).
 - Make pages so that you don't manually have to route with a big case or something
     - Make `Root.spall` act like a layout page
     - Make route parameters like `product/{id}`. 
@@ -77,6 +78,7 @@ You can give parameters to instantiated elements as if it was a normal element. 
 - Move to typescript, attach some sort of package manager
     - Build a standard library of components
 - Allow subdirectories of elements, something namespace-like
+- Data binding/two-way parameters
 
 #### Internal changes
 

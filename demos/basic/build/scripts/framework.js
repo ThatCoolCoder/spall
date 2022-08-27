@@ -290,7 +290,7 @@ class SpallElement {
 
 // class __CompiledExampleElement extends SpallElement {
 //     generateRenderables() {
-//         return ['<h1>', new SpallElementRenderable(...), '</h1>'];
+//         return [new SpallMarkupRenderable('<h1>'), new SpallElementRenderable(...), new SpallMarkupRenderable('</h1>')];
 //     }
 // }
 
