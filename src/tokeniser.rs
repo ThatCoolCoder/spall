@@ -19,8 +19,6 @@ pub enum Token {
 }
 
 // Represents a single html tag - <opening>, </closing> or <standalone />
-// #[derive(Display)]
-// #[display(fmt = "[{tag_type} {name} tag with attributes {attributes:?}]")]
 pub struct TagToken {
     pub name: String,
     pub attributes: Vec<TagAttribute>, // eg style or id
@@ -41,7 +39,7 @@ impl fmt::Display for TagToken {
                 self.tag_type, self.name, attributes_str
             )
         } else {
-            write!(f, "[{} {} tag", self.tag_type, self.name)
+            write!(f, "[{} {} tag]", self.tag_type, self.name)
         }
     }
 }
@@ -87,7 +85,9 @@ pub fn read_element(markup: &str) -> Vec<Token> {
         else {
             let content = read_tag_content(&remaining);
             remaining.drain(..content.len());
-            result.push(Token::Content(ContentToken { value: content }));
+            if !content.trim().is_empty() {
+                result.push(Token::Content(ContentToken { value: content }));
+            }
         }
     }
     return result;

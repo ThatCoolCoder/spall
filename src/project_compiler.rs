@@ -119,10 +119,16 @@ fn compile_elements(
     let mut compiled_elements = Vec::new();
 
     for entry in element_files {
-        compiled_elements.push(file_compiler::compile_element_file(
-            &entry.unwrap().path().as_path(),
-            compilation_settings,
-        )?);
+        let p = &entry.unwrap().path();
+        let file_name = p.as_path();
+        compiled_elements.push(
+            file_compiler::compile_element_file(file_name, compilation_settings).or_else(|e| {
+                Err(CompilationError::File {
+                    file_name: file_name.to_string_lossy().to_string(),
+                    inner_error: e,
+                })
+            })?,
+        );
     }
     return Ok(compiled_elements);
 }

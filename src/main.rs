@@ -10,13 +10,22 @@ mod tag_type;
 mod tokeniser;
 // mod tokeniser_new;
 
-fn main() -> Result<(), errs::CompilationError> {
-    return project_compiler::compile_project(
+fn main() {
+    let result = project_compiler::compile_project(
         &std::env::current_dir().unwrap(),
         compilation_settings::CompilationSettings {
-            log_level: compilation_settings::CompilationLogLevel::PerStep,
+            log_level: compilation_settings::CompilationLogLevel::Minimal,
             minify_bundle: false,
-            debug_tokens: true,
+            debug_tokens: false,
         },
     );
+    if let Err(e) = result {
+        handle_compilation_error(e);
+    } else {
+        println!("Done!");
+    }
+}
+
+fn handle_compilation_error(e: errs::CompilationError) {
+    println!("{e}");
 }
