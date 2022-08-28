@@ -1,3 +1,5 @@
+requires(SpallUtils.js);
+
 class SpallRenderer {
     constructor(logger) {
         this._lastUsedId = 0;
@@ -8,8 +10,10 @@ class SpallRenderer {
         this._idToPath = {}; // these two are relative to document.body
         this._pathToId = {};
         this._idToElement = {};
+
+        this.router = new SpallRouter(this);
     }
-    
+
     renderPage() {
         this._throwIfRendering();
         var root = new __SpallCompiledRoot(this._lastUsedId, -1, this);

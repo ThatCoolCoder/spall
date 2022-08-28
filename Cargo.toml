@@ -10,3 +10,4 @@ minifier = "0.2.1"
 include_dir = { version = "0.7.2", features = ["glob"] }
 derive_more = "0.99.17"
 argparse = "0.2.2"
+itertools = "0.10.3"

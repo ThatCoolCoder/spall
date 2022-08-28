@@ -1,3 +1,119 @@
+class SpallRenderable {
+    // (abstract class thingy)
+}
+
+class SpallMarkupRenderable extends SpallRenderable {
+    constructor(markup) {
+        super();
+        this.markup = markup;
+    }
+}
+
+class SpallElementRenderable extends SpallRenderable {
+    constructor(elementName, elementClass, relativePath, parameters) {
+        super();
+        this.elementName = elementName;
+        this.elementClass = elementClass;
+        this.relativePath = relativePath;
+        this.parameters = parameters; // (dictionary of var name to function that can produce the value)
+    }
+}
+// Interface for render loggers
+class ISpallRenderLogger {
+    logStartRender(element) {
+        SpallUtils.abstractNotOverridden();
+    }
+
+    logAddMarkup(markup) {
+        SpallUtils.abstractNotOverridden();
+    }
+
+    logFinishRender(element) {
+        SpallUtils.abstractNotOverridden();
+    }
+
+    logCreatedElement(element) {
+        SpallUtils.abstractNotOverridden();
+    }
+}
+
+// Render logger that does nothing, for production
+class SpallMockRenderLogger {
+    constructor() {
+    }
+
+    logStartRender(element) {
+
+    }
+
+    logAddMarkup(markup) {
+
+    }
+
+    logFinishRender(element) {
+
+    }
+
+    logCreatedElement(element) {
+
+    }
+}
+
+// Render logger that logs everything, for development
+class SpallDebugRenderLogger {
+    constructor() {
+        this.indent = 0;
+        this.indentIncrement = 3;
+    }
+
+    logStartRender(element) {
+        console.log(`${this._generateIndent()}-- Start render ${element.elementName}`);
+        this.indent += this.indentIncrement;
+    }
+
+    logAddMarkup(markup) {
+        console.log(`${this._generateIndent()}Rendering ${markup}`);
+    }
+
+    logFinishRender(element) {
+        this.indent -= this.indentIncrement;
+        console.log(`${this._generateIndent()}-- Finish render ${element.elementName}`);
+    }
+
+    logCreatedElement(element) {
+        console.log(`${this._generateIndent()}Creating element for ${element.elementName}. Id is ${element.id}`)
+    }
+
+    _generateIndent() {
+        return ' '.repeat(this.indent);
+    }
+}
+class SpallRouter {
+    // Handles switching between "pages" I guess.
+    // Most of the work is done in the element, this just links everything together and adds a nice interface
+    // Currently routes are just strings with no slashes in them. Proper urls will come when I add namespaces
+
+    constructor(renderer) {
+        this.renderer = renderer;
+
+        this.routeToPageClass = {}; // define routes through here, by creating a page class
+        this.crntRoute = ""; // empty route == homepage
+    }
+
+    navigateTo(route) {
+        if (Object.keys(this.routeToPageClass).includes(route)) {
+            this.crntRoute = route;
+            this.renderer.renderPage();
+        }
+        else {
+            throw new Error(`Cannot navigate to "${route}": route does not exist`);
+        }
+    }
+    
+    getElementForRoute() {
+        return this.routeToPageClass[this.crntRoute];
+    }
+}
 class SpallUtils {
     static fatalRenderError(message) {
         console.error(`Fatal renderer error: ${message}`);
@@ -19,17 +135,6 @@ class SpallUtils {
         throw new Error(`Abstract function "${functionName}" not overridden`);
     }
 }
-class SpallRouter {
-    // Handles switching between pages I guess
-    constructor(renderer) {
-        this.renderer = renderer;
-        this.routeToPageClass = {};
-    }
-
-    navigateTo(url) {
-        // todo: look up in registry of pages, somehow splat an element inside of Root.spall
-    }
-}
 
 class SpallRenderer {
     constructor(logger) {
@@ -41,8 +146,10 @@ class SpallRenderer {
         this._idToPath = {}; // these two are relative to document.body
         this._pathToId = {};
         this._idToElement = {};
+
+        this.router = new SpallRouter(this);
     }
-    
+
     renderPage() {
         this._throwIfRendering();
         var root = new __SpallCompiledRoot(this._lastUsedId, -1, this);
@@ -161,110 +268,14 @@ class SpallRenderer {
         return crntElement;
     }
 }
-class SpallRenderable {
-    // (abstract class thingy)
-}
-
-class SpallMarkupRenderable extends SpallRenderable {
-    constructor(markup) {
-        super();
-        this.markup = markup;
-    }
-}
-
-class SpallElementRenderable extends SpallRenderable {
-    constructor(elementName, elementClass, relativePath, parameters) {
-        super();
-        this.elementName = elementName;
-        this.elementClass = elementClass;
-        this.relativePath = relativePath;
-        this.parameters = parameters; // (dictionary of var name to function that can produce the value)
-    }
-}
-// Interface for render loggers
-class ISpallRenderLogger {
-    logStartRender(element) {
-        SpallUtils.abstractNotOverridden();
-    }
-
-    logAddMarkup(markup) {
-        SpallUtils.abstractNotOverridden();
-    }
-
-    logFinishRender(element) {
-        SpallUtils.abstractNotOverridden();
-    }
-
-    logCreatedElement(element) {
-        SpallUtils.abstractNotOverridden();
-    }
-}
-
-// Render logger that does nothing, for production
-class SpallMockRenderLogger {
-    constructor() {
-    }
-
-    logStartRender(element) {
-
-    }
-
-    logAddMarkup(markup) {
-
-    }
-
-    logFinishRender(element) {
-
-    }
-
-    logCreatedElement(element) {
-
-    }
-}
-
-// Render logger that logs everything, for development
-class SpallDebugRenderLogger {
-    constructor() {
-        this.indent = 0;
-        this.indentIncrement = 3;
-    }
-
-    logStartRender(element) {
-        console.log(`${this._generateIndent()}-- Start render ${element.elementName}`);
-        this.indent += this.indentIncrement;
-    }
-
-    logAddMarkup(markup) {
-        console.log(`${this._generateIndent()}Rendering ${markup}`);
-    }
-
-    logFinishRender(element) {
-        this.indent -= this.indentIncrement;
-        console.log(`${this._generateIndent()}-- Finish render ${element.elementName}`);
-    }
-
-    logCreatedElement(element) {
-        console.log(`${this._generateIndent()}Creating element for ${element.elementName}. Id is ${element.id}`)
-    }
-
-    _generateIndent() {
-        return ' '.repeat(this.indent);
-    }
-}
-// class SpallPage extends SpallElement {
-//     constructor(title, elementName, id, parentId, rendererInstance, path) {
-//         super(elementName, id, parentId, rendererInstance, path);
-//         this.title = title;
-//     }
-// }
 class SpallElement {
     // Represents an element that's actually on the page and has a state and such. Is extended by compiled files.
-    constructor(elementName, id, parentId, rendererInstance, path) {
+    constructor(elementName, id, parentId, renderer, path) {
         this.elementName = elementName;
         this.id = id;
         this.parentId = parentId;
         this.children = [];
-        this.rendererInstance = rendererInstance;
+        this.renderer = renderer;
         this.path = path;
     }
 
@@ -274,7 +285,7 @@ class SpallElement {
     }
 
     needsRender() {
-        this.rendererInstance.renderElement(this, this.rendererInstance.getElementContainer(this.id));
+        this.renderer.renderElement(this, this.renderer.getElementContainer(this.id));
     }
 
     onInitialized() {
@@ -294,6 +305,27 @@ class SpallElement {
 //     }
 // }
 
-class SpallRootElement extends SpallElement {
+// class SpallPage extends SpallElement {
+//     constructor(title, elementName, id, parentId, renderer, path) {
+//         super(elementName, id, parentId, renderer, path);
+//         this.title = title;
+//     }
+// }
 
+class __SpallCompiledRoutedApp extends SpallElement {
+    // Defines the section of the app that is rendered by routing
+    // I'm too lazy to make a proper system for predefined elements or imports, so it's just a manually compiled element
+
+    constructor(id, parentId, renderer, path) {
+        super("RoutedApp", id, parentId, renderer, path);
+    }
+
+    generateRenderables() {
+        var elementClass = this.renderer.router.getElementForRoute();
+        return [new SpallElementRenderable("", elementClass, "1", {})];
+    }
+}
+
+class SpallRootElement extends SpallElement {
+    // uuuh... currently it doesn't do anything special
 }

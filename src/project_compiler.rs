@@ -1,7 +1,9 @@
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 
 use include_dir::{include_dir, Dir, DirEntry};
+use itertools::Itertools;
 use minifier;
 
 use crate::compilation_settings::*;
@@ -85,20 +87,79 @@ fn copy_index_file(project_paths: &ProjectPaths) {
 }
 
 fn build_framework_runtime() -> String {
-    // Yes I know it's not efficient to build it each time, but it would be very painful to do this through macros.
+    // Yes I know it's not efficient to build it each time, but it would be very painful to do this all through macros.
+    // Admittedly pretty shoddy, especially the dependency order part
 
-    return FRAMEWORK_RUNTIME_FILES
+    let file_map: HashMap<String, String> = FRAMEWORK_RUNTIME_FILES
         .find("**/*.js")
         .unwrap()
-        // Convert entries to none if they are a dir
         .filter_map(|entry| match entry {
-            DirEntry::File(f) => Some(f.contents_utf8()),
+            DirEntry::File(f) => Some((
+                f.path().to_string_lossy().to_string(),
+                f.contents_utf8().unwrap().to_string(),
+            )),
             _ => None,
         })
-        //
-        .map(|x| x.unwrap())
-        .collect::<Vec<&str>>()
+        .collect();
+
+    let mut file_order: Vec<String> = vec![];
+    for tuple in &file_map {
+        let deps = parse_framework_file_dependencies(&tuple.1);
+        add_dependencies_for_file(&deps, &file_map, &mut file_order);
+        file_order.push(tuple.0.to_string());
+    }
+
+    return file_order
+        .iter()
+        .unique()
+        .map(|x| remove_require_statement(file_map.get(x).unwrap()))
+        .collect::<Vec<String>>()
         .join("\n");
+}
+
+fn parse_framework_file_dependencies(file_content: &str) -> Vec<String> {
+    // Returns a list of files it depends on and returns a copy of the file with require statement removed
+    if file_content.starts_with("requires(") {
+        let requirements: Vec<String> = file_content
+            .lines()
+            .next()
+            .unwrap()
+            .replacen("requires(", "", 1)
+            .replace(");", "")
+            .split(",")
+            .map(|x| x.trim().to_string())
+            .collect();
+        requirements
+    } else {
+        vec![]
+    }
+}
+
+fn add_dependencies_for_file(
+    file_dependencies: &Vec<String>,
+    file_map: &HashMap<String, String>,
+    dependency_accumulator: &mut Vec<String>,
+) {
+    for file in file_dependencies {
+        if !file_map.contains_key(file) {
+            panic!("Could not find file {}", file);
+        }
+        add_dependencies_for_file(
+            &parse_framework_file_dependencies(file_map.get(file).unwrap()),
+            file_map,
+            dependency_accumulator,
+        );
+        dependency_accumulator.push(file.to_string());
+    }
+}
+
+fn remove_require_statement(text: &str) -> String {
+    // Remove the requires() statement from the first line of a framework file if it has one
+    if text.starts_with("requires(") {
+        text.lines().skip(1).collect::<Vec<&str>>().join("\n")
+    } else {
+        text.to_string()
+    }
 }
 
 fn write_framework_runtime(project_paths: &ProjectPaths, framework_runtime: &str) {
@@ -108,7 +169,6 @@ fn write_framework_runtime(project_paths: &ProjectPaths, framework_runtime: &str
     )
     .expect("Error copying framework scripts");
 }
-
 fn compile_elements(
     project_paths: &ProjectPaths,
     compilation_settings: &CompilationSettings,

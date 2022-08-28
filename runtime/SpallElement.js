@@ -1,11 +1,11 @@
 class SpallElement {
     // Represents an element that's actually on the page and has a state and such. Is extended by compiled files.
-    constructor(elementName, id, parentId, rendererInstance, path) {
+    constructor(elementName, id, parentId, renderer, path) {
         this.elementName = elementName;
         this.id = id;
         this.parentId = parentId;
         this.children = [];
-        this.rendererInstance = rendererInstance;
+        this.renderer = renderer;
         this.path = path;
     }
 
@@ -15,7 +15,7 @@ class SpallElement {
     }
 
     needsRender() {
-        this.rendererInstance.renderElement(this, this.rendererInstance.getElementContainer(this.id));
+        this.renderer.renderElement(this, this.renderer.getElementContainer(this.id));
     }
 
     onInitialized() {
@@ -34,7 +34,3 @@ class SpallElement {
 //         return [new SpallMarkupRenderable('<h1>'), new SpallElementRenderable(...), new SpallMarkupRenderable('</h1>')];
 //     }
 // }
-
-class SpallRootElement extends SpallElement {
-
-}

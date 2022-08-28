@@ -10,8 +10,6 @@
     <script src="scripts/bundle.js"></script>
     <script>
         SpallRenderer.instance = new SpallRenderer(new SpallDebugRenderLogger());
-        SpallRouter.instance = new SpallRouter(SpallRenderer);
-        // SpallRouter.navigateTo("/");
-        SpallRenderer.instance.renderPage();
+        SpallRenderer.instance.router.navigateTo("/");
     </script>
 </html>
