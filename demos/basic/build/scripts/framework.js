@@ -1,22 +1,42 @@
-class SpallRenderable {
-    // (abstract class thingy)
-}
-
-class SpallMarkupRenderable extends SpallRenderable {
-    constructor(markup) {
-        super();
-        this.markup = markup;
-    }
-}
-
-class SpallElementRenderable extends SpallRenderable {
-    constructor(elementName, elementClass, relativePath, parameters) {
-        super();
+class SpallElement {
+    // Represents an element that's actually on the page and has a state and such. Is extended by compiled files.
+    constructor(elementName, id, parentId, renderer, path) {
         this.elementName = elementName;
-        this.elementClass = elementClass;
-        this.relativePath = relativePath;
-        this.parameters = parameters; // (dictionary of var name to function that can produce the value)
+        this.id = id;
+        this.parentId = parentId;
+        this.children = [];
+        this.renderer = renderer;
+        this.path = path;
     }
+
+    // Should return an array of SpallRenderables
+    generateRenderables() {
+        SpallUtils.fatalRenderError(`generateRenderables was not overridden in ${this.constructor.name}`);
+    }
+
+    needsRender() {
+        this.renderer.renderElement(this, this.renderer.getElementContainer(this.id));
+    }
+
+    onInitialized() {
+
+    }
+
+    onRender() {
+        
+    }
+}
+
+// Compiled project creates a bunch of classes like this one:
+
+// class __CompiledExampleElement extends SpallElement {
+//     generateRenderables() {
+//         return [new SpallMarkupRenderable('<h1>'), new SpallElementRenderable(...), new SpallMarkupRenderable('</h1>')];
+//     }
+// }
+
+class SpallRootElement extends SpallElement {
+    // uuuh... currently it doesn't do anything special
 }
 // Interface for render loggers
 class ISpallRenderLogger {
@@ -112,6 +132,26 @@ class SpallRouter {
     
     getElementForRoute() {
         return this.routeToPageClass[this.crntRoute];
+    }
+}
+class SpallRenderable {
+    // (abstract class thingy)
+}
+
+class SpallMarkupRenderable extends SpallRenderable {
+    constructor(markup) {
+        super();
+        this.markup = markup;
+    }
+}
+
+class SpallElementRenderable extends SpallRenderable {
+    constructor(elementName, elementClass, relativePath, parameters) {
+        super();
+        this.elementName = elementName;
+        this.elementClass = elementClass;
+        this.relativePath = relativePath;
+        this.parameters = parameters; // (dictionary of var name to function that can produce the value)
     }
 }
 class SpallUtils {
@@ -268,49 +308,6 @@ class SpallRenderer {
         return crntElement;
     }
 }
-class SpallElement {
-    // Represents an element that's actually on the page and has a state and such. Is extended by compiled files.
-    constructor(elementName, id, parentId, renderer, path) {
-        this.elementName = elementName;
-        this.id = id;
-        this.parentId = parentId;
-        this.children = [];
-        this.renderer = renderer;
-        this.path = path;
-    }
-
-    // Should return an array of SpallRenderables
-    generateRenderables() {
-        SpallUtils.fatalRenderError(`generateRenderables was not overridden in ${this.constructor.name}`);
-    }
-
-    needsRender() {
-        this.renderer.renderElement(this, this.renderer.getElementContainer(this.id));
-    }
-
-    onInitialized() {
-
-    }
-
-    onRender() {
-        
-    }
-}
-
-// Compiled project creates a bunch of classes like this one:
-
-// class __CompiledExampleElement extends SpallElement {
-//     generateRenderables() {
-//         return [new SpallMarkupRenderable('<h1>'), new SpallElementRenderable(...), new SpallMarkupRenderable('</h1>')];
-//     }
-// }
-
-// class SpallPage extends SpallElement {
-//     constructor(title, elementName, id, parentId, renderer, path) {
-//         super(elementName, id, parentId, renderer, path);
-//         this.title = title;
-//     }
-// }
 
 class __SpallCompiledRoutedApp extends SpallElement {
     // Defines the section of the app that is rendered by routing
@@ -326,6 +323,9 @@ class __SpallCompiledRoutedApp extends SpallElement {
     }
 }
 
-class SpallRootElement extends SpallElement {
-    // uuuh... currently it doesn't do anything special
+class SpallPage extends SpallElement {
+    constructor(title, elementName, id, parentId, renderer, path) {
+        super(elementName, id, parentId, renderer, path);
+        this.title = title;
+    }
 }
