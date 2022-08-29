@@ -1,3 +1,22 @@
 ~// currently just a mockup of how this would look
 <title>Hello</title>
-<route>/hello/</route>
+<pageroute></pageroute>
+
+<h1>Basic Spall Demo</h1>
+<div>
+    <p>So here we have some text</p>
+    <p>And here is an instantiated element: <Button /></p>
+    <p>This instantiated button has some styling: <StyledButton /></p>
+    <p>This instantiated button has a callback to itself, which changes the state: <CounterButton counter="5" /></p>
+
+    <RenderCounter />
+
+    <p>The next sentence is generated on the fly with an if-statement</p>
+    <span>
+        ~if (Math.random() > 0.5) {
+            <p>Math.random() was lower than 0.5</p>
+        ~} else {
+            <p>Math.random() was greater than 0.5</p>
+        ~}
+    </span>
+</div>

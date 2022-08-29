@@ -18,6 +18,20 @@ struct ProjectPaths {
     build_scripts_dir: PathBuf,
     meta_dir: PathBuf,
     elements_dir: PathBuf,
+    pages_dir: PathBuf,
+}
+
+impl ProjectPaths {
+    pub fn new(project_dir: &Path) -> ProjectPaths {
+        return ProjectPaths {
+            root_dir: project_dir.to_path_buf(),
+            build_dir: project_dir.join("build"),
+            build_scripts_dir: project_dir.join("build/scripts"),
+            meta_dir: project_dir.join("meta"),
+            elements_dir: project_dir.join("elements"),
+            pages_dir: project_dir.join("pages"),
+        };
+    }
 }
 
 const FRAMEWORK_RUNTIME_FILES: Dir = include_dir!("runtime");
@@ -32,7 +46,7 @@ pub fn compile_project(
 
     logging::log_brief("Preparing for compilation", compilation_settings.log_level);
 
-    let project_paths = find_project_paths(project_dir);
+    let project_paths = ProjectPaths::new(project_dir);
 
     logging::log_per_step("Setting up build directory", compilation_settings.log_level);
     setup_build_dir(&project_paths);
@@ -46,7 +60,16 @@ pub fn compile_project(
     write_framework_runtime(&project_paths, &runtime);
 
     logging::log_brief("Compiling elements", compilation_settings.log_level);
-    let compiled_elements = compile_elements(&project_paths, &compilation_settings)?;
+    let mut compiled_elements = compile_elements(
+        &project_paths.elements_dir,
+        &compilation_settings,
+        file_compiler::ElementType::Basic,
+    )?;
+    compiled_elements.extend(compile_elements(
+        &project_paths.pages_dir,
+        &compilation_settings,
+        file_compiler::ElementType::Page,
+    )?);
 
     logging::log_brief("Bundling application", compilation_settings.log_level);
     let mut bundle = bundle_compiled_elements(&compiled_elements);
@@ -56,16 +79,6 @@ pub fn compile_project(
     save_bundle(&project_paths, &bundle);
 
     return Ok(());
-}
-
-fn find_project_paths(project_dir: &Path) -> ProjectPaths {
-    return ProjectPaths {
-        root_dir: project_dir.to_path_buf(),
-        build_dir: project_dir.join("build"),
-        build_scripts_dir: project_dir.join("build/scripts"),
-        meta_dir: project_dir.join("meta"),
-        elements_dir: project_dir.join("elements"),
-    };
 }
 
 fn setup_build_dir(project_paths: &ProjectPaths) {
@@ -170,19 +183,25 @@ fn write_framework_runtime(project_paths: &ProjectPaths, framework_runtime: &str
     .expect("Error copying framework scripts");
 }
 fn compile_elements(
-    project_paths: &ProjectPaths,
+    element_directory: &Path,
     compilation_settings: &CompilationSettings,
+    element_types: file_compiler::ElementType,
 ) -> Result<Vec<String>, CompilationError> {
     // Compile all the elements in the project
 
-    let element_files = fs::read_dir(&project_paths.elements_dir).unwrap();
+    let element_files = fs::read_dir(element_directory).unwrap();
     let mut compiled_elements = Vec::new();
 
     for entry in element_files {
         let p = &entry.unwrap().path();
         let file_name = p.as_path();
         compiled_elements.push(
-            file_compiler::compile_element_file(file_name, compilation_settings).or_else(|e| {
+            file_compiler::compile_element_file(
+                file_name,
+                compilation_settings,
+                element_types.clone(),
+            )
+            .or_else(|e| {
                 Err(CompilationError::File {
                     file_name: file_name.to_string_lossy().to_string(),
                     inner_error: e,

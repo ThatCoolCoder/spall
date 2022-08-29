@@ -11,7 +11,14 @@ use crate::tag_type::TagType;
 use crate::{parser, tokeniser};
 
 const ROOT_ELEMENT_NAME: &str = "Root";
-const SCRIPT_ELEMENT_NAME: &str = "script";
+// Elements that aren't put into the final markup
+const IGNORED_ELEMENT_NAMES: [&'static str; 3] = ["title", "routename", "script"];
+
+#[derive(Clone, PartialEq)]
+pub enum ElementType {
+    Basic,
+    Page,
+}
 
 enum CompileChunk {
     // Chunk of stuff that we need to compile
@@ -34,6 +41,7 @@ enum Renderable {
 pub fn compile_element_file(
     file_path: &Path,
     compilation_settings: &CompilationSettings,
+    element_type: ElementType,
 ) -> Result<String, FileCompilationError> {
     // todo: if is not a .spall file: crash
 
@@ -42,7 +50,12 @@ pub fn compile_element_file(
         file_path.to_string_lossy()
     ));
     let element_name = file_path.file_stem().unwrap().to_str().unwrap();
-    return compile_element(&file_content, &element_name, compilation_settings);
+    return compile_element(
+        &file_content,
+        &element_name,
+        compilation_settings,
+        element_type,
+    );
 }
 
 // How the general flow of compilation works:
@@ -58,6 +71,7 @@ pub fn compile_element(
     file_content: &str,
     element_name: &str,
     compilation_settings: &CompilationSettings,
+    element_type: ElementType,
 ) -> Result<String, FileCompilationError> {
     // Preparation
 
@@ -73,10 +87,14 @@ pub fn compile_element(
     }
 
     let compiled_element_name = generate_compiled_element_name(element_name);
-    let base_class = if element_name == ROOT_ELEMENT_NAME {
-        "SpallRootElement"
+    let base_class = if element_type == ElementType::Basic {
+        if element_name == ROOT_ELEMENT_NAME {
+            "SpallRootElement"
+        } else {
+            "SpallElement"
+        }
     } else {
-        "SpallElement"
+        "SpallPage"
     };
 
     // Reading/ parsing
@@ -98,11 +116,29 @@ pub fn compile_element(
     chunks = concat_successive_compile_chunks(&chunks);
     let compiled_render_func = compile_chunks(&chunks);
 
-    let result = format!(
+    let constructor = match element_type {
+        ElementType::Basic => {
+            format!("super('{element_name}', id, parentId, rendererInstance, path);")
+        }
+        ElementType::Page => {
+            let mut page_title = "".to_string();
+            // add code to register as page
+            tree.depth_first_map(&mut |node, _is_entering| {
+                if let parser::NodeData::Markup(inner_data) = &node.data {
+                    if inner_data.tag_name == "title" {
+                        page_title = inner_data.inner_text.clone();
+                    }
+                };
+            });
+            format!("super('{page_title}', '{element_name}', id, parentId, rendererInstance, path)")
+        }
+    };
+
+    let mut result = format!(
         r#"
         class {compiled_element_name} extends {base_class} {{
-            constructor(id, parentId, rendererInstance) {{
-                super('{element_name}', id, parentId, rendererInstance);
+            constructor(id, parentId, rendererInstance, path) {{
+                {constructor}
             }}
 
             generateRenderables() {{
@@ -113,6 +149,24 @@ pub fn compile_element(
         }}
     "#
     );
+
+    if element_type == ElementType::Page {
+        // add code to register as page
+
+        let mut element_route = "".to_string();
+        // add code to register as page
+        tree.depth_first_map(&mut |node, _is_entering| {
+            if let parser::NodeData::Markup(inner_data) = &node.data {
+                if inner_data.tag_name == "pageroute" {
+                    element_route = inner_data.inner_text.clone();
+                }
+            };
+        });
+
+        result += &format!(
+            "SpallRouter.routeToPageClass['{element_route}'] = {compiled_element_name};\n"
+        );
+    }
 
     return Ok(result);
 }
@@ -170,7 +224,7 @@ fn find_class_body(tree: &parser::Tree) -> Option<String> {
     let mut result = None;
     tree.depth_first_map(&mut |node, _is_entering| {
         if let parser::NodeData::Markup(inner_data) = &node.data {
-            if inner_data.tag_name == SCRIPT_ELEMENT_NAME {
+            if inner_data.tag_name == "script" {
                 result = Some(inner_data.inner_text.clone());
             }
         }
@@ -234,7 +288,7 @@ fn renderable_from_node_visit(
     is_entering: bool,
     path: &str,
 ) -> Option<Renderable> {
-    if node_data.tag_name == SCRIPT_ELEMENT_NAME {
+    if IGNORED_ELEMENT_NAMES.contains(&node_data.tag_name.as_str()) {
         return None;
     }
 

@@ -6,13 +6,15 @@ class SpallRouter {
     constructor(renderer) {
         this.renderer = renderer;
 
-        this.routeToPageClass = {}; // define routes through here, by creating a page class
+        this.routeToPageClass = SpallRouter.routeToPageClass;
         this.crntRoute = ""; // empty route == homepage
     }
 
     navigateTo(route) {
         if (Object.keys(this.routeToPageClass).includes(route)) {
+            console.log("Navigating to ", route);
             this.crntRoute = route;
+            history.pushState("", "", `/${this.crntRoute}`);
             this.renderer.renderPage();
         }
         else {
@@ -24,3 +26,5 @@ class SpallRouter {
         return this.routeToPageClass[this.crntRoute];
     }
 }
+
+SpallRouter.routeToPageClass = {};

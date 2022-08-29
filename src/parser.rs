@@ -6,7 +6,7 @@ use crate::tag_type::TagType;
 use crate::tokeniser;
 
 // Spans are not used to contain the inner text of these tags
-static SPANLESS_INNER_TEXTS: [&'static str; 1] = ["script"];
+static SPANLESS_INNER_TEXTS: [&'static str; 3] = ["script", "title", "pageroute"];
 
 pub type NodeIndex = usize;
 
