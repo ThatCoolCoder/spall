@@ -8,11 +8,15 @@ class SpallRouter {
 
         this.routeToPageClass = SpallRouter.routeToPageClass;
         this.crntRoute = ""; // empty route == homepage
+        this.defaultTitle = ""; // title shown if page doesn't define a title
+    }
+
+    setDefaultTitle(title) {
+        this.defaultTitle = title;
     }
 
     navigateTo(route) {
         if (Object.keys(this.routeToPageClass).includes(route)) {
-            console.log("Navigating to ", route);
             this.crntRoute = route;
             history.pushState("", "", `/${this.crntRoute}`);
             this.renderer.renderPage();

@@ -9,8 +9,6 @@
     <p>This instantiated button has some styling: <StyledButton /></p>
     <p>This instantiated button has a callback to itself, which changes the state: <CounterButton counter="5" /></p>
 
-    <RenderCounter />
-
     <p>The next sentence is generated on the fly with an if-statement</p>
     <span>
         ~if (Math.random() > 0.5) {

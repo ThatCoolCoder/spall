@@ -2,6 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use fs_extra;
 use include_dir::{include_dir, Dir, DirEntry};
 use itertools::Itertools;
 use minifier;
@@ -19,6 +20,8 @@ struct ProjectPaths {
     meta_dir: PathBuf,
     elements_dir: PathBuf,
     pages_dir: PathBuf,
+    static_dir: PathBuf,
+    build_static_dir: PathBuf,
 }
 
 impl ProjectPaths {
@@ -30,6 +33,8 @@ impl ProjectPaths {
             meta_dir: project_dir.join("meta"),
             elements_dir: project_dir.join("elements"),
             pages_dir: project_dir.join("pages"),
+            static_dir: project_dir.join("static"),
+            build_static_dir: project_dir.join("build/static"),
         };
     }
 }
@@ -51,6 +56,7 @@ pub fn compile_project(
     logging::log_per_step("Setting up build directory", compilation_settings.log_level);
     setup_build_dir(&project_paths);
     copy_index_file(&project_paths);
+    copy_static_files(&project_paths);
 
     logging::log_per_step(
         "Building and saving runtime",
@@ -97,6 +103,30 @@ fn copy_index_file(project_paths: &ProjectPaths) {
         project_paths.build_dir.join("index.html"),
     )
     .expect("Error copying index file");
+}
+
+fn copy_static_files(project_paths: &ProjectPaths) {
+    // Clean existing directory
+    if project_paths.build_static_dir.exists() {
+        (if project_paths.build_static_dir.is_dir() {
+            fs::remove_dir_all(&project_paths.build_static_dir)
+        } else {
+            fs::remove_file(&project_paths.build_static_dir)
+        })
+        .expect("Failed to delete old static directory");
+    }
+    // Copy files if exists
+    if project_paths.build_dir.exists() {
+        let mut options = fs_extra::dir::CopyOptions::new();
+        // options.mirror_copy = true;
+        options.copy_inside = true;
+        fs_extra::dir::copy(
+            &project_paths.static_dir,
+            &project_paths.build_static_dir,
+            &options,
+        )
+        .expect("Failed copying static directory");
+    }
 }
 
 fn build_framework_runtime() -> String {

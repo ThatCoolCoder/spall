@@ -1,0 +1,21 @@
+~if (this.selected) {
+    <a class="nav-button" !onclick="this.visitLink()">${this.title}</a>
+~}
+~ else {
+    <a class="nav-button nav-button-selected">${this.title}</a>
+~}
+
+<script>
+    onInitialized() {
+        this.route = 'unrouted';
+        this.title = 'Untitled';
+    }
+
+    get selected() {
+        return window.location.pathname.replaceAll('/', '') == this.route;
+    }
+
+    visitLink() {
+        this.renderer.router.navigateTo(this.route);
+    }
+</script>

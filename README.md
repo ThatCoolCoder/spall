@@ -2,7 +2,7 @@
 
 > Spall: (noun) A chip or splinter of stone
 
-Unremarkable JS framework for the benefit of my learning, is probably very similar to some other frameworks. I've build this before using a JS framework so that I'm not influenced by the design of others, although I have used C# Blazor extensively. Compiler is built in Rust. Very WIP.
+Unremarkable SPA JS framework for the benefit of my learning, is probably very similar to some other frameworks. I've built this before using a JS framework so that I'm not influenced by the design of others. I have used C# Blazor extensively in the past. Compiler is built in Rust. Very WIP.
 
 See misc notes to see what this is currently capable of.
 
@@ -12,9 +12,11 @@ See `demos/basic` for a basic look at how to make stuff work.
 
 An app is made up of elements, which are stored in the `elements/` directory. They're basically components but with a better name. Element file names are in format `{element name}.spall`. There must be an element called `Root` which is the root of your app. Calling them elements is somewhat confusing because HTML elements also exist. Maybe I should change the name.
 
-The `pages/` dir of a project will hold... pages. Pages are just elements that correspond to a "route".
+The `pages/` dir of a project holds pages. Pages are just elements that correspond to a "route". A page's route is specified inside a `<pageroute>` tag. You can specify a page title using `<title>` tags but it doesn't do anything yet.
 
 The `meta/` dir of a project contains stuff that is not the app itself. `index.html` is the entry point into the app and is plain html. You should put stuff like linking to the renderer in there.
+
+The `static/` dir of a project holds static files that can be accessed in the built app from `static/`.
 
 When an app is built, files are created in the `build/` directory, which can then be used in a regular server like Apache.
 
@@ -71,14 +73,15 @@ You can give parameters to instantiated elements as if it was a normal element. 
 #### Public changes
 
 - Consistent "special chars" - don't use a tilde over here and a exclamation mark over there, and ${} string interpolation here. Make the markup consistent (like how Razor uses the @ sign for everything).
-- Make pages so that you don't manually have to route with a big case or something
-    - Make `Root.spall` act like a layout page
-    - Make route parameters like `product/{id}`. 
+- Make route parameters for pages like `product/{id}`. 
 - Ability to keep references to html elements
 - Move to typescript, attach some sort of package manager
     - Build a standard library of components
-- Allow subdirectories of elements, something namespace-like
+- Allow subdirectories of elements + pages, something namespace-like
 - Data binding/two-way parameters
+- Scoped CSS
+- Make requests to non-index directories still lead to the SPA (is this possible without writing a custom server?)
+- Make custom dev server with file watching (similar to `dotnet watch run`)
 
 #### Internal changes
 

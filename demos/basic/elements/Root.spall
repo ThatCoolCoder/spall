@@ -1,7 +1,8 @@
-<div style="width: 100%; background-color: blue">
-    <h1>Demo App</h1>
-    <button onclick="SpallRenderer.instance.router.navigateTo('')">Home</button>
-    <button onclick="SpallRenderer.instance.router.navigateTo('weather')">Weather</button>
+<div class="top-row px-4 d-flex">
+
+        <h1>Demo App</h1>
+        <button onclick="SpallRenderer.instance.router.navigateTo('')">Home</button>
+        <button onclick="SpallRenderer.instance.router.navigateTo('weather')">Weather</button>
 </div>
 
 <RoutedApp></RoutedApp>
