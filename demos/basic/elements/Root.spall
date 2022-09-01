@@ -1,8 +1,12 @@
-<div class="top-row px-4 d-flex">
-
-        <h1>Demo App</h1>
-        <button onclick="SpallRenderer.instance.router.navigateTo('')">Home</button>
-        <button onclick="SpallRenderer.instance.router.navigateTo('weather')">Weather</button>
+<div class="top-row px-2">
+    <h1 class="main-title" >Demo App</h1>
+    <div class="d-flex">
+        <NavButton title="Home" route="" />
+        <NavButton title="Counter World" route="counterworld" />
+        <NavButton title="Weather" route="weather" />
+    </div>
 </div>
 
-<RoutedApp></RoutedApp>
+<div class="px-2 py-1">
+    <RoutedApp></RoutedApp>
+</div>

@@ -21,7 +21,7 @@ return __spallRenderables;
 
             generateRenderables() {
                 var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<div class="top-row px-4 d-flex"><h1 ><span >Demo App</span></h1><button onclick="SpallRenderer.instance.router.navigateTo('')"><span >Home</span></button><button onclick="SpallRenderer.instance.router.navigateTo('weather')"><span >Weather</span></button></div>`), new SpallElementRenderable("RoutedApp", __SpallCompiledRoutedApp, "1", {  })]);
+__spallRenderables.push(...[new SpallMarkupRenderable(`<div class="top-row px-2"><h1 class="main-title"><span >Demo App</span></h1><div class="d-flex">`), new SpallElementRenderable("NavButton", __SpallCompiledNavButton, "0/1/0", { title:() => "Home",route:() => "" }), new SpallMarkupRenderable(``), new SpallElementRenderable("NavButton", __SpallCompiledNavButton, "0/1/1", { title:() => "Counter World",route:() => "counterworld" }), new SpallMarkupRenderable(``), new SpallElementRenderable("NavButton", __SpallCompiledNavButton, "0/1/2", { title:() => "Weather",route:() => "weather" }), new SpallMarkupRenderable(`</div></div><div class="px-2 py-1">`), new SpallElementRenderable("RoutedApp", __SpallCompiledRoutedApp, "1/0", {  }), new SpallMarkupRenderable(`</div>`)]);
 return __spallRenderables;
             }
 
@@ -44,9 +44,41 @@ return __spallRenderables;
         }
     
 
-        class __SpallCompiledCounterButton extends SpallElement {
+        class __SpallCompiledNavButton extends SpallElement {
             constructor(id, parentId, rendererInstance, path) {
-                super('CounterButton', id, parentId, rendererInstance, path);
+                super('NavButton', id, parentId, rendererInstance, path);
+            }
+
+            generateRenderables() {
+                var __spallRenderables = [];
+if (this.selected) {
+__spallRenderables.push(...[new SpallMarkupRenderable(`<a class="nav-button nav-button-selected px-4 py-2"><span >${this.title}</span></a>`)]);
+} else {
+__spallRenderables.push(...[new SpallMarkupRenderable(`<a class="nav-button px-4 py-2" onclick="SpallRenderer.instance.getElementById(${this.id}).visitLink()"><span >${this.title}</span></a>`)]);
+}
+return __spallRenderables;
+            }
+
+            
+    onInitialized() {
+        this.route = 'unrouted';
+        this.title = 'Untitled';
+    }
+
+    get selected() {
+        return window.location.pathname.replaceAll('/', '') == this.route;
+    }
+
+    visitLink() {
+        this.renderer.router.navigateTo(this.route);
+    }
+
+        }
+    
+
+        class __SpallCompiledCounter extends SpallElement {
+            constructor(id, parentId, rendererInstance, path) {
+                super('Counter', id, parentId, rendererInstance, path);
             }
 
             generateRenderables() {
@@ -79,14 +111,7 @@ return __spallRenderables;
 
             generateRenderables() {
                 var __spallRenderables = [];
-// currently just a mockup of how this would look
-__spallRenderables.push(...[new SpallMarkupRenderable(`<pageroute ></pageroute><h1 ><span >Basic Spall Demo</span></h1><div ><p ><span >So here we have some text</span></p><p ><span >And here is an instantiated element: </span>`), new SpallElementRenderable("Button", __SpallCompiledButton, "4/1/1", {  }), new SpallMarkupRenderable(`</p><p ><span >This instantiated button has some styling: </span>`), new SpallElementRenderable("StyledButton", __SpallCompiledStyledButton, "4/2/1", {  }), new SpallMarkupRenderable(`</p><p ><span >This instantiated button has a callback to itself, which changes the state: </span>`), new SpallElementRenderable("CounterButton", __SpallCompiledCounterButton, "4/3/1", { counter:() => 5 }), new SpallMarkupRenderable(`</p><p ><span >The next sentence is generated on the fly with an if-statement</span></p><span >`)]);
-if (Math.random() > 0.5) {
-__spallRenderables.push(...[new SpallMarkupRenderable(`<p ><span >Math.random() was lower than 0.5</span></p>`)]);
-} else {
-__spallRenderables.push(...[new SpallMarkupRenderable(`<p ><span >Math.random() was greater than 0.5</span></p>`)]);
-}
-__spallRenderables.push(...[new SpallMarkupRenderable(`</span></div>`)]);
+__spallRenderables.push(...[new SpallMarkupRenderable(`<h1 ><span >Welcome to Spall</span></h1><p ><span >Spall is a Javascript framework for building SPAs, with a compiler written in Rust.</span></p><p ><span >Here is an example of basic interactive stateful behavior: </span>`), new SpallElementRenderable("Counter", __SpallCompiledCounter, "4/1", {  }), new SpallMarkupRenderable(`</p><p ><span >Click the links above to learn more about Spall</span></p>`)]);
 return __spallRenderables;
             }
 
@@ -102,10 +127,29 @@ return __spallRenderables;
 
             generateRenderables() {
                 var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<pageroute >weather</pageroute><p ><span >There is weather yes</span></p>`)]);
+__spallRenderables.push(...[new SpallMarkupRenderable(`<p ><span >There is weather yes</span></p>`)]);
 return __spallRenderables;
             }
 
             
         }
     SpallRouter.routeToPageClass['weather'] = __SpallCompiledWeather;
+
+
+        class __SpallCompiledCounterWorld extends SpallPage {
+            constructor(id, parentId, rendererInstance, path) {
+                super('Counter World', 'CounterWorld', id, parentId, rendererInstance, path)
+            }
+
+            generateRenderables() {
+                var __spallRenderables = [];
+for (var i = 0; i < 100; i ++) {
+__spallRenderables.push(...[new SpallMarkupRenderable(``), new SpallElementRenderable("Counter", __SpallCompiledCounter, "2/0", {  })]);
+}
+__spallRenderables.push(...[new SpallMarkupRenderable(`<p ></p>`)]);
+return __spallRenderables;
+            }
+
+            
+        }
+    SpallRouter.routeToPageClass['counterworld'] = __SpallCompiledCounterWorld;

@@ -1,24 +1,3 @@
-class SpallUtils {
-    static fatalRenderError(message) {
-        console.error(`Fatal renderer error: ${message}`);
-    }
-
-    static addChildAtIndex(element, child, index) {
-        // Based on https://stackoverflow.com/a/39181175/12650706
-        if (!index) index = 0
-        if (index >= element.children.length) {
-            element.appendChild(child)
-        } else {
-            element.insertBefore(child, element.children[index])
-        }
-    }
-
-    static abstractNotOverridden() {
-        // Put this in your abstract methods so it throws if it's not overridden.
-        var functionName = new Error().stack.split('\n')[1].split('@')[0];
-        throw new Error(`Abstract function "${functionName}" not overridden`);
-    }
-}
 class SpallElement {
     // Represents an element that's actually on the page and has a state and such. Is extended by compiled files.
     constructor(elementName, id, parentId, renderer, path) {
@@ -55,88 +34,25 @@ class SpallElement {
 //         return [new SpallMarkupRenderable('<h1>'), new SpallElementRenderable(...), new SpallMarkupRenderable('</h1>')];
 //     }
 // }
-
-class __SpallCompiledRoutedApp extends SpallElement {
-    // Defines the section of the app that is rendered by routing
-    // I'm too lazy to make a proper system for predefined elements or imports, so it's just a manually compiled element
-
-    constructor(id, parentId, renderer, path) {
-        super("RoutedApp", id, parentId, renderer, path);
+class SpallUtils {
+    static fatalRenderError(message) {
+        console.error(`Fatal renderer error: ${message}`);
     }
 
-    generateRenderables() {
-        var elementClass = this.renderer.router.getElementForRoute();
-        return [new SpallElementRenderable("", elementClass, "1", {})];
-    }
-}
-// Interface for render loggers
-class ISpallRenderLogger {
-    logStartRender(element) {
-        SpallUtils.abstractNotOverridden();
-    }
-
-    logAddMarkup(markup) {
-        SpallUtils.abstractNotOverridden();
+    static addChildAtIndex(element, child, index) {
+        // Based on https://stackoverflow.com/a/39181175/12650706
+        if (!index) index = 0
+        if (index >= element.children.length) {
+            element.appendChild(child)
+        } else {
+            element.insertBefore(child, element.children[index])
+        }
     }
 
-    logFinishRender(element) {
-        SpallUtils.abstractNotOverridden();
-    }
-
-    logCreatedElement(element) {
-        SpallUtils.abstractNotOverridden();
-    }
-}
-
-// Render logger that does nothing, for production
-class SpallMockRenderLogger {
-    constructor() {
-    }
-
-    logStartRender(element) {
-
-    }
-
-    logAddMarkup(markup) {
-
-    }
-
-    logFinishRender(element) {
-
-    }
-
-    logCreatedElement(element) {
-
-    }
-}
-
-// Render logger that logs everything, for development
-class SpallDebugRenderLogger {
-    constructor() {
-        this.indent = 0;
-        this.indentIncrement = 3;
-    }
-
-    logStartRender(element) {
-        console.log(`${this._generateIndent()}-- Start render ${element.elementName}`);
-        this.indent += this.indentIncrement;
-    }
-
-    logAddMarkup(markup) {
-        console.log(`${this._generateIndent()}Rendering ${markup}`);
-    }
-
-    logFinishRender(element) {
-        this.indent -= this.indentIncrement;
-        console.log(`${this._generateIndent()}-- Finish render ${element.elementName}`);
-    }
-
-    logCreatedElement(element) {
-        console.log(`${this._generateIndent()}Creating element for ${element.elementName}. Id is ${element.id}`)
-    }
-
-    _generateIndent() {
-        return ' '.repeat(this.indent);
+    static abstractNotOverridden() {
+        // Put this in your abstract methods so it throws if it's not overridden.
+        var functionName = new Error().stack.split('\n')[1].split('@')[0];
+        throw new Error(`Abstract function "${functionName}" not overridden`);
     }
 }
 
@@ -272,31 +188,92 @@ class SpallRenderer {
         return crntElement;
     }
 }
+// Interface for render loggers
+class ISpallRenderLogger {
+    logStartRender(element) {
+        SpallUtils.abstractNotOverridden();
+    }
 
-class SpallPage extends SpallElement {
-    constructor(title, elementName, id, parentId, renderer, path) {
-        super(elementName, id, parentId, renderer, path);
-        this.title = title;
+    logAddMarkup(markup) {
+        SpallUtils.abstractNotOverridden();
+    }
+
+    logFinishRender(element) {
+        SpallUtils.abstractNotOverridden();
+    }
+
+    logCreatedElement(element) {
+        SpallUtils.abstractNotOverridden();
     }
 }
-class SpallRenderable {
-    // (abstract class thingy)
-}
 
-class SpallMarkupRenderable extends SpallRenderable {
-    constructor(markup) {
-        super();
-        this.markup = markup;
+// Render logger that does nothing, for production
+class SpallMockRenderLogger {
+    constructor() {
+    }
+
+    logStartRender(element) {
+
+    }
+
+    logAddMarkup(markup) {
+
+    }
+
+    logFinishRender(element) {
+
+    }
+
+    logCreatedElement(element) {
+
     }
 }
 
-class SpallElementRenderable extends SpallRenderable {
-    constructor(elementName, elementClass, relativePath, parameters) {
-        super();
-        this.elementName = elementName;
-        this.elementClass = elementClass;
-        this.relativePath = relativePath;
-        this.parameters = parameters; // (dictionary of var name to function that can produce the value)
+// Render logger that logs everything, for development
+class SpallDebugRenderLogger {
+    constructor() {
+        this.indent = 0;
+        this.indentIncrement = 3;
+    }
+
+    logStartRender(element) {
+        console.log(`${this._generateIndent()}-- Start render ${element.elementName}`);
+        this.indent += this.indentIncrement;
+    }
+
+    logAddMarkup(markup) {
+        console.log(`${this._generateIndent()}Rendering ${markup}`);
+    }
+
+    logFinishRender(element) {
+        this.indent -= this.indentIncrement;
+        console.log(`${this._generateIndent()}-- Finish render ${element.elementName}`);
+    }
+
+    logCreatedElement(element) {
+        console.log(`${this._generateIndent()}Creating element for ${element.elementName}. Id is ${element.id}`)
+    }
+
+    _generateIndent() {
+        return ' '.repeat(this.indent);
+    }
+}
+
+class SpallRootElement extends SpallElement {
+    // uuuh... currently it doesn't do anything special
+}
+
+class __SpallCompiledRoutedApp extends SpallElement {
+    // Defines the section of the app that is rendered by routing
+    // I'm too lazy to make a proper system for predefined elements or imports, so it's just a manually compiled element
+
+    constructor(id, parentId, renderer, path) {
+        super("RoutedApp", id, parentId, renderer, path);
+    }
+
+    generateRenderables() {
+        var elementClass = this.renderer.router.getElementForRoute();
+        return [new SpallElementRenderable("", elementClass, "1", {})];
     }
 }
 class SpallRouter {
@@ -333,7 +310,30 @@ class SpallRouter {
 }
 
 SpallRouter.routeToPageClass = {};
+class SpallRenderable {
+    // (abstract class thingy)
+}
 
-class SpallRootElement extends SpallElement {
-    // uuuh... currently it doesn't do anything special
+class SpallMarkupRenderable extends SpallRenderable {
+    constructor(markup) {
+        super();
+        this.markup = markup;
+    }
+}
+
+class SpallElementRenderable extends SpallRenderable {
+    constructor(elementName, elementClass, relativePath, parameters) {
+        super();
+        this.elementName = elementName;
+        this.elementClass = elementClass;
+        this.relativePath = relativePath;
+        this.parameters = parameters; // (dictionary of var name to function that can produce the value)
+    }
+}
+
+class SpallPage extends SpallElement {
+    constructor(title, elementName, id, parentId, renderer, path) {
+        super(elementName, id, parentId, renderer, path);
+        this.title = title;
+    }
 }

@@ -1,8 +1,8 @@
 ~if (this.selected) {
-    <a class="nav-button" !onclick="this.visitLink()">${this.title}</a>
+    <a class="nav-button nav-button-selected px-4 py-2">${this.title}</a>
 ~}
 ~ else {
-    <a class="nav-button nav-button-selected">${this.title}</a>
+    <a class="nav-button px-4 py-2" !onclick="this.visitLink()">${this.title}</a>
 ~}
 
 <script>

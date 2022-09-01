@@ -12,7 +12,7 @@ use crate::{parser, tokeniser};
 
 const ROOT_ELEMENT_NAME: &str = "Root";
 // Elements that aren't put into the final markup
-const IGNORED_ELEMENT_NAMES: [&'static str; 3] = ["title", "routename", "script"];
+const IGNORED_ELEMENT_NAMES: [&'static str; 3] = ["title", "pageroute", "script"];
 
 #[derive(Clone, PartialEq)]
 pub enum ElementType {
@@ -34,8 +34,17 @@ enum Renderable {
         tag_name: String,
         compiled_element_name: String,
         path: String,
-        parameters: Vec<(String, String)>,
+        parameters: Vec<ElementParameter>,
     },
+}
+
+#[derive(Clone)]
+struct ElementParameter {
+    name: String,
+    value: String,
+    is_dynamic: bool, // whether it is a plain text value or is executed at render-time.
+                      // Dynamic parameters are those which have a ! at the start in the initial HTML,
+                      // although when they are put into the structure the ! is stripped
 }
 
 pub fn compile_element_file(
@@ -303,7 +312,21 @@ fn renderable_from_node_visit(
                 parameters: node_data
                     .tag_attributes
                     .iter()
-                    .map(|attr| (attr.name.clone(), attr.value.clone()))
+                    .map(|attr| {
+                        if attr.name.starts_with('!') {
+                            ElementParameter {
+                                name: attr.name.replacen('!', "", 1),
+                                value: attr.value.clone(),
+                                is_dynamic: true,
+                            }
+                        } else {
+                            ElementParameter {
+                                name: attr.name.clone(),
+                                value: attr.value.clone(),
+                                is_dynamic: false,
+                            }
+                        }
+                    })
                     .collect(),
             });
         } else {
@@ -331,10 +354,11 @@ fn compile_tag_attributes(tag_attributes: &Vec<TagAttribute>, _tag_path: &str) -
             // for this.x() callbacks, get context for the "this" by lookups through the renderer
             if x.is_callback && x.value.starts_with("this.") {
                 let this_removed = x.value.replacen("this.", "", 1);
+                // take advantage of the way that strings are inserted into js to inject some stuff from runtime into the html
                 format!(
                     "{}=\"SpallRenderer.instance.getElementById(${{this.id}}).{}\"",
                     x.name, this_removed
-                ) // take advantage of the way that strings are inserted into js to inject some stuff from runtime into the html
+                )
             } else {
                 format!("{x}")
             }
@@ -453,7 +477,11 @@ fn renderables_to_string(renderables: &Vec<Renderable>) -> String {
                 r#"new SpallElementRenderable("{tag_name}", {compiled_element_name}, "{path}", {{ {} }})"#,
                 parameters
                     .iter()
-                    .map(|p| format!("{}:() => {}", p.0, p.1))
+                    .map(|p| if p.is_dynamic {
+                        format!("{}:() => {}", p.name, p.value)
+                    } else {
+                        format!("{}:() => \"{}\"", p.name, p.value)
+                    })
                     .collect::<Vec<String>>()
                     .join(",")
             ),

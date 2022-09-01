@@ -1,0 +1,35 @@
+:root {
+    --theme-main-1: #213c5f;
+    --theme-main-2: #2f5588;
+    --theme-main-3: #3e70b1;
+    --theme-main-4: #4479be;
+    --theme-main: #4780ca;
+    --theme-main-6: #5684c0;
+    --theme-main-6: #7394be;
+    --theme-main-7: #849fc2;
+}
+
+.top-row {
+    background-color: var(--theme-main);
+}
+
+.main-title {
+    color: white;
+}
+
+.nav-button, .nav-button * {
+    cursor: pointer;
+    transition: 0.5s;
+    color: white;
+    background-color: none;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.nav-button:hover {
+    background-color: var(--theme-main-4);
+}
+
+.nav-button-selected {
+    background-color: var(--theme-main-3);
+}

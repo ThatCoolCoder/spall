@@ -1,0 +1,8 @@
+<title>Counter World</title>
+<pageroute>counterworld</pageroute>
+
+~for (var i = 0; i < 100; i ++) {
+    <Counter />
+~}
+
+<p></p>
