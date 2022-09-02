@@ -294,19 +294,25 @@ fn read_inline_javascript(markup: &str) -> (InlineJavascriptToken, usize) {
     // Expects markup to begin with a tilde (inline start char)
 
     let mut result = "".to_string();
+    let mut reached_end = false;
     for char in markup.chars().skip(1) {
         if char == '~' || char == '\n' {
+            reached_end = true;
             break;
         }
         result.push(char);
     }
     let javascript_type = find_javascript_type(&result);
+    let mut length = result.len() + 1; // +1 to account for start tilde
+    if reached_end {
+        length += 1; // +1 to account for \n or end tilde
+    }
     return (
         InlineJavascriptToken {
             value: result.clone(),
             javascript_type: javascript_type,
         },
-        result.len() + 2, // + 2 to account for start and end tilde
+        length,
     );
 }
 

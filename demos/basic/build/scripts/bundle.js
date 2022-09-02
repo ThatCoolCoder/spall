@@ -14,21 +14,6 @@ return __spallRenderables;
         }
     
 
-        class __SpallCompiledRoot extends SpallRootElement {
-            constructor(id, parentId, rendererInstance, path) {
-                super('Root', id, parentId, rendererInstance, path);
-            }
-
-            generateRenderables() {
-                var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<div class="top-row px-2"><h1 class="main-title"><span >Demo App</span></h1><div class="d-flex">`), new SpallElementRenderable("NavButton", __SpallCompiledNavButton, "0/1/0", { title:() => "Home",route:() => "" }), new SpallMarkupRenderable(``), new SpallElementRenderable("NavButton", __SpallCompiledNavButton, "0/1/1", { title:() => "Counter World",route:() => "counterworld" }), new SpallMarkupRenderable(``), new SpallElementRenderable("NavButton", __SpallCompiledNavButton, "0/1/2", { title:() => "Weather",route:() => "weather" }), new SpallMarkupRenderable(`</div></div><div class="px-2 py-1">`), new SpallElementRenderable("RoutedApp", __SpallCompiledRoutedApp, "1/0", {  }), new SpallMarkupRenderable(`</div>`)]);
-return __spallRenderables;
-            }
-
-            
-        }
-    
-
         class __SpallCompiledStyledButton extends SpallElement {
             constructor(id, parentId, rendererInstance, path) {
                 super('StyledButton', id, parentId, rendererInstance, path);
@@ -37,6 +22,21 @@ return __spallRenderables;
             generateRenderables() {
                 var __spallRenderables = [];
 __spallRenderables.push(...[new SpallMarkupRenderable(`<button style="background-color: black; color: white"><span >I'm a styled button</span></button>`)]);
+return __spallRenderables;
+            }
+
+            
+        }
+    
+
+        class __SpallCompiledRoot extends SpallRootElement {
+            constructor(id, parentId, rendererInstance, path) {
+                super('Root', id, parentId, rendererInstance, path);
+            }
+
+            generateRenderables() {
+                var __spallRenderables = [];
+__spallRenderables.push(...[new SpallMarkupRenderable(`<div class="top-row px-2"><h1 class="main-title"><span >Demo App</span></h1><div class="d-flex">`), new SpallElementRenderable("NavButton", __SpallCompiledNavButton, "0/1/0", { title:() => "Home",route:() => "" }), new SpallMarkupRenderable(``), new SpallElementRenderable("NavButton", __SpallCompiledNavButton, "0/1/1", { title:() => "Counter World",route:() => "counterworld" }), new SpallMarkupRenderable(``), new SpallElementRenderable("NavButton", __SpallCompiledNavButton, "0/1/2", { title:() => "Weather",route:() => "weather" }), new SpallMarkupRenderable(`</div></div><div class="px-2 py-1">`), new SpallElementRenderable("RoutedApp", __SpallCompiledRoutedApp, "1/0", {  }), new SpallMarkupRenderable(`</div>`)]);
 return __spallRenderables;
             }
 
@@ -60,19 +60,6 @@ return __spallRenderables;
             }
 
             
-    onInitialized() {
-        this.route = 'unrouted';
-        this.title = 'Untitled';
-    }
-
-    get selected() {
-        return window.location.pathname.replaceAll('/', '') == this.route;
-    }
-
-    visitLink() {
-        this.renderer.router.navigateTo(this.route);
-    }
-
         }
     
 
@@ -120,22 +107,6 @@ return __spallRenderables;
     SpallRouter.routeToPageClass[''] = __SpallCompiledIndex;
 
 
-        class __SpallCompiledWeather extends SpallPage {
-            constructor(id, parentId, rendererInstance, path) {
-                super('Weather page', 'Weather', id, parentId, rendererInstance, path)
-            }
-
-            generateRenderables() {
-                var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<p ><span >There is weather yes</span></p>`)]);
-return __spallRenderables;
-            }
-
-            
-        }
-    SpallRouter.routeToPageClass['weather'] = __SpallCompiledWeather;
-
-
         class __SpallCompiledCounterWorld extends SpallPage {
             constructor(id, parentId, rendererInstance, path) {
                 super('Counter World', 'CounterWorld', id, parentId, rendererInstance, path)
@@ -153,3 +124,19 @@ return __spallRenderables;
             
         }
     SpallRouter.routeToPageClass['counterworld'] = __SpallCompiledCounterWorld;
+
+
+        class __SpallCompiledWeather extends SpallPage {
+            constructor(id, parentId, rendererInstance, path) {
+                super('Weather page', 'Weather', id, parentId, rendererInstance, path)
+            }
+
+            generateRenderables() {
+                var __spallRenderables = [];
+__spallRenderables.push(...[new SpallMarkupRenderable(`<p ><span >There is weather yes</span></p>`)]);
+return __spallRenderables;
+            }
+
+            
+        }
+    SpallRouter.routeToPageClass['weather'] = __SpallCompiledWeather;
