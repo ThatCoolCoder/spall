@@ -1,10 +1,12 @@
 requires(SpallUtils.js);
 
 class SpallRenderer {
-    constructor(logger) {
-        this._lastUsedId = 0;
-        this.rendering = false;
+    constructor(appContainer=document.body, logger=new SpallMockRenderLogger()) {
+        this._appContainer = appContainer;
         this._logger = logger;
+
+        this._lastUsedId = 0;
+        this._rendering = false;
         
         this._idToHtml = {};
         this._idToPath = {}; // these two are relative to document.body
@@ -17,12 +19,12 @@ class SpallRenderer {
     renderPage() {
         this._throwIfRendering();
         var root = new __SpallCompiledRoot(this._lastUsedId, -1, this);
-        this._idToHtml[root.id] = document.body;
+        this._idToHtml[root.id] = this._appContainer;
 
         this._registerElement(root, '');
 
         try {
-            this.renderElement(root, document.body);
+            this.renderElement(root, this._appContainer);
         }
         catch (e) {
             SpallUtils.fatalRenderError(`General exception: ${e}\nStack trace: ${e.stack}`);
@@ -108,7 +110,7 @@ class SpallRenderer {
     }
 
     _throwIfRendering() {
-        if (this.rendering) throw new Exception("Already rendering");
+        if (this._rendering) throw new Exception("Already rendering");
     }
 
     _numericIdToHtmlId(id) {

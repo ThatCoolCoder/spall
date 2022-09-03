@@ -30,7 +30,7 @@ This will change a lot in the future but this should be correct for some time:
 
 It's pretty similar to HTML and uses the same element names. It aims to be as similar to HTML/JS as possible, reusing familiar symbols/concepts.
 
-To interpolate/template values just do it like Javascript template literals: `<p>The value is ${Math.random()}</p>`.
+To interpolate/template values just do it like Javascript template literals: `<p>The value is ${Math.random()}</p>`. Interopolated values are evaluated in the context of one of the element's functions.
 
 You can do conditionals and loops like this:
 ```
@@ -75,12 +75,15 @@ You can give parameters to instantiated elements as if it was a normal element. 
 
 - Allow there to be no `common/` dir, etc
 - Give better error messages if required files (meta, elements) don't exist
+- Auto-render after callbacks
 - Maybe a namespace/build/import system for `common/` files?
     - Perhaps this should be left until we get a proper bundler
 - Some sort of system for passing what Blazor calls render fragments - allows templating of tables and stuff
 - Consistent "special chars" - don't use a tilde over here and a exclamation mark over there, and ${} string interpolation here. Make the markup consistent (like how Razor uses the @ sign for everything).
 - Make route parameters for pages like `product/{id}`. 
 - Ability to keep references to html elements
+- Don't rebuild children elements when the parent is rerendered, only if the structure changes
+    - First, we need to define what structures are and how to tell if two are equivalent.
 - Move to typescript, attach some sort of package manager
     - Build a standard library of components
 - Allow subdirectories of elements + pages, something namespace-like
