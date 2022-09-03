@@ -38,7 +38,7 @@ fn compilation_settings_from_args(
             _ => panic!("Max verbosity is 2"),
         },
         debug_tokens: args.debug_tokens,
-        minify_bundle: !args.do_not_minify,
+        minify_files: !args.do_not_minify,
     }
 }
 

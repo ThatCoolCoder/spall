@@ -64,7 +64,10 @@ pub fn compile_project(
         "Building and saving runtime",
         compilation_settings.log_level,
     );
-    let runtime = build_framework_runtime();
+    let mut runtime = build_framework_runtime();
+    if compilation_settings.minify_files {
+        runtime = minifier::js::minify(&runtime).to_string();
+    }
     write_framework_runtime(&project_paths, &runtime);
 
     logging::log_brief("Compiling elements", compilation_settings.log_level);
@@ -82,8 +85,8 @@ pub fn compile_project(
 
     logging::log_brief("Bundling application", compilation_settings.log_level);
     let mut bundle = bundle_compiled_files(&compiled_files);
-    if compilation_settings.minify_bundle {
-        bundle = minify_bundle(&bundle);
+    if compilation_settings.minify_files {
+        bundle = minifier::js::minify(&bundle).to_string();
     }
     save_bundle(&project_paths, &bundle);
 
@@ -257,10 +260,6 @@ fn compile_common_files(project_paths: &ProjectPaths) -> Vec<String> {
 
 fn bundle_compiled_files(compiled_files: &Vec<String>) -> String {
     compiled_files.join(";\n") // minifier gets a bit too excited if we don't have semicolons after some lines, so add extra ones.
-}
-
-fn minify_bundle(bundle: &str) -> String {
-    minifier::js::minify(bundle).to_string()
 }
 
 fn save_bundle(project_paths: &ProjectPaths, bundle: &str) {

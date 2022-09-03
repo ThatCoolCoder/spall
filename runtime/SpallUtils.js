@@ -5,7 +5,7 @@ class SpallUtils {
 
     static addChildAtIndex(element, child, index) {
         // Based on https://stackoverflow.com/a/39181175/12650706
-        if (!index) index = 0
+        if (!index) index = 0;
         if (index >= element.children.length) {
             element.appendChild(child)
         } else {

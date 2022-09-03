@@ -1,6 +1,6 @@
 pub struct CompilationSettings {
     pub log_level: CompilationLogLevel,
-    pub minify_bundle: bool,
+    pub minify_files: bool,
     pub debug_tokens: bool,
 }
 
