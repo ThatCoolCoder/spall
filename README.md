@@ -2,7 +2,7 @@
 
 > Spall: (noun) A chip or splinter of stone
 
-Unremarkable SPA JS framework for the benefit of my learning, is probably very similar to some other frameworks. I've built this before using a JS framework so that I'm not influenced by the design of others. I have used C# Blazor extensively in the past. Compiler is built in Rust. Very WIP.
+Unremarkable SPA JS framework for the benefit of my learning, is probably very similar to some other frameworks. I've built this before using a JS framework so that I'm not influenced by the design of others. I have used C# Blazor extensively in the past. Compiler is built in Rust. Very WIP. In this initial version everything is fully custom - custom markup language, custom tokeniser, custom build/bundle tool.
 
 See misc notes to see what this is currently capable of.
 
@@ -17,6 +17,8 @@ The `pages/` dir of a project holds pages. Pages are just elements that correspo
 The `meta/` dir of a project contains stuff that is not the app itself. `index.html` is the entry point into the app and is plain html. You should put stuff like linking to the renderer in there.
 
 The `static/` dir of a project holds static files that can be accessed in the built app from `static/`.
+
+The `common/` dir of a project holds Javascript files that can be accessed from elements and pages. Use it for shared functions or business logic - anything not directly tied to the frontend.
 
 When an app is built, files are created in the `build/` directory, which can then be used in a regular server like Apache.
 
@@ -71,6 +73,11 @@ You can give parameters to instantiated elements as if it was a normal element. 
 
 #### Public changes
 
+- Allow there to be no `common/` dir, etc
+- Give better error messages if required files (meta, elements) don't exist
+- Maybe a namespace/build/import system for `common/` files?
+    - Perhaps this should be left until we get a proper bundler
+- Some sort of system for passing what Blazor calls render fragments - allows templating of tables and stuff
 - Consistent "special chars" - don't use a tilde over here and a exclamation mark over there, and ${} string interpolation here. Make the markup consistent (like how Razor uses the @ sign for everything).
 - Make route parameters for pages like `product/{id}`. 
 - Ability to keep references to html elements
@@ -80,9 +87,14 @@ You can give parameters to instantiated elements as if it was a normal element. 
 - Data binding/two-way parameters
 - Scoped CSS
 - Make requests to non-index directories still lead to the SPA (is this possible without writing a custom server?)
+- Make project-template-creater (similar to `dotnet new`)
 - Make custom dev server with file watching (similar to `dotnet watch run`)
 
 #### Internal changes
 
+- Skip empty content tags.
 - Rewrite tokeniser to make tokens smaller. For example one token would be a single `<` instead of a whole tag. This makes it way easier to add consistent special chars.
     - Add an intermediate step to form individual tokens into stuff like tags.
+- Restructure runtime stuff so that router is not a member of renderer, they are both members of an App
+- Restructure runtime stuff so that multiple Spall apps can live on one page (currently uses statics)
+- Restructure runtime stuff to auto-start? (or maybe it is preferable to manually create an app and attach it to the DOM)

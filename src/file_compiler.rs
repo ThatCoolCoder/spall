@@ -152,7 +152,7 @@ pub fn compile_element(
                 {constructor}
             }}
 
-            generateRenderables() {{
+            compiledGenerateRenderables() {{
                 {compiled_render_func}
             }}
 

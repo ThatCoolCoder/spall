@@ -20,6 +20,7 @@ struct ProjectPaths {
     meta_dir: PathBuf,
     elements_dir: PathBuf,
     pages_dir: PathBuf,
+    common_dir: PathBuf,
     static_dir: PathBuf,
     build_static_dir: PathBuf,
 }
@@ -33,6 +34,7 @@ impl ProjectPaths {
             meta_dir: project_dir.join("meta"),
             elements_dir: project_dir.join("elements"),
             pages_dir: project_dir.join("pages"),
+            common_dir: project_dir.join("common"),
             static_dir: project_dir.join("static"),
             build_static_dir: project_dir.join("build/static"),
         };
@@ -66,19 +68,20 @@ pub fn compile_project(
     write_framework_runtime(&project_paths, &runtime);
 
     logging::log_brief("Compiling elements", compilation_settings.log_level);
-    let mut compiled_elements = compile_elements(
+    let mut compiled_files = compile_elements(
         &project_paths.elements_dir,
         &compilation_settings,
         file_compiler::ElementType::Basic,
     )?;
-    compiled_elements.extend(compile_elements(
+    compiled_files.extend(compile_elements(
         &project_paths.pages_dir,
         &compilation_settings,
         file_compiler::ElementType::Page,
     )?);
+    compiled_files.extend(compile_common_files(&project_paths));
 
     logging::log_brief("Bundling application", compilation_settings.log_level);
-    let mut bundle = bundle_compiled_elements(&compiled_elements);
+    let mut bundle = bundle_compiled_files(&compiled_files);
     if compilation_settings.minify_bundle {
         bundle = minify_bundle(&bundle);
     }
@@ -217,7 +220,7 @@ fn compile_elements(
     compilation_settings: &CompilationSettings,
     element_types: file_compiler::ElementType,
 ) -> Result<Vec<String>, CompilationError> {
-    // Compile all the elements in the project
+    // Compile all the elements in the folder as element_types elements
 
     let element_files = fs::read_dir(element_directory).unwrap();
     let mut compiled_elements = Vec::new();
@@ -242,8 +245,18 @@ fn compile_elements(
     return Ok(compiled_elements);
 }
 
-fn bundle_compiled_elements(compiled_elements: &Vec<String>) -> String {
-    return compiled_elements.join("\n");
+fn compile_common_files(project_paths: &ProjectPaths) -> Vec<String> {
+    let common_files = fs::read_dir(&project_paths.common_dir).unwrap();
+    return common_files
+        .map(|entry| {
+            let p = &entry.unwrap().path();
+            fs::read_to_string(p).unwrap()
+        })
+        .collect();
+}
+
+fn bundle_compiled_files(compiled_files: &Vec<String>) -> String {
+    return compiled_files.join("\n");
 }
 
 fn minify_bundle(bundle: &str) -> String {

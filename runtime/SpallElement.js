@@ -9,8 +9,14 @@ class SpallElement {
         this.path = path;
     }
 
-    // Should return an array of SpallRenderables
     generateRenderables() {
+        // Override this method to add custom behavior to element-derived things like pages
+        return this.compiledGenerateRenderables();
+    }
+
+    // Override to specify renderables
+    // Should return an array of SpallRenderables
+    compiledGenerateRenderables() {
         SpallUtils.fatalRenderError(`generateRenderables was not overridden in ${this.constructor.name}`);
     }
 
@@ -30,7 +36,7 @@ class SpallElement {
 // Compiled project creates a bunch of classes like this one:
 
 // class __CompiledExampleElement extends SpallElement {
-//     generateRenderables() {
+//     compiledGenerateRenderables() {
 //         return [new SpallMarkupRenderable('<h1>'), new SpallElementRenderable(...), new SpallMarkupRenderable('</h1>')];
 //     }
 // }
