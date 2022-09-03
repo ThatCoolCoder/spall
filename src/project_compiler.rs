@@ -27,7 +27,7 @@ struct ProjectPaths {
 
 impl ProjectPaths {
     pub fn new(project_dir: &Path) -> ProjectPaths {
-        return ProjectPaths {
+        ProjectPaths {
             root_dir: project_dir.to_path_buf(),
             build_dir: project_dir.join("build"),
             build_scripts_dir: project_dir.join("build/scripts"),
@@ -37,7 +37,7 @@ impl ProjectPaths {
             common_dir: project_dir.join("common"),
             static_dir: project_dir.join("static"),
             build_static_dir: project_dir.join("build/static"),
-        };
+        }
     }
 }
 
@@ -87,7 +87,7 @@ pub fn compile_project(
     }
     save_bundle(&project_paths, &bundle);
 
-    return Ok(());
+    Ok(())
 }
 
 fn setup_build_dir(project_paths: &ProjectPaths) {
@@ -155,12 +155,12 @@ fn build_framework_runtime() -> String {
         file_order.push(tuple.0.to_string());
     }
 
-    return file_order
+    file_order
         .iter()
         .unique()
         .map(|x| remove_require_statement(file_map.get(x).unwrap()))
         .collect::<Vec<String>>()
-        .join("\n");
+        .join("\n")
 }
 
 fn parse_framework_file_dependencies(file_content: &str) -> Vec<String> {
@@ -242,25 +242,25 @@ fn compile_elements(
             })?,
         );
     }
-    return Ok(compiled_elements);
+    Ok(compiled_elements)
 }
 
 fn compile_common_files(project_paths: &ProjectPaths) -> Vec<String> {
     let common_files = fs::read_dir(&project_paths.common_dir).unwrap();
-    return common_files
+    common_files
         .map(|entry| {
             let p = &entry.unwrap().path();
             fs::read_to_string(p).unwrap()
         })
-        .collect();
+        .collect()
 }
 
 fn bundle_compiled_files(compiled_files: &Vec<String>) -> String {
-    return compiled_files.join("\n");
+    compiled_files.join("\n")
 }
 
 fn minify_bundle(bundle: &str) -> String {
-    return minifier::js::minify(bundle).to_string();
+    minifier::js::minify(bundle).to_string()
 }
 
 fn save_bundle(project_paths: &ProjectPaths, bundle: &str) {

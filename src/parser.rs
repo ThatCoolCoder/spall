@@ -52,10 +52,10 @@ impl Tree {
             children: vec![],
             parent: None,
         };
-        return Tree {
+        Tree {
             nodes: vec![node],
             root: 0,
-        };
+        }
     }
 
     pub fn add_node(&mut self, parent: NodeIndex, mut node: Node) -> NodeIndex {
@@ -65,23 +65,23 @@ impl Tree {
 
         node.parent = Some(parent);
         self.nodes.push(node);
-        return index;
+        index
     }
 
     pub fn get_root(&self) -> &Node {
-        return &self.nodes[self.root];
+        &self.nodes[self.root]
     }
 
     pub fn get_node(&self, node: NodeIndex) -> &Node {
-        return &self.nodes[node];
+        &self.nodes[node]
     }
 
     pub fn get_node_mut(&mut self, node: NodeIndex) -> &mut Node {
-        return &mut self.nodes[node];
+        &mut self.nodes[node]
     }
 
     pub fn get_root_mut(&mut self) -> &mut Node {
-        return &mut self.nodes[self.root];
+        &mut self.nodes[self.root]
     }
 
     pub fn depth_first_map<T>(&self, enter_func: &mut T)
@@ -143,7 +143,7 @@ pub fn parse_element(tokens: &Vec<tokeniser::Token>) -> Result<Tree, errs::Marku
         }
     }
 
-    return Ok(tree);
+    Ok(tree)
 }
 
 fn read_tag_token(

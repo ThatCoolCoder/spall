@@ -43,6 +43,5 @@ pub fn parse_args() -> Options {
         );
         parser.parse_args_or_exit();
     }
-
-    return options;
+    options
 }

@@ -88,7 +88,7 @@ pub fn read_element(markup: &str) -> Vec<Token> {
             }
         }
     }
-    return result;
+    result
 }
 
 fn read_html_tag(markup: &str) -> (TagToken, usize) {
@@ -148,14 +148,14 @@ fn read_html_tag(markup: &str) -> (TagToken, usize) {
             }
         }
     }
-    return (
+    (
         TagToken {
             name: tag_name,
             attributes: tag_attributes,
             tag_type: tag_type,
         },
         idx,
-    );
+    )
 }
 
 fn read_tag_attributes(data: &str) -> (Vec<TagAttribute>, usize) {
@@ -178,7 +178,7 @@ fn read_tag_attributes(data: &str) -> (Vec<TagAttribute>, usize) {
         tag_attributes.push(attribute);
         idx += len;
     }
-    return (tag_attributes, idx);
+    (tag_attributes, idx)
 }
 
 fn read_tag_attribute(data: &str) -> (TagAttribute, usize) {
@@ -212,18 +212,18 @@ fn read_tag_attribute(data: &str) -> (TagAttribute, usize) {
     idx += attribute_value.len();
     attribute_value.pop();
     attribute_value.remove(0);
-    return (
+    (
         TagAttribute {
             name: attribute_name,
             value: attribute_value,
             is_dynamic: is_dynamic,
         },
         idx,
-    );
+    )
 }
 
 fn get_char_unwrap(data: &str, idx: usize) -> char {
-    return data.chars().nth(idx).unwrap();
+    data.chars().nth(idx).unwrap()
 }
 
 fn read_tag_content(markup: &str) -> String {
@@ -235,7 +235,7 @@ fn read_tag_content(markup: &str) -> String {
         }
         result.push(char);
     }
-    return result;
+    result
 }
 
 fn read_javascript(data: &str) -> String {
@@ -284,7 +284,7 @@ fn read_javascript(data: &str) -> String {
             break;
         }
     }
-    return result;
+    result
 }
 
 fn read_inline_javascript(markup: &str) -> (InlineJavascriptToken, usize) {
@@ -304,12 +304,12 @@ fn read_inline_javascript(markup: &str) -> (InlineJavascriptToken, usize) {
     if reached_end {
         length += 1; // +1 to account for \n or end tilde
     }
-    return (
+    (
         InlineJavascriptToken {
             value: result.clone(),
         },
         length,
-    );
+    )
 }
 
 fn read_string(quote_char: char, escape_char: char, data: &str) -> String {
@@ -336,7 +336,7 @@ fn read_string(quote_char: char, escape_char: char, data: &str) -> String {
             last_char_is_escape = false;
         }
     }
-    return result;
+    result
 }
 
 fn read_whitespace(data: &str) -> String {
@@ -357,7 +357,7 @@ fn read_whitespace(data: &str) -> String {
         }
         idx += 1;
     }
-    return result;
+    result
 }
 
 #[cfg(test)]

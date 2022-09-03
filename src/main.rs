@@ -30,7 +30,7 @@ fn main() {
 fn compilation_settings_from_args(
     args: &cli::Options,
 ) -> compilation_settings::CompilationSettings {
-    return compilation_settings::CompilationSettings {
+    compilation_settings::CompilationSettings {
         log_level: match args.verbosity {
             0 => compilation_settings::CompilationLogLevel::Minimal,
             1 => compilation_settings::CompilationLogLevel::Brief,
@@ -39,7 +39,7 @@ fn compilation_settings_from_args(
         },
         debug_tokens: args.debug_tokens,
         minify_bundle: !args.do_not_minify,
-    };
+    }
 }
 
 fn handle_compilation_error(e: errs::CompilationError) {

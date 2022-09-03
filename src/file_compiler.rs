@@ -59,12 +59,12 @@ pub fn compile_element_file(
         file_path.to_string_lossy()
     ));
     let element_name = file_path.file_stem().unwrap().to_str().unwrap();
-    return compile_element(
+    compile_element(
         &file_content,
         &element_name,
         compilation_settings,
         element_type,
-    );
+    )
 }
 
 // How the general flow of compilation works:
@@ -179,24 +179,23 @@ pub fn compile_element(
         );
     }
 
-    return Ok(result);
+    Ok(result)
 }
 
 fn generate_compiled_element_name(element_name: &str) -> String {
-    return format!("__SpallCompiled{element_name}");
+    format!("__SpallCompiled{element_name}")
 }
 
 fn element_name_valid(element_name: &str) -> bool {
     if element_name.len() == 0 {
-        return false;
+        false
+    } else if !element_name.chars().next().unwrap().is_alphabetic() {
+        false
+    } else if element_name.chars().any(|c| !c.is_alphanumeric()) {
+        false
+    } else {
+        true
     }
-    if !element_name.chars().next().unwrap().is_alphabetic() {
-        return false;
-    }
-    if element_name.chars().any(|c| !c.is_alphanumeric()) {
-        return false;
-    }
-    return true;
 }
 
 fn debug_tokens(tokens: &Vec<tokeniser::Token>) {
@@ -222,13 +221,12 @@ fn check_token_syntax(tokens: &Vec<tokeniser::Token>) -> Result<(), errs::Markup
             }
         }
     }
-    return Ok(());
+    Ok(())
 }
 
 fn escape_quotes(data: &str, quote_char: char, escape_char: char) -> String {
-    return data
-        .replace(escape_char, format!("{escape_char}{escape_char}").as_str())
-        .replace(quote_char, format!("{escape_char}{quote_char}").as_str());
+    data.replace(escape_char, format!("{escape_char}{escape_char}").as_str())
+        .replace(quote_char, format!("{escape_char}{quote_char}").as_str())
 }
 
 fn find_class_body(tree: &parser::Tree) -> Option<String> {
@@ -240,7 +238,7 @@ fn find_class_body(tree: &parser::Tree) -> Option<String> {
             }
         }
     });
-    return result;
+    result
 }
 
 fn compile_chunks_from_tree(tree: &parser::Tree) -> Vec<CompileChunk> {
@@ -284,7 +282,7 @@ fn compile_chunks_from_tree(tree: &parser::Tree) -> Vec<CompileChunk> {
             }
         }
     });
-    return chunks;
+    chunks
 }
 
 fn renderable_from_node_visit(
@@ -300,7 +298,7 @@ fn renderable_from_node_visit(
 
     if is_element {
         if is_entering {
-            return Some(Renderable::Element {
+            Some(Renderable::Element {
                 tag_name: node_data.tag_name.clone(),
                 compiled_element_name: generate_compiled_element_name(&node_data.tag_name),
                 path: path.to_string(),
@@ -313,9 +311,9 @@ fn renderable_from_node_visit(
                         is_dynamic: attr.is_dynamic,
                     })
                     .collect(),
-            });
+            })
         } else {
-            return None;
+            None
         }
     } else {
         let tag_attributes = compile_tag_attributes(&node_data.tag_attributes, path);
@@ -328,12 +326,12 @@ fn renderable_from_node_visit(
             ),
             (false, false) => format!("</{}>", node_data.tag_name),
         };
-        return Some(Renderable::Markup(markup_string));
+        Some(Renderable::Markup(markup_string))
     }
 }
 
 fn compile_tag_attributes(tag_attributes: &Vec<TagAttribute>, _tag_path: &str) -> String {
-    return tag_attributes
+    tag_attributes
         .iter()
         .map(|x| {
             // for this.x() callbacks, get context for the "this" by lookups through the renderer
@@ -349,7 +347,7 @@ fn compile_tag_attributes(tag_attributes: &Vec<TagAttribute>, _tag_path: &str) -
             }
         })
         .collect::<Vec<String>>()
-        .join(" ");
+        .join(" ")
 }
 
 fn concat_successive_compile_chunks(chunks: &Vec<CompileChunk>) -> Vec<CompileChunk> {
@@ -385,7 +383,7 @@ fn concat_successive_compile_chunks(chunks: &Vec<CompileChunk>) -> Vec<CompileCh
         result.push(CompileChunk::Renderable(crnt_renderable_values));
     }
 
-    return result;
+    result
 }
 
 fn compile_chunks(chunks: &Vec<CompileChunk>) -> String {
@@ -405,11 +403,11 @@ fn compile_chunks(chunks: &Vec<CompileChunk>) -> String {
         }
     }
     result += "return __spallRenderables;";
-    return result;
+    result
 }
 
 fn simplify_renderables(renderables: &Vec<Renderable>) -> Vec<Renderable> {
-    return join_successive_markup_renderables(renderables);
+    join_successive_markup_renderables(renderables)
 }
 
 fn join_successive_markup_renderables(renderables: &Vec<Renderable>) -> Vec<Renderable> {
@@ -442,7 +440,7 @@ fn join_successive_markup_renderables(renderables: &Vec<Renderable>) -> Vec<Rend
         new_renderables.push(Renderable::Markup(crnt_markup_string));
     }
 
-    return new_renderables;
+    new_renderables
 }
 
 fn renderables_to_string(renderables: &Vec<Renderable>) -> String {
@@ -474,5 +472,5 @@ fn renderables_to_string(renderables: &Vec<Renderable>) -> String {
         stringified_renderables.push(string_val);
     }
 
-    return stringified_renderables.join(", ");
+    stringified_renderables.join(", ")
 }
