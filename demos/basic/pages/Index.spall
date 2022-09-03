@@ -4,6 +4,6 @@
 <h1>Welcome to Spall</h1>
 <p>Spall is a Javascript framework for building SPAs, with a compiler written in Rust.</p>
 
-<p>Here is an example of basic interactive stateful behavior: <Counter /></p>
+<p>Here is an example of basic interactive stateful behavior: <Counter/></p>
 
 <p>Click the links above to learn more about Spall</p>

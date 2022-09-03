@@ -1,7 +1,6 @@
 // use std::rc::Rc;
 
 use crate::errs;
-use crate::javascript_type::JavascriptType;
 use crate::tag_attribute::TagAttribute;
 use crate::tag_type::TagType;
 use crate::tokeniser;
@@ -21,8 +20,7 @@ pub struct Node {
 
 pub enum NodeData {
     Markup(NodeMarkupData),
-    JavascriptBlock(NodeJavascriptBlockData),
-    JavascriptStandalone(NodeJavascriptStandaloneData),
+    InlineJavascript(NodeInlineJavascriptData),
 }
 
 // We can't pass specific enum variants around so just make structs that the enum wraps
@@ -32,11 +30,7 @@ pub struct NodeMarkupData {
     pub is_standalone: bool,
     pub inner_text: String,
 }
-pub struct NodeJavascriptBlockData {
-    pub start_value: String,
-    pub end_value: String,
-}
-pub struct NodeJavascriptStandaloneData {
+pub struct NodeInlineJavascriptData {
     pub value: String,
 }
 
@@ -272,51 +266,18 @@ fn read_javascript_token(
     // Read a javascript token and modify the node tree based on it
     // (yes is very similar to the code for tag tokens, but on different types)
 
-    match token.javascript_type {
-        // Javascript open block
-        JavascriptType::BlockStart => {
-            let new_node_idx = tree.add_node(
-                *node_stack
-                    .last()
-                    .ok_or(errs::MarkupSyntaxError::OrphanedNode)?,
-                Node {
-                    data: NodeData::JavascriptBlock(NodeJavascriptBlockData {
-                        start_value: token.value.to_string(),
-                        end_value: "".to_string(),
-                    }),
-                    parent: None,
-                    children: vec![],
-                },
-            );
-            node_stack.push(new_node_idx);
-        }
-        // Javascript end block
-        JavascriptType::BlockEnd => {
-            let node = tree.get_node_mut(
-                node_stack
-                    .pop()
-                    .ok_or(errs::MarkupSyntaxError::OrphanedNode)?,
-            );
-            if let NodeData::JavascriptBlock(ref mut inside_data) = node.data {
-                inside_data.end_value = "}".to_string();
-            }
-        }
-        // Standalone JS
-        JavascriptType::Standalone => {
-            tree.add_node(
-                *node_stack
-                    .last()
-                    .ok_or(errs::MarkupSyntaxError::OrphanedNode)?,
-                Node {
-                    data: NodeData::JavascriptStandalone(NodeJavascriptStandaloneData {
-                        value: token.value.clone(),
-                    }),
-                    parent: None,
-                    children: vec![],
-                },
-            );
-        }
-    }
+    tree.add_node(
+        *node_stack
+            .last()
+            .ok_or(errs::MarkupSyntaxError::OrphanedNode)?,
+        Node {
+            data: NodeData::InlineJavascript(NodeInlineJavascriptData {
+                value: token.value.clone(),
+            }),
+            parent: None,
+            children: vec![],
+        },
+    );
 
     Ok(())
 }

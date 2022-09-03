@@ -7,7 +7,6 @@ use std::fmt;
 
 use derive_more::Display;
 
-use crate::javascript_type::JavascriptType;
 use crate::tag_attribute::TagAttribute;
 use crate::tag_type::TagType;
 
@@ -51,10 +50,9 @@ pub struct ContentToken {
 }
 // Represents a chunk of javascript found in the markup
 #[derive(Display)]
-#[display(fmt = "[{javascript_type} inline javascript: {value}]")]
+#[display(fmt = "[Inline javascript: {value}]")]
 pub struct InlineJavascriptToken {
     pub value: String,
-    pub javascript_type: JavascriptType,
 }
 
 pub fn read_element(markup: &str) -> Vec<Token> {
@@ -189,8 +187,8 @@ fn read_tag_attribute(data: &str) -> (TagAttribute, usize) {
     let mut idx: usize = 0;
     let mut attribute_name = "".to_string();
 
-    let is_callback = data.chars().next().unwrap() == '!'; // todo: throw EOF error instead of unwrap
-    if is_callback {
+    let is_dynamic = data.chars().next().unwrap() == '!'; // todo: throw EOF error instead of unwrap
+    if is_dynamic {
         idx += 1;
     }
 
@@ -218,7 +216,7 @@ fn read_tag_attribute(data: &str) -> (TagAttribute, usize) {
         TagAttribute {
             name: attribute_name,
             value: attribute_value,
-            is_callback: is_callback,
+            is_dynamic: is_dynamic,
         },
         idx,
     );
@@ -302,7 +300,6 @@ fn read_inline_javascript(markup: &str) -> (InlineJavascriptToken, usize) {
         }
         result.push(char);
     }
-    let javascript_type = find_javascript_type(&result);
     let mut length = result.len() + 1; // +1 to account for start tilde
     if reached_end {
         length += 1; // +1 to account for \n or end tilde
@@ -310,7 +307,6 @@ fn read_inline_javascript(markup: &str) -> (InlineJavascriptToken, usize) {
     return (
         InlineJavascriptToken {
             value: result.clone(),
-            javascript_type: javascript_type,
         },
         length,
     );
@@ -362,16 +358,6 @@ fn read_whitespace(data: &str) -> String {
         idx += 1;
     }
     return result;
-}
-
-fn find_javascript_type(javascript: &str) -> JavascriptType {
-    if javascript.chars().last().unwrap() == '{' {
-        return JavascriptType::BlockStart;
-    } else if javascript.chars().next().unwrap() == '}' {
-        return JavascriptType::BlockEnd;
-    } else {
-        return JavascriptType::Standalone;
-    }
 }
 
 #[cfg(test)]
@@ -442,17 +428,14 @@ mod tests {
     fn test_read_inline_javascript() {
         let mut data = read_inline_javascript("~if (x == 5) {\n");
         assert_eq!(data.0.value, "if (x == 5) {");
-        assert_eq!(data.0.javascript_type, JavascriptType::BlockStart);
         assert_eq!(data.1, 15);
 
         data = read_inline_javascript("~}~");
         assert_eq!(data.0.value, "}");
-        assert_eq!(data.0.javascript_type, JavascriptType::BlockEnd);
         assert_eq!(data.1, 3);
 
         data = read_inline_javascript("~var x = 5~");
         assert_eq!(data.0.value, "var x = 5");
-        assert_eq!(data.0.javascript_type, JavascriptType::Standalone);
         assert_eq!(data.1, 11);
 
         data = read_inline_javascript("~var x = 5\n");
@@ -476,18 +459,5 @@ mod tests {
     fn test_read_whitespace() {
         assert_eq!(read_whitespace("      hello"), "      ");
         assert_eq!(read_whitespace("      \t\n  hello"), "      \t\n  ");
-    }
-
-    #[test]
-    fn test_find_javascript_type() {
-        assert_eq!(
-            find_javascript_type("if (x == 5) {"),
-            JavascriptType::BlockStart
-        );
-        assert_eq!(find_javascript_type("}"), JavascriptType::BlockEnd);
-        assert_eq!(
-            find_javascript_type("var x = 10;"),
-            JavascriptType::Standalone
-        );
     }
 }

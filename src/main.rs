@@ -2,7 +2,6 @@ mod cli;
 mod compilation_settings;
 mod errs;
 mod file_compiler;
-mod javascript_type;
 mod logging;
 mod parser;
 mod project_compiler;

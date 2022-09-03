@@ -34,8 +34,7 @@ You can do conditionals and loops like this:
 ```
 ~if (Math.random() > 0.5) {~
     <p>It's a big number</p>
-~}~
-~else {~
+~} else {~
     <p>It's a small number</p>
 ~}~
 ```
@@ -66,7 +65,7 @@ Callbacks like `onclick="..."` can also be used in the normal way if you don't w
 
 If you want a callback to call a function in your element class, put an exclamation mark in front of the callback name: `<button !onclick="this.someCustomFunction()">Button</button>`.
 
-You can give parameters to instantiated elements as if it was a normal element. For example, `<MyElem number="5" />` will set `this.number` on the `MyElem` instance. I'm not sure what context the parameters are evaluated in.
+You can give parameters to instantiated elements as if it was a normal element. For example, `<MyElem name="John" />` will set `this.name` on the `MyElem` instance. That is how to make plain text parameters, to make evaluated/integer/object parameters put an exclamation mark at the start of the parameter name: `<MyElem !number=5 />` . The context of parameter evaulation is within a closure defined in a method of the element class.
 
 ## Roadmap
 

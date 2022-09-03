@@ -6,7 +6,7 @@
 
             generateRenderables() {
                 var __spallRenderables = [];
-__spallRenderables.push(...[new SpallMarkupRenderable(`<button onclick="alert('You have clicked me!')"(callback) ><span >Im a button</span></button>`)]);
+__spallRenderables.push(...[new SpallMarkupRenderable(`<button onclick="alert('You have clicked me!')"(dynamic) ><span >Im a button</span></button>`)]);
 return __spallRenderables;
             }
 
@@ -84,6 +84,9 @@ return __spallRenderables;
             generateRenderables() {
                 var __spallRenderables = [];
 __spallRenderables.push(...[new SpallMarkupRenderable(`<button onclick="SpallRenderer.instance.getElementById(${this.id}).count()"><span >Clicked ${this.formatCount()}</span></button>`)]);
+if (this.counter >= 5) {
+__spallRenderables.push(...[new SpallMarkupRenderable(`<span ><span >Has been clicked a lot</span></span>`)]);
+}
 return __spallRenderables;
             }
 
@@ -128,7 +131,7 @@ return __spallRenderables;
             generateRenderables() {
                 var __spallRenderables = [];
 for (var i = 0; i < 100; i ++) {
-__spallRenderables.push(...[new SpallMarkupRenderable(``), new SpallElementRenderable("Counter", __SpallCompiledCounter, "2/0", {  })]);
+__spallRenderables.push(...[new SpallMarkupRenderable(``), new SpallElementRenderable("Counter", __SpallCompiledCounter, "3", {  })]);
 }
 __spallRenderables.push(...[new SpallMarkupRenderable(`<p ></p>`)]);
 return __spallRenderables;

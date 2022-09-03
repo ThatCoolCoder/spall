@@ -276,14 +276,7 @@ fn compile_chunks_from_tree(tree: &parser::Tree) -> Vec<CompileChunk> {
                         _ => (),
                     }
                 }
-                parser::NodeData::JavascriptBlock(inner_data) => {
-                    if is_entering {
-                        chunks.push(CompileChunk::Javascript(inner_data.start_value.clone()));
-                    } else {
-                        chunks.push(CompileChunk::Javascript(inner_data.end_value.clone()));
-                    }
-                }
-                parser::NodeData::JavascriptStandalone(inner_data) => {
+                parser::NodeData::InlineJavascript(inner_data) => {
                     if is_entering {
                         chunks.push(CompileChunk::Javascript(inner_data.value.clone()));
                     }
@@ -314,20 +307,10 @@ fn renderable_from_node_visit(
                 parameters: node_data
                     .tag_attributes
                     .iter()
-                    .map(|attr| {
-                        if attr.name.starts_with('!') {
-                            ElementParameter {
-                                name: attr.name.replacen('!', "", 1),
-                                value: attr.value.clone(),
-                                is_dynamic: true,
-                            }
-                        } else {
-                            ElementParameter {
-                                name: attr.name.clone(),
-                                value: attr.value.clone(),
-                                is_dynamic: false,
-                            }
-                        }
+                    .map(|attr| ElementParameter {
+                        name: attr.name.clone(),
+                        value: attr.value.clone(),
+                        is_dynamic: attr.is_dynamic,
                     })
                     .collect(),
             });
@@ -354,7 +337,7 @@ fn compile_tag_attributes(tag_attributes: &Vec<TagAttribute>, _tag_path: &str) -
         .iter()
         .map(|x| {
             // for this.x() callbacks, get context for the "this" by lookups through the renderer
-            if x.is_callback && x.value.starts_with("this.") {
+            if x.is_dynamic && x.value.starts_with("this.") {
                 let this_removed = x.value.replacen("this.", "", 1);
                 // take advantage of the way that strings are inserted into js to inject some stuff from runtime into the html
                 format!(
