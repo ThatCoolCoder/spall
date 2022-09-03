@@ -60,6 +60,19 @@ return __spallRenderables;
             }
 
             
+    onInitialized() {
+        this.route = 'unrouted';
+        this.title = 'Untitled';
+    }
+
+    get selected() {
+        return window.location.pathname.replaceAll('/', '') == this.route;
+    }
+
+    visitLink() {
+        this.renderer.router.navigateTo(this.route);
+    }
+
         }
     
 

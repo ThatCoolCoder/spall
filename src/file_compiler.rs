@@ -4,7 +4,7 @@ use std::fs;
 use std::path::Path;
 
 use crate::compilation_settings::*;
-use crate::errs::*;
+use crate::errs;
 use crate::logging;
 use crate::tag_attribute::TagAttribute;
 use crate::tag_type::TagType;
@@ -51,7 +51,7 @@ pub fn compile_element_file(
     file_path: &Path,
     compilation_settings: &CompilationSettings,
     element_type: ElementType,
-) -> Result<String, FileCompilationError> {
+) -> Result<String, errs::FileCompilationError> {
     // todo: if is not a .spall file: crash
 
     let file_content = fs::read_to_string(file_path).expect(&format!(
@@ -81,7 +81,7 @@ pub fn compile_element(
     element_name: &str,
     compilation_settings: &CompilationSettings,
     element_type: ElementType,
-) -> Result<String, FileCompilationError> {
+) -> Result<String, errs::FileCompilationError> {
     // Preparation
 
     logging::log_brief(
@@ -90,7 +90,7 @@ pub fn compile_element(
     );
 
     if !element_name_valid(element_name) {
-        return Err(FileCompilationError::InvalidElementName {
+        return Err(errs::FileCompilationError::InvalidElementName {
             name: element_name.to_owned(),
         });
     }
@@ -113,9 +113,11 @@ pub fn compile_element(
     if compilation_settings.debug_tokens {
         debug_tokens(&tokens);
     }
-    check_token_syntax(&tokens).or_else(|e| Err(FileCompilationError::MarkupSyntaxError(e)))?;
+    check_token_syntax(&tokens)
+        .or_else(|e| Err(errs::FileCompilationError::MarkupSyntaxError(e)))?;
     logging::log_per_step("Parsing", compilation_settings.log_level);
-    let tree = parser::parse_element(&tokens);
+    let tree = parser::parse_element(&tokens)
+        .or_else(|e| Err(errs::FileCompilationError::MarkupSyntaxError(e)))?;
 
     // Building/writing
 
@@ -210,11 +212,11 @@ fn debug_tokens(tokens: &Vec<tokeniser::Token>) {
     println!("{data}");
 }
 
-fn check_token_syntax(tokens: &Vec<tokeniser::Token>) -> Result<(), MarkupSyntaxError> {
+fn check_token_syntax(tokens: &Vec<tokeniser::Token>) -> Result<(), errs::MarkupSyntaxError> {
     for token in tokens {
         if let tokeniser::Token::Tag(tag) = token {
             if tag.tag_type == TagType::End && tag.attributes.len() > 0 {
-                return Err(MarkupSyntaxError::AttributesOnCloseTag {
+                return Err(errs::MarkupSyntaxError::AttributesOnCloseTag {
                     tag_name: tag.name.clone(),
                 });
             }

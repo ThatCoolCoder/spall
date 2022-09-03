@@ -35,46 +35,26 @@ class SpallElement {
 //     }
 // }
 
+class __SpallCompiledRoutedApp extends SpallElement {
+    // Defines the section of the app that is rendered by routing
+    // I'm too lazy to make a proper system for predefined elements or imports, so it's just a manually compiled element
+
+    constructor(id, parentId, renderer, path) {
+        super("RoutedApp", id, parentId, renderer, path);
+    }
+
+    generateRenderables() {
+        var elementClass = this.renderer.router.getElementForRoute();
+        return [new SpallElementRenderable("", elementClass, "1", {})];
+    }
+}
+
 class SpallPage extends SpallElement {
     constructor(title, elementName, id, parentId, renderer, path) {
         super(elementName, id, parentId, renderer, path);
         this.title = title;
     }
 }
-class SpallRouter {
-    // Handles switching between "pages" I guess.
-    // Most of the work is done in the element, this just links everything together and adds a nice interface
-    // Currently routes are just strings with no slashes in them. Proper urls will come when I add namespaces
-
-    constructor(renderer) {
-        this.renderer = renderer;
-
-        this.routeToPageClass = SpallRouter.routeToPageClass;
-        this.crntRoute = ""; // empty route == homepage
-        this.defaultTitle = ""; // title shown if page doesn't define a title
-    }
-
-    setDefaultTitle(title) {
-        this.defaultTitle = title;
-    }
-
-    navigateTo(route) {
-        if (Object.keys(this.routeToPageClass).includes(route)) {
-            this.crntRoute = route;
-            history.pushState("", "", `/${this.crntRoute}`);
-            this.renderer.renderPage();
-        }
-        else {
-            throw new Error(`Cannot navigate to "${route}": route does not exist`);
-        }
-    }
-    
-    getElementForRoute() {
-        return this.routeToPageClass[this.crntRoute];
-    }
-}
-
-SpallRouter.routeToPageClass = {};
 class SpallUtils {
     static fatalRenderError(message) {
         console.error(`Fatal renderer error: ${message}`);
@@ -233,26 +213,6 @@ class SpallRenderer {
 class SpallRootElement extends SpallElement {
     // uuuh... currently it doesn't do anything special
 }
-class SpallRenderable {
-    // (abstract class thingy)
-}
-
-class SpallMarkupRenderable extends SpallRenderable {
-    constructor(markup) {
-        super();
-        this.markup = markup;
-    }
-}
-
-class SpallElementRenderable extends SpallRenderable {
-    constructor(elementName, elementClass, relativePath, parameters) {
-        super();
-        this.elementName = elementName;
-        this.elementClass = elementClass;
-        this.relativePath = relativePath;
-        this.parameters = parameters; // (dictionary of var name to function that can produce the value)
-    }
-}
 // Interface for render loggers
 class ISpallRenderLogger {
     logStartRender(element) {
@@ -323,17 +283,57 @@ class SpallDebugRenderLogger {
         return ' '.repeat(this.indent);
     }
 }
+class SpallRouter {
+    // Handles switching between "pages" I guess.
+    // Most of the work is done in the element, this just links everything together and adds a nice interface
+    // Currently routes are just strings with no slashes in them. Proper urls will come when I add namespaces
 
-class __SpallCompiledRoutedApp extends SpallElement {
-    // Defines the section of the app that is rendered by routing
-    // I'm too lazy to make a proper system for predefined elements or imports, so it's just a manually compiled element
+    constructor(renderer) {
+        this.renderer = renderer;
 
-    constructor(id, parentId, renderer, path) {
-        super("RoutedApp", id, parentId, renderer, path);
+        this.routeToPageClass = SpallRouter.routeToPageClass;
+        this.crntRoute = ""; // empty route == homepage
+        this.defaultTitle = ""; // title shown if page doesn't define a title
     }
 
-    generateRenderables() {
-        var elementClass = this.renderer.router.getElementForRoute();
-        return [new SpallElementRenderable("", elementClass, "1", {})];
+    setDefaultTitle(title) {
+        this.defaultTitle = title;
+    }
+
+    navigateTo(route) {
+        if (Object.keys(this.routeToPageClass).includes(route)) {
+            this.crntRoute = route;
+            history.pushState("", "", `/${this.crntRoute}`);
+            this.renderer.renderPage();
+        }
+        else {
+            throw new Error(`Cannot navigate to "${route}": route does not exist`);
+        }
+    }
+    
+    getElementForRoute() {
+        return this.routeToPageClass[this.crntRoute];
+    }
+}
+
+SpallRouter.routeToPageClass = {};
+class SpallRenderable {
+    // (abstract class thingy)
+}
+
+class SpallMarkupRenderable extends SpallRenderable {
+    constructor(markup) {
+        super();
+        this.markup = markup;
+    }
+}
+
+class SpallElementRenderable extends SpallRenderable {
+    constructor(elementName, elementClass, relativePath, parameters) {
+        super();
+        this.elementName = elementName;
+        this.elementClass = elementClass;
+        this.relativePath = relativePath;
+        this.parameters = parameters; // (dictionary of var name to function that can produce the value)
     }
 }
