@@ -1,9 +1,5 @@
 <button !onclick="this.count()">Clicked ${this.formatCount()}</button>
 
-~if (this.counter >= 5) {
-    <span>Has been clicked a lot</span>
-~}
-
 <script>
     onInitialized() {
         this.counter = 0;

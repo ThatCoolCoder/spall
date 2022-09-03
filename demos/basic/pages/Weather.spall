@@ -1,4 +1,40 @@
-<title>Weather page</title>
+<title>Weather Forecast</title>
 <pageroute>weather</pageroute>
 
-<p>There is weather yes</p>
+<h1>Weather Forecast</h1>
+
+<table>
+    <thead>
+        <td class="px-2">Date</td>
+        <td class="px-2">Temperature</td>
+        <td class="px-2">Condition</td>
+        <td class="px-2">Chance of rain</td>
+        <td class="px-2">Humidity</td>
+    </thead>
+    ~for (var labelName in this.weather.snapshots) {
+        ~var snapshot = this.weather.snapshots[labelName];
+        <tr>
+            <td class="px-2">${new Date(labelName).toLocaleDateString()}</td>
+            <td class="px-2">${snapshot.temperature}C</td>
+            <td class="px-2">${weatherService.WeatherCondition[snapshot.condition]}</td>
+            <td class="px-2">${Math.floor(snapshot.rainProbability * 100)}%</td>
+            <td class="px-2">${Math.floor(snapshot.humidity * 100)}%</td>
+        </tr>
+    ~}
+</table>
+
+<br />
+<br />
+
+<button !onclick="this.generateNewForecast()">Generate new forecast</button>
+
+<script>
+    onInitialized() {
+        this.generateNewForecast();
+    }
+
+    generateNewForecast() {
+        this.weather = weatherService.generateForecast(new Date(), 7);
+        this.needsRender();
+    }
+</script>
