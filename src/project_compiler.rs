@@ -256,7 +256,7 @@ fn compile_common_files(project_paths: &ProjectPaths) -> Vec<String> {
 }
 
 fn bundle_compiled_files(compiled_files: &Vec<String>) -> String {
-    compiled_files.join("\n")
+    compiled_files.join(";\n") // minifier gets a bit too excited if we don't have semicolons after some lines, so add extra ones.
 }
 
 fn minify_bundle(bundle: &str) -> String {

@@ -92,7 +92,6 @@ You can give parameters to instantiated elements as if it was a normal element. 
 
 #### Internal changes
 
-- Skip empty content tags.
 - Rewrite tokeniser to make tokens smaller. For example one token would be a single `<` instead of a whole tag. This makes it way easier to add consistent special chars.
     - Add an intermediate step to form individual tokens into stuff like tags.
 - Restructure runtime stuff so that router is not a member of renderer, they are both members of an App
