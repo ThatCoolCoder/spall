@@ -2,8 +2,6 @@
 
 use argparse;
 
-use crate::compilation_settings::{CompilationLogLevel, CompilationSettings};
-
 pub struct Options {
     pub verbosity: i32,
     pub debug_tokens: bool,

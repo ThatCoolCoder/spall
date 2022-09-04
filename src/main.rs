@@ -11,8 +11,7 @@ mod tokeniser;
 
 fn main() {
     let args = cli::parse_args();
-    let mut settings = compilation_settings_from_args(&args);
-    // settings.minify_bundle = false; // minifying is broken currently
+    let settings = compilation_settings_from_args(&args);
     let final_path = &std::env::current_dir()
         .unwrap()
         .join(args.project_path)

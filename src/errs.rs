@@ -1,7 +1,5 @@
 use std::fmt;
 
-use crate::tag_type::TagType;
-
 #[derive(Debug)]
 pub enum CompilationError {
     Project,
@@ -46,7 +44,6 @@ impl fmt::Display for FileCompilationError {
 pub enum MarkupSyntaxError {
     AttributesOnCloseTag { tag_name: String },
     UnbalancedTag(UnbalancedTag),
-    UnbalancedInlineJavascript,
     OrphanedNode,
     UnmatchedTokenTypes,
 }
@@ -58,9 +55,6 @@ impl fmt::Display for MarkupSyntaxError {
                 format!("Closing HTML tags cannot have attributes (tag name {tag_name})")
             }
             MarkupSyntaxError::UnbalancedTag(inner_data) => format!("{inner_data}"),
-            MarkupSyntaxError::UnbalancedInlineJavascript => {
-                format!("Unbalanced opening/closing of inline Javascript")
-            }
             MarkupSyntaxError::OrphanedNode => {
                 format!("Found orphaned node - all nodes must have a parent, except for the root")
             }
