@@ -74,7 +74,7 @@ You can give parameters to instantiated elements as if it was a normal element. 
 #### Public changes
 
 - Auto-render after callbacks
-- Distinguish between `!` callbacks and `!` attributes. 
+- Distinguish between `!` callbacks and `!` parameters. 
 - Maybe a namespace/build/import system for `common/` files?
     - Perhaps this should be left until we get a proper bundler
 - Some sort of system for passing what Blazor calls render fragments - allows templating of tables and stuff
@@ -96,6 +96,4 @@ You can give parameters to instantiated elements as if it was a normal element. 
 
 - Rewrite tokeniser to make tokens smaller. For example one token would be a single `<` instead of a whole tag. This makes it way easier to add consistent special chars.
     - Add an intermediate step to form individual tokens into stuff like tags.
-- Restructure runtime stuff so that router is not a member of renderer, they are both members of an App
 - Restructure runtime stuff so that multiple Spall apps can live on one page (currently uses statics)
-- Restructure runtime stuff to auto-start? (or maybe it is preferable to manually create an app and attach it to the DOM)

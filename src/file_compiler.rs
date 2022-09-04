@@ -129,7 +129,7 @@ pub fn compile_element(
 
     let constructor = match element_type {
         ElementType::Basic => {
-            format!("super('{element_name}', id, parentId, rendererInstance, path);")
+            format!("super('{element_name}', id, parentId, spallApp, path);")
         }
         ElementType::Page => {
             let mut page_title = "".to_string();
@@ -141,14 +141,14 @@ pub fn compile_element(
                     }
                 };
             });
-            format!("super('{page_title}', '{element_name}', id, parentId, rendererInstance, path)")
+            format!("super('{page_title}', '{element_name}', id, parentId, spallApp, path)")
         }
     };
 
     let mut result = format!(
         r#"
         class {compiled_element_name} extends {base_class} {{
-            constructor(id, parentId, rendererInstance, path) {{
+            constructor(id, parentId, spallApp, path) {{
                 {constructor}
             }}
 
@@ -339,7 +339,7 @@ fn compile_tag_attributes(tag_attributes: &Vec<TagAttribute>, _tag_path: &str) -
                 let this_removed = x.value.replacen("this.", "", 1);
                 // take advantage of the way that strings are inserted into js to inject some stuff from runtime into the html
                 format!(
-                    "{}=\"SpallRenderer.instance.getElementById(${{this.id}}).{}\"",
+                    "{}=\"SpallApp.instance.renderer.getElementById(${{this.id}}).{}\"",
                     x.name, this_removed
                 )
             } else {

@@ -1,8 +1,8 @@
 requires(SpallUtils.js);
 
 class SpallRenderer {
-    constructor(appContainer=document.body, logger=new SpallMockRenderLogger()) {
-        this._appContainer = appContainer;
+    constructor(spallApp=null, logger=new SpallMockRenderLogger()) {
+        this.spallApp = spallApp;
         this._logger = logger;
 
         this._lastUsedId = 0;
@@ -12,19 +12,22 @@ class SpallRenderer {
         this._idToPath = {}; // these two are relative to document.body
         this._pathToId = {};
         this._idToElement = {};
+    }
 
-        this.router = new SpallRouter(this);
+    attachSpallApp(spallApp) {
+        this.spallApp = spallApp;
     }
 
     renderPage() {
         this._throwIfRendering();
+        if (this.spallApp == null) SpallUtils.fatalError("SpallRenderer.spallApp was not provided");
         var root = new __SpallCompiledRoot(this._lastUsedId, -1, this);
-        this._idToHtml[root.id] = this._appContainer;
+        this._idToHtml[root.id] = this.spallApp.appContainer;
 
         this._registerElement(root, '');
 
         try {
-            this.renderElement(root, this._appContainer);
+            this.renderElement(root, this.spallApp.appContainer);
         }
         catch (e) {
             SpallUtils.fatalRenderError(`General exception: ${e}\nStack trace: ${e.stack}`);
@@ -48,7 +51,7 @@ class SpallRenderer {
             }
             else {
                 var path = this._idToPath[element.id] + '/' + renderable.relativePath;
-                var child = new renderable.elementClass(this._newElementId(), element.id, this, path);
+                var child = new renderable.elementClass(this._newElementId(), element.id, this.spallApp, path);
 
                 var id = "__sp" + child.id;
                 finalHtml += `<span style="display: contents" id="${id}"></span>`;

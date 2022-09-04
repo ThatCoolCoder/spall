@@ -16,6 +16,6 @@
     }
 
     visitLink() {
-        this.renderer.router.navigateTo(this.route);
+        this.spallApp.router.navigateTo(this.route);
     }
 </script>

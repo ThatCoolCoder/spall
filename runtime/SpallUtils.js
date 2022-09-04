@@ -1,6 +1,10 @@
 class SpallUtils {
+    static fatalError(message) {
+        console.error(`Fatal Spall error:\n    ${message}`);
+    }
+
     static fatalRenderError(message) {
-        console.error(`Fatal renderer error: ${message}`);
+        this.fatalError(`Fatal renderer error:\n        ${message}`)
     }
 
     static addChildAtIndex(element, child, index) {

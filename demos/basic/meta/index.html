@@ -15,7 +15,6 @@
     <script src="scripts/framework.js"></script>
     <script src="scripts/bundle.js"></script>
     <script>
-        SpallRenderer.instance = new SpallRenderer(document.body, new SpallDebugRenderLogger());
-        SpallRenderer.instance.router.navigateTo("");
+        SpallApp.instance = new SpallApp();
     </script>
 </html>
