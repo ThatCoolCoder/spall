@@ -17,7 +17,7 @@ class SpallElement {
     // Override to specify renderables
     // Should return an array of SpallRenderables
     compiledGenerateRenderables() {
-        SpallUtils.fatalRenderError(`generateRenderables was not overridden in ${this.constructor.name}`);
+        SpallUtils.abstractNotOverridden();
     }
 
     needsRender() {

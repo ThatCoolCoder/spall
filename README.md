@@ -42,7 +42,7 @@ You can do conditionals and loops like this:
 ```
 Note that a closing tilde is optional if the Javascript ends at the end of a line. You can also run arbitrary JS code mid-render by writing something other than a conditional inside the tildes. This is useful for calculating intermediate values in complex calculations. The context of this code is inside a method of the generated class.
 
-To add functions and state, add a script tag. Treat the script tag like an ES5 class wrapper, contents should look like:
+To add functions and state, add a script tag. Treat the script tag like an ES6 class wrapper, contents should look like:
 ```javascript
 <script>
 
@@ -79,7 +79,7 @@ You can give parameters to instantiated elements as if it was a normal element. 
     - Perhaps this should be left until we get a proper bundler
 - Some sort of system for passing what Blazor calls render fragments - allows templating of tables and stuff
 - Consistent "special chars" - don't use a tilde over here and a exclamation mark over there, and ${} string interpolation here. Make the markup consistent (like how Razor uses the @ sign for everything).
-- Make route parameters for pages like `product/{id}`. 
+- Make route parameters for pages like `product/${id}`. 
 - Ability to keep references to html elements
 - Don't rebuild children elements when the parent is rerendered, only if the structure changes
     - First, we need to define what structures are and how to tell if two are equivalent.
@@ -91,9 +91,38 @@ You can give parameters to instantiated elements as if it was a normal element. 
 - Make requests to non-index directories still lead to the SPA (is this possible without writing a custom server?)
 - Make project-template-creater (similar to `dotnet new`)
 - Make custom dev server with file watching (similar to `dotnet watch run`)
+- Make more resilient to JS lines not ending in semicolon (they are broken by minifier)
 
 #### Internal changes
 
 - Rewrite tokeniser to make tokens smaller. For example one token would be a single `<` instead of a whole tag. This makes it way easier to add consistent special chars.
     - Add an intermediate step to form individual tokens into stuff like tags.
 - Restructure runtime stuff so that multiple Spall apps can live on one page (currently uses statics)
+    - Would be very difficult due to the slightly hacky way we give context for callbacks.
+- Potentially move to a more object-oriented approach where tokens decide to compile themselves
+- Maybe don't even bother writing markup if it matches what was written before (actually, sounds hard). Would be desirable if adding auto-render after callbacks 
+- Increase robustness of route parsing in rust (see associated functions in `file_compiler.rs` for details)
+- Did we make pages missing be resilient?
+- Add an error for when no page route
+- Make title templatable
+
+## Plan for route params
+so they will work like `/product/${id}`. When a matching page is visited, it will set `this.id` to the item in there. We also want to be able to have more complex params like `product/${productId}/data/tags/${tagId}`.
+
+It requires doing routing better with actual URLs, not a simple string (let's call it the `unified route format` for now). Perhaps we can store the URLs as sections like `[StringSection("product"), VarSection("productId"), StringSection("data"), StringSection("tags"), VarSection("tagId")]`. We will need to write a parser for compile time (template -> unified format) and then a comparator for runtime (to check if filled-in template matches an actual template). We will need to write a applier to in the event of a match 
+
+The comparator can work like so:
+```
+if the length doesn't match then FALSE
+split the string url into sections and clean it
+for each section:
+    if this is supposed to be varsection then is ok
+    if them match then ok
+    if they don't match then FALSE
+```
+
+Later it would be nice to prioritise direct matches compared to parameter matches. Eg we can have a page `/users/me/` and a page `/users/{userId}` and if both match the first one is picked.
+
+Later it would be nice to be able to update route parameters when the referenced var changes. Actually is that desirable though?
+
+Later it would be needed to add support for what type the param is - currently it's all strings and you'll have to convert them yourself

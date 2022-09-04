@@ -164,18 +164,20 @@ pub fn compile_element(
     if element_type == ElementType::Page {
         // add code to register as page
 
-        let mut element_route = "".to_string();
+        let mut page_route = "".to_string();
         // add code to register as page
         tree.depth_first_map(&mut |node, _is_entering| {
             if let parser::NodeData::Markup(inner_data) = &node.data {
                 if inner_data.tag_name == "pageroute" {
-                    element_route = inner_data.inner_text.clone();
+                    page_route = inner_data.inner_text.clone();
                 }
             };
         });
 
+        let compiled_route_sections = compile_page_route(&page_route);
+
         result += &format!(
-            "SpallRouter.routeToPageClass['{element_route}'] = {compiled_element_name};\n"
+            "SpallRouter.routeList.push([{compiled_route_sections},{compiled_element_name}]);\n"
         );
     }
 
@@ -343,7 +345,7 @@ fn compile_tag_attributes(tag_attributes: &Vec<TagAttribute>, _tag_path: &str) -
                     x.name, this_removed
                 )
             } else {
-                format!("{x}")
+                format!("{}=\"{}\"", x.name, x.value)
             }
         })
         .collect::<Vec<String>>()
@@ -473,4 +475,23 @@ fn renderables_to_string(renderables: &Vec<Renderable>) -> String {
     }
 
     stringified_renderables.join(", ")
+}
+
+fn compile_page_route(raw_route: &str) -> String {
+    let sections = raw_route.split('/').filter(|x| !x.trim().is_empty());
+    // todo: if sections contain ${} but it's not at the start + end then cry.
+    // todo: check validity of route name
+    let compiled_sections = sections
+        .map(|s| {
+            if s.starts_with("${") {
+                let cleaned = s.replace("${", "").replace("}", "");
+                format!("new SpallPropertyRouteSection(\"{cleaned}\")")
+            } else {
+                format!("new SpallStringRouteSection(\"{s}\")")
+            }
+        })
+        .collect::<Vec<String>>()
+        .join(",");
+
+    format!("[{compiled_sections}]")
 }

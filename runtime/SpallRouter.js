@@ -6,7 +6,7 @@ class SpallRouter {
     constructor(spallApp=null) {
         this.spallApp = spallApp;
 
-        this.routeToPageClass = SpallRouter.routeToPageClass;
+        this.routeList = SpallRouter.routeList;
         this.crntRoute = ""; // empty route == homepage
         this.defaultTitle = ""; // title shown if page doesn't define a title
     }
@@ -20,20 +20,24 @@ class SpallRouter {
     }
 
     navigateTo(route) {
-        if (Object.keys(this.routeToPageClass).includes(route)) {
-            this.crntRoute = route;
-            history.pushState("", "", `/${this.crntRoute}`);
-            if (this.spallApp == null) SpallUtils.fatalError("SpallRouter.attachApp() has not been called");
-            this.spallApp.renderer.renderPage();
-        }
-        else {
-            throw new Error(`Cannot navigate to "${route}": route does not exist`);
-        }
-    }
-    
-    getElementForRoute() {
-        return this.routeToPageClass[this.crntRoute];
+        this.crntRoute = route;
+        history.pushState("", "", `/${this.crntRoute}`);
+        if (this.spallApp == null) SpallUtils.fatalError("SpallRouter.attachApp() has not been called");
+        this.spallApp.renderer.renderPage();
     }
 }
 
-SpallRouter.routeToPageClass = {};
+// List of "tuples" of [<list of route sections>, page class]
+SpallRouter.routeList = [];
+
+class SpallStringRouteSection {
+    constructor(value) {
+        this.value = value;
+    }
+}
+
+class SpallPropertyRouteSection {
+    constructor(propertyName) {
+        this.propertyName = propertyName;
+    }
+}

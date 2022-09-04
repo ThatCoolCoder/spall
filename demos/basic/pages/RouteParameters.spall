@@ -1,0 +1,59 @@
+<title>Page #${44}</title>
+<pageroute>rparam/${storeName}/products/${productId}/</pageroute>
+
+<h1>Products at ${this.storeName} Store</h1>
+<button !onclick="this.newStore()">Change my store</button>
+<br />
+<br />
+
+~if (this.productId == "all") {
+    <p>All products:</p>
+    ~for (var productId in this.products) {
+        <div class="px-4 py-2 border" style="cursor: pointer" !onclick="this.showProduct(${productId})">${this.products[productId]}</div>
+    ~}
+~} else if (Object.hasOwn(this.products, this.productId)) {
+    <p>${this.products[this.productId]}:</p>
+    ~if (this.stockList[this.storeName].includes(this.productId)) {
+        <div class="border border-success">Item is in stock at ${this.storeName}</div>
+    ~} else {
+        <div class="border border-danger">Item out of stock at ${this.storeName}</div>
+    ~}
+    <br />
+    <button !onclick="this.allProducts()">All products</button>
+~} else {
+    <p>This product does not exist</p>
+    <button !onclick="this.allProducts()">All products</button>
+~}
+
+
+<script>
+    onInitialized() {
+        this.stores = ["Christchurch", "London", "Tokyo", "Sydney", "Rome", "Munich"];
+        this.products = {
+            "11": "Jumper",
+            "21": "Tie",
+            "84": "Bathtub",
+            "34": "Laptop",
+            "48": "Desk",
+            "43": "Playing Cards",
+            "53": "Gloves"
+        };
+        this.stockList = Object.fromEntries(this.stores.map(store => {
+            var products = Object.keys(this.products).filter(x => Math.random() > 0.5);
+            return [store, products];
+        }));
+    }
+
+    newStore() {
+        this.spallApp.router.navigateTo(`rparam/${randomService.randomChoice(this.stores)}/products/all`);
+    }
+
+    allProducts() {
+        this.spallApp.router.navigateTo(`rparam/${this.storeName}/products/all`);
+    }
+
+    showProduct(id) {
+        this.spallApp.router.navigateTo(`rparam/${this.storeName}/products/${id}`);
+    }
+
+</script>
