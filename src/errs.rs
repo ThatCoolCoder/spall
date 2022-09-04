@@ -2,7 +2,7 @@ use std::fmt;
 
 #[derive(Debug)]
 pub enum CompilationError {
-    Project,
+    Project(ProjectCompilationError),
     File {
         file_name: String,
         inner_error: FileCompilationError,
@@ -11,14 +11,34 @@ pub enum CompilationError {
 impl fmt::Display for CompilationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            CompilationError::Project => write!(
-                f,
-                "Unknown error compiling project. Likely things haven't been set up properly"
-            ),
+            CompilationError::Project(inner_error) => {
+                write!(f, "Error compiling project:\n    {inner_error}")
+            }
             CompilationError::File {
                 file_name,
                 inner_error,
             } => write!(f, "Error compiling {}:\n    {}", file_name, inner_error),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum ProjectCompilationError {
+    NoElementsDirectory,
+    NoMetaDirectory,
+    NoRootElement,
+    NoMetaIndex,
+}
+
+impl fmt::Display for ProjectCompilationError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            ProjectCompilationError::NoElementsDirectory => {
+                write!(f, "Could not find elements/ directory")
+            }
+            ProjectCompilationError::NoMetaDirectory => write!(f, "Could not find meta/ directory"),
+            ProjectCompilationError::NoRootElement => write!(f, "No root element defined"),
+            ProjectCompilationError::NoMetaIndex => write!(f, "No index.html defined in meta/ dir"),
         }
     }
 }

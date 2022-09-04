@@ -22,7 +22,7 @@ The `common/` dir of a project holds Javascript files that can be accessed from 
 
 When an app is built, files are created in the `build/` directory, which can then be used in a regular server like Apache.
 
-The `runtime/` dir contains the stuff that runs in the browser. It contains multiple files which are written . `build.rs` makes the project rebuild if these are changed.
+The `runtime/` dir of the repo contains the stuff that runs in the browser. It contains multiple files which are bundled into the Rust executable and built using a custom import system. See inside one of the files to see how to import other files. `build.rs` makes the project rebuild if these are changed.
 
 #### .spall markup format
 
@@ -67,15 +67,14 @@ Callbacks like `onclick="..."` can also be used in the normal way if you don't w
 
 If you want a callback to call a function in your element class, put an exclamation mark in front of the callback name: `<button !onclick="this.someCustomFunction()">Button</button>`.
 
-You can give parameters to instantiated elements as if it was a normal element. For example, `<MyElem name="John" />` will set `this.name` on the `MyElem` instance. That is how to make plain text parameters, to make evaluated/integer/object parameters put an exclamation mark at the start of the parameter name: `<MyElem !number=5 />` . The context of parameter evaulation is within a closure defined in a method of the element class.
+You can give parameters to instantiated elements as if it was a normal element. For example, `<MyElem name="John" />` will set `this.name` on the `MyElem` instance. That is how to make plain text parameters, to make evaluated/integer/object parameters put an exclamation mark at the start of the parameter name: `<MyElem !number="5" />`. The context of parameter evaulation is within a closure defined in a method of the element class.
 
 ## Roadmap
 
 #### Public changes
 
-- Allow there to be no `common/` dir, etc
-- Give better error messages if required files (meta, elements) don't exist
 - Auto-render after callbacks
+- Distinguish between `!` callbacks and `!` attributes. 
 - Maybe a namespace/build/import system for `common/` files?
     - Perhaps this should be left until we get a proper bundler
 - Some sort of system for passing what Blazor calls render fragments - allows templating of tables and stuff

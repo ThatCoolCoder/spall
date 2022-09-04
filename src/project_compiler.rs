@@ -8,7 +8,7 @@ use itertools::Itertools;
 use minifier;
 
 use crate::compilation_settings::*;
-use crate::errs::*;
+use crate::errs;
 use crate::file_compiler;
 use crate::logging;
 
@@ -46,7 +46,7 @@ const FRAMEWORK_RUNTIME_FILES: Dir = include_dir!("runtime");
 pub fn compile_project(
     project_dir: &Path,
     compilation_settings: CompilationSettings,
-) -> Result<(), CompilationError> {
+) -> Result<(), errs::CompilationError> {
     // Entry point of the compiler
 
     logging::log_always(format!("Compiling project {}", project_dir.to_string_lossy()).as_str());
@@ -55,9 +55,11 @@ pub fn compile_project(
 
     let project_paths = ProjectPaths::new(project_dir);
 
+    check_required_dirs_exist(&project_paths)?;
+
     logging::log_per_step("Setting up build directory", compilation_settings.log_level);
     setup_build_dir(&project_paths);
-    copy_index_file(&project_paths);
+    copy_index_file(&project_paths)?;
     copy_static_files(&project_paths);
 
     logging::log_per_step(
@@ -70,7 +72,10 @@ pub fn compile_project(
     }
     write_framework_runtime(&project_paths, &runtime);
 
-    logging::log_brief("Compiling elements", compilation_settings.log_level);
+    logging::log_brief(
+        "Compiling elements and pages",
+        compilation_settings.log_level,
+    );
     let mut compiled_files = compile_elements(
         &project_paths.elements_dir,
         &compilation_settings,
@@ -93,6 +98,20 @@ pub fn compile_project(
     Ok(())
 }
 
+fn check_required_dirs_exist(project_paths: &ProjectPaths) -> Result<(), errs::CompilationError> {
+    if !project_paths.elements_dir.exists() {
+        Err(errs::CompilationError::Project(
+            errs::ProjectCompilationError::NoElementsDirectory,
+        ))
+    } else if !project_paths.meta_dir.exists() {
+        Err(errs::CompilationError::Project(
+            errs::ProjectCompilationError::NoMetaDirectory,
+        ))
+    } else {
+        Ok(())
+    }
+}
+
 fn setup_build_dir(project_paths: &ProjectPaths) {
     if !project_paths.build_dir.is_dir() {
         fs::create_dir(&project_paths.build_dir).expect("Failed to create build directory");
@@ -103,12 +122,15 @@ fn setup_build_dir(project_paths: &ProjectPaths) {
     }
 }
 
-fn copy_index_file(project_paths: &ProjectPaths) {
+fn copy_index_file(project_paths: &ProjectPaths) -> Result<(), errs::CompilationError> {
     fs::copy(
         project_paths.meta_dir.join("index.html"),
         project_paths.build_dir.join("index.html"),
     )
-    .expect("Error copying index file");
+    .map(|_| ())
+    .or(Err(errs::CompilationError::Project(
+        errs::ProjectCompilationError::NoMetaIndex,
+    )))
 }
 
 fn copy_static_files(project_paths: &ProjectPaths) {
@@ -222,7 +244,7 @@ fn compile_elements(
     element_directory: &Path,
     compilation_settings: &CompilationSettings,
     element_types: file_compiler::ElementType,
-) -> Result<Vec<String>, CompilationError> {
+) -> Result<Vec<String>, errs::CompilationError> {
     // Compile all the elements in the folder as element_types elements
 
     let element_files = fs::read_dir(element_directory).unwrap();
@@ -238,7 +260,7 @@ fn compile_elements(
                 element_types.clone(),
             )
             .or_else(|e| {
-                Err(CompilationError::File {
+                Err(errs::CompilationError::File {
                     file_name: file_name.to_string_lossy().to_string(),
                     inner_error: e,
                 })
@@ -249,13 +271,17 @@ fn compile_elements(
 }
 
 fn compile_common_files(project_paths: &ProjectPaths) -> Vec<String> {
-    let common_files = fs::read_dir(&project_paths.common_dir).unwrap();
-    common_files
-        .map(|entry| {
-            let p = &entry.unwrap().path();
-            fs::read_to_string(p).unwrap()
-        })
-        .collect()
+    if project_paths.common_dir.exists() {
+        let common_files = fs::read_dir(&project_paths.common_dir).unwrap();
+        common_files
+            .map(|entry| {
+                let p = &entry.unwrap().path();
+                fs::read_to_string(p).unwrap()
+            })
+            .collect()
+    } else {
+        vec![]
+    }
 }
 
 fn bundle_compiled_files(compiled_files: &Vec<String>) -> String {
