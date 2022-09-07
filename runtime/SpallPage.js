@@ -1,13 +1,12 @@
 requires(SpallElement.js);
 
 class SpallPage extends SpallElement {
-    constructor(title, elementName, id, parentId, spallApp, path) {
+    constructor(elementName, id, parentId, spallApp, path) {
         super(elementName, id, parentId, spallApp, path);
-        this.title = title;
     }
 
     generateRenderables() {
-        document.title = this.title == "" ? this.spallApp.router.defaultTitle : this.title;
+        document.title = this.generateTitle() ?? this.spallApp.router.defaultTitle;
         return this.compiledGenerateRenderables();
     }
 }

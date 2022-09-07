@@ -127,10 +127,8 @@ pub fn compile_element(
     chunks = concat_successive_compile_chunks(&chunks);
     let compiled_render_func = compile_chunks(&chunks);
 
-    let constructor = match element_type {
-        ElementType::Basic => {
-            format!("super('{element_name}', id, parentId, spallApp, path);")
-        }
+    let extra_methods = match element_type {
+        ElementType::Basic => "".to_string(),
         ElementType::Page => {
             let mut page_title = "".to_string();
             // add code to register as page
@@ -141,20 +139,25 @@ pub fn compile_element(
                     }
                 };
             });
-            format!("super('{page_title}', '{element_name}', id, parentId, spallApp, path)")
+            format!(r#"
+            generateTitle() {{
+                return `{page_title}`;
+            }}"#)
         }
     };
-
+    
     let mut result = format!(
         r#"
         class {compiled_element_name} extends {base_class} {{
             constructor(id, parentId, spallApp, path) {{
-                {constructor}
+                super('{element_name}', id, parentId, spallApp, path);
             }}
 
             compiledGenerateRenderables() {{
                 {compiled_render_func}
             }}
+
+            {extra_methods}
 
             {class_body}
         }}
@@ -164,17 +167,17 @@ pub fn compile_element(
     if element_type == ElementType::Page {
         // add code to register as page
 
-        let mut page_route = "".to_string();
+        let mut page_route = None;
         // add code to register as page
         tree.depth_first_map(&mut |node, _is_entering| {
             if let parser::NodeData::Markup(inner_data) = &node.data {
                 if inner_data.tag_name == "pageroute" {
-                    page_route = inner_data.inner_text.clone();
+                    page_route = Some(inner_data.inner_text.clone());
                 }
             };
         });
 
-        let compiled_route_sections = compile_page_route(&page_route);
+        let compiled_route_sections = compile_page_route(&page_route.ok_or(errs::FileCompilationError::NoPageRoute)?);
 
         result += &format!(
             "SpallRouter.routeList.push([{compiled_route_sections},{compiled_element_name}]);\n"

@@ -46,6 +46,7 @@ impl fmt::Display for ProjectCompilationError {
 #[derive(Debug)]
 pub enum FileCompilationError {
     InvalidElementName { name: String },
+    NoPageRoute,
     MarkupSyntaxError(MarkupSyntaxError),
 }
 
@@ -54,6 +55,9 @@ impl fmt::Display for FileCompilationError {
         match self {
             FileCompilationError::InvalidElementName { name } => {
                 write!(f, "Element name \"{name}\" is not valid")
+            }
+            FileCompilationError::NoPageRoute => {
+                write!(f, "No page route was defined")
             }
             FileCompilationError::MarkupSyntaxError(e) => e.fmt(f),
         }

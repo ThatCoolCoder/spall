@@ -13,7 +13,7 @@ class __SpallCompiledRoutedApp extends SpallElement {
         var matchingRouteData = null;
         for (var routeData of this.spallApp.router.routeList) {
             var [routeSections, elementClass] = routeData;
-            if (this._stringMatchesRoute(stringRouteSections, routeSections)) {
+            if (this.spallApp.router.stringMatchesRoute(stringRouteSections, routeSections)) {
                 matchingRouteData = routeData;
                 break;
             }
@@ -40,17 +40,5 @@ class __SpallCompiledRoutedApp extends SpallElement {
     _parseStringRoute(stringRoute) {
         // Parse a string route into a list of sections
         return stringRoute.split('/').filter(x => x.length > 0);
-    }
-
-    _stringMatchesRoute(stringRouteSections, routeSections) {
-        if (stringRouteSections.length != routeSections.length) return false;
-
-        for (var i = 0; i < stringRouteSections.length; i ++) {
-            var crntStringSection = stringRouteSections[i];
-            var crntRouteSection = routeSections[i];
-            if (crntRouteSection instanceof SpallPropertyRouteSection) {} // property route sections always match - that's how properties work!
-            else if (crntRouteSection.value != crntStringSection) return false; // immediately we can tell it's not a match
-        }
-        return true;
     }
 }

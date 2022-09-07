@@ -1,4 +1,4 @@
-<title>Page #${44}</title>
+<title>${this.storeName} Store</title>
 <pageroute>rparam/${storeName}/products/${productId}/</pageroute>
 
 <h1>Products at ${this.storeName} Store</h1>

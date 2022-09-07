@@ -25,6 +25,18 @@ class SpallRouter {
         if (this.spallApp == null) SpallUtils.fatalError("SpallRouter.attachApp() has not been called");
         this.spallApp.renderer.renderPage();
     }
+
+    stringMatchesRoute(stringRouteSections, routeSections) {
+        if (stringRouteSections.length != routeSections.length) return false;
+
+        for (var i = 0; i < stringRouteSections.length; i ++) {
+            var crntStringSection = stringRouteSections[i];
+            var crntRouteSection = routeSections[i];
+            if (crntRouteSection instanceof SpallPropertyRouteSection) {} // property route sections always match - that's how properties work!
+            else if (crntRouteSection.value != crntStringSection) return false; // immediately we can tell it's not a match
+        }
+        return true;
+    }
 }
 
 // List of "tuples" of [<list of route sections>, page class]
