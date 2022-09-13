@@ -33,7 +33,7 @@ class SpallRouter {
             var crntStringSection = stringRouteSections[i];
             var crntRouteSection = routeSections[i];
             if (crntRouteSection instanceof SpallPropertyRouteSection) {} // property route sections always match - that's how properties work!
-            else if (crntStringSection == '*') {} // wildcard route matches everything
+            else if (crntStringSection == '*' || crntRouteSection.value == '*') {} // wildcard route matches everything
             else if (crntRouteSection.value != crntStringSection) return false; // immediately we can tell it's not a match
         }
         return true;

@@ -71,7 +71,15 @@ You can give parameters to instantiated elements as if it was a normal element. 
 
 #### Routing
 
-To add routing ("pages") to your app, first add a `<RoutedApp></RoutedApp>` element to your `Root.spall`. The routed portion of your app will be inserted inside there. To add routed pages, add a `.spall` file in the `pages/` directory. Specify what route a page corresponds to using `<pageroute>your/route/here</pageroute>` tag. To navigate to that page from within an element (for example as a button-press callback), call `this.spallApp.router.navigateTo("your/route/here")`.
+To add routing ("pages") to your app, first add a `<RoutedApp></RoutedApp>` element to your `Root.spall`. The routed portion of your app will be inserted inside there. Then you can write pages as `.spall` files in the `pages/` directory. Specify what route a page corresponds to using `<pageroute>your/route/here</pageroute>` tag. To navigate to that page from within an element (for example as a button-press callback), call `this.spallApp.router.navigateTo("your/route/here")`.
+
+Specify route parameters using regular JS templating syntax. For example if you specify the route `/cars/${id}/info` and navigate to `/cars/55/info`, `this.id` will be set to `55` on the page. For more information, look at the `RouteParameters` page in `demos/basic`.
+
+Wildcards can be used in page routes. Eg `<pageroute>animals/*</pageroute>` will be found if you navigate to both `animals/dogs` and `animals/cats`. It has the same lack of matching rules as a route parameter except that the value is not stored.
+
+You can create multiple routes leading to the same page by simply specifying multiple `<pageroute>` tags.
+
+Bad things may happen if you have multiple pages with the same route, so don't do that.
 
 You can specify the title of a page within a `<title>` tag. Regular `${}` templating can be used in the title tag but it cannot contain other elements or interpolated javascript. To specify a default title for pages where the title is not provided, set `this.spallApp.router.defaultTitle = "Default Title Here"`. Note that if you want this to work for first render, you'll need to disable autorun in the `SpallApp` constructor, set the field, and then manually call `app.run()`.
 
@@ -98,11 +106,13 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
 - Make custom dev server with file watching (similar to `dotnet watch run`)
 - Add resilience for when JS lines don't end in a semicolon (they are broken by minifier)
 - Prioritise direct route matches compared to parameter matches. Eg we can have a page `/users/me/` and a page `/users/{userId}` and if both match the first one is picked.
+    - Can create a system of specificity that also works for wildcards.
+    - Perhaps should treat wildcards and parameters in the same way
 - Add support for types in route parameters is - currently it's all strings and you'll have to convert them yourself
     - This would likely be easier in typescript with generics
-- Multiple routes per element
 - Support for comments in HTML parser
     - Should they be included in the final markup? Let's add a compilation option for that, by default it will be no.
+- Raise NoRootElement compilation error
 
 #### Internal changes
 

@@ -167,21 +167,21 @@ pub fn compile_element(
     if element_type == ElementType::Page {
         // add code to register as page
 
-        let mut page_route = None;
+        let mut page_routes = vec![];
         // add code to register as page
         tree.depth_first_map(&mut |node, _is_entering| {
             if let parser::NodeData::Markup(inner_data) = &node.data {
                 if inner_data.tag_name == "pageroute" {
-                    page_route = Some(inner_data.inner_text.clone());
+                    page_routes.push(inner_data.inner_text.clone());
                 }
             };
         });
 
-        let compiled_route_sections = compile_page_route(&page_route.ok_or(errs::FileCompilationError::NoPageRoute)?);
+        if page_routes.len() == 0 {
+            return Err(errs::FileCompilationError::NoPageRoutes);
+        }
 
-        result += &format!(
-            "SpallRouter.routeList.push([{compiled_route_sections},{compiled_element_name}]);\n"
-        );
+        result += &compile_all_page_routes(&page_routes, &compiled_element_name);
     }
 
     Ok(result)
@@ -480,6 +480,13 @@ fn renderables_to_string(renderables: &Vec<Renderable>) -> String {
     stringified_renderables.join(", ")
 }
 
+fn compile_all_page_routes(raw_page_routes: &Vec<String>, element_name: &str) -> String {
+    raw_page_routes.iter().map(|route| {
+        let compiled_route = compile_page_route(route);
+        format!("SpallRouter.routeList.push([{compiled_route},{element_name}]);")
+    }).collect::<Vec<String>>().join("\n")
+}
+
 fn compile_page_route(raw_route: &str) -> String {
     let sections = raw_route.split('/').filter(|x| !x.trim().is_empty());
     // todo: if sections contain ${} but it's not at the start + end then cry.
@@ -494,7 +501,7 @@ fn compile_page_route(raw_route: &str) -> String {
             }
         })
         .collect::<Vec<String>>()
-        .join(",");
+        .join(", ");
 
     format!("[{compiled_sections}]")
 }
