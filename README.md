@@ -12,7 +12,7 @@ See `demos/basic` for a basic look at how to make stuff work.
 
 An app is made up of elements, which are stored in the `elements/` directory. They're basically components but with a better name. Element file names are in format `{element name}.spall`. There must be an element called `Root` which is the root of your app. Calling them elements is somewhat confusing because HTML elements also exist. Maybe I should change the name.
 
-The `pages/` dir of a project holds pages. Pages are just elements that correspond to a "route". A page's route is specified inside a `<pageroute>` tag. You can specify a page title using `<title>` tags but it doesn't do anything yet.
+The `pages/` dir of a project holds pages. Pages are just elements that correspond to a "route". See the Routing section for more information.
 
 The `meta/` dir of a project contains stuff that is not the app itself. `index.html` is the entry point into the app and is plain html. You should put stuff like linking to the renderer in there.
 
@@ -69,6 +69,12 @@ If you want a callback to call a function in your element class, put an exclamat
 
 You can give parameters to instantiated elements as if it was a normal element. For example, `<MyElem name="John" />` will set `this.name` on the `MyElem` instance. That is how to make plain text parameters, to make evaluated/integer/object parameters put an exclamation mark at the start of the parameter name: `<MyElem !number="5" />`. The context of parameter evaulation is within a closure defined in a method of the element class.
 
+#### Routing
+
+To add routing ("pages") to your app, first add a `<RoutedApp></RoutedApp>` element to your `Root.spall`. The routed portion of your app will be inserted inside there. To add routed pages, add a `.spall` file in the `pages/` directory. Specify what route a page corresponds to using `<pageroute>your/route/here</pageroute>` tag. To navigate to that page from within an element (for example as a button-press callback), call `this.spallApp.router.navigateTo("your/route/here")`.
+
+You can specify the title of a page within a `<title>` tag. Regular `${}` templating can be used in the title tag but it cannot contain other elements or interpolated javascript. To specify a default title for pages where the title is not provided, set `this.spallApp.router.defaultTitle = "Default Title Here"`. Note that if you want this to work for first render, you'll need to disable autorun in the `SpallApp` constructor, set the field, and then manually call `app.run()`.
+
 ## Roadmap
 
 #### Public changes
@@ -94,6 +100,9 @@ You can give parameters to instantiated elements as if it was a normal element. 
 - Prioritise direct route matches compared to parameter matches. Eg we can have a page `/users/me/` and a page `/users/{userId}` and if both match the first one is picked.
 - Add support for types in route parameters is - currently it's all strings and you'll have to convert them yourself
     - This would likely be easier in typescript with generics
+- Multiple routes per element
+- Support for comments in HTML parser
+    - Should they be included in the final markup? Let's add a compilation option for that, by default it will be no.
 
 #### Internal changes
 

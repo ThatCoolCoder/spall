@@ -6,7 +6,7 @@ class SpallPage extends SpallElement {
     }
 
     generateRenderables() {
-        document.title = this.generateTitle() ?? this.spallApp.router.defaultTitle;
+        document.title = this.generateTitle() || this.spallApp.router.defaultTitle;
         return this.compiledGenerateRenderables();
     }
 }
