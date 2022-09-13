@@ -8,11 +8,12 @@
 <script>
     onInitialized() {
         this.route = 'unrouted';
+        this.routeMatchTemplate = '';
         this.title = 'Untitled';
     }
 
     get selected() {
-        return window.location.pathname.replaceAll('/', '') == this.route;
+        return this.spallApp.router.stringRoutesMatch(window.location.pathname, this.routeMatchTemplate || this.route)
     }
 
     visitLink() {

@@ -94,7 +94,6 @@ You can give parameters to instantiated elements as if it was a normal element. 
 - Prioritise direct route matches compared to parameter matches. Eg we can have a page `/users/me/` and a page `/users/{userId}` and if both match the first one is picked.
 - Add support for types in route parameters is - currently it's all strings and you'll have to convert them yourself
     - This would likely be easier in typescript with generics
-- Make NavButtons still work if the route that is accessed contains parameters
 
 #### Internal changes
 

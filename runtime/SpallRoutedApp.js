@@ -9,7 +9,7 @@ class __SpallCompiledRoutedApp extends SpallElement {
     }
 
     compiledGenerateRenderables() {
-        var stringRouteSections = this._parseStringRoute(this.spallApp.router.crntRoute);
+        var stringRouteSections = this.spallApp.router.parseStringRoute(this.spallApp.router.crntRoute);
         var matchingRouteData = null;
         for (var routeData of this.spallApp.router.routeList) {
             var [routeSections, elementClass] = routeData;
@@ -35,10 +35,5 @@ class __SpallCompiledRoutedApp extends SpallElement {
             return [new SpallElementRenderable("", elementClass, "1", properties)];
         }
 
-    }
-
-    _parseStringRoute(stringRoute) {
-        // Parse a string route into a list of sections
-        return stringRoute.split('/').filter(x => x.length > 0);
     }
 }
