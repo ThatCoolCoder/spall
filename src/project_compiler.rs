@@ -8,8 +8,8 @@ use itertools::Itertools;
 use minifier;
 
 use crate::compilation_settings::*;
+use crate::element_compiler;
 use crate::errs;
-use crate::file_compiler;
 use crate::logging;
 
 #[allow(dead_code)]
@@ -80,13 +80,13 @@ pub fn compile_project(
     let mut compiled_files = compile_elements(
         &project_paths.elements_dir,
         &compilation_settings,
-        file_compiler::ElementType::Basic,
+        element_compiler::ElementType::Basic,
         &mut last_element_id,
     )?;
     compiled_files.extend(compile_elements(
         &project_paths.pages_dir,
         &compilation_settings,
-        file_compiler::ElementType::Page,
+        element_compiler::ElementType::Page,
         &mut last_element_id,
     )?);
 
@@ -251,9 +251,9 @@ fn write_framework_runtime(project_paths: &ProjectPaths, framework_runtime: &str
 fn compile_elements(
     element_directory: &Path,
     compilation_settings: &CompilationSettings,
-    element_types: file_compiler::ElementType,
+    element_types: element_compiler::ElementType,
     last_element_id: &mut i32,
-) -> Result<Vec<file_compiler::CompiledElement>, errs::CompilationError> {
+) -> Result<Vec<element_compiler::CompiledElement>, errs::CompilationError> {
     // Compile all the elements in the folder as element_types elements.
     // last_element_id is an out parameter, perhaps this is bad
     // but it makes the calling function's code simpler
@@ -266,7 +266,7 @@ fn compile_elements(
         let p = &entry.unwrap().path();
         let file_name = p.as_path();
         compiled_elements.push(
-            file_compiler::compile_element_file(
+            element_compiler::compile_element_file(
                 file_name,
                 compilation_settings,
                 element_types.clone(),
@@ -299,12 +299,9 @@ fn compile_common_files(project_paths: &ProjectPaths) -> Vec<String> {
 }
 
 fn check_root_element_exists(
-    compiled_elements: &Vec<file_compiler::CompiledElement>,
+    compiled_elements: &Vec<element_compiler::CompiledElement>,
 ) -> Result<(), errs::CompilationError> {
-    if compiled_elements
-        .iter()
-        .any(|e| e.element_name == "SpallRootElement")
-    {
+    if compiled_elements.iter().any(|e| e.element_name == "Root") {
         Ok(())
     } else {
         Err(errs::CompilationError::Project(

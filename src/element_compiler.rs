@@ -196,7 +196,7 @@ pub fn compile_element(
 
     Ok(CompiledElement {
         content: result,
-        element_name: compiled_element_name.to_string(),
+        element_name: element_name.to_string(),
         compiled_element_name: compiled_element_name.to_string(),
     })
 }

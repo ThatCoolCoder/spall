@@ -1,7 +1,7 @@
 mod cli;
 mod compilation_settings;
+mod element_compiler;
 mod errs;
-mod file_compiler;
 mod logging;
 mod parser;
 mod project_compiler;
