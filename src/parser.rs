@@ -107,9 +107,6 @@ impl Tree {
 pub fn parse_element(tokens: &Vec<tokeniser::Token>) -> Result<Tree, errs::MarkupSyntaxError> {
     // Arrange tokens in a hierarchy.
     // The root-most node is not a real node in the element, but is just there to hold all of the children
-
-    // todo: figure out how to have nodes in both a tree and a stack at the same time
-
     let mut tree = Tree::new();
 
     let mut node_stack: Vec<NodeIndex> = vec![tree.root];
