@@ -23,6 +23,7 @@ struct ProjectPaths {
     common_dir: PathBuf,
     static_dir: PathBuf,
     build_static_dir: PathBuf,
+    scoped_css_dir: PathBuf,
 }
 
 impl ProjectPaths {
@@ -37,6 +38,7 @@ impl ProjectPaths {
             common_dir: project_dir.join("common"),
             static_dir: project_dir.join("static"),
             build_static_dir: project_dir.join("build/static"),
+            scoped_css_dir: project_dir.join("styles"),
         }
     }
 }

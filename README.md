@@ -12,13 +12,15 @@ See `demos/basic` for a basic look at how to make stuff work.
 
 An app is made up of elements, which are stored in the `elements/` directory. They're basically components but with a better name. Element file names are in format `{element name}.spall`. There must be an element called `Root` which is the root of your app. Calling them elements is somewhat confusing because HTML elements also exist. Maybe I should change the name.
 
-The `pages/` dir of a project holds pages. Pages are just elements that correspond to a "route". See the Routing section for more information.
+The `pages/` dir of a project holds pages. Pages are just elements that correspond to a "route". Bad things will happen if a page and an element have the same name See the Routing section for more information.
 
 The `meta/` dir of a project contains stuff that is not the app itself. `index.html` is the entry point into the app and is plain html. You should put stuff like linking to the renderer in there.
 
 The `static/` dir of a project holds static files that can be accessed in the built app from `static/`.
 
 The `common/` dir of a project holds Javascript files that can be accessed from elements and pages. Use it for shared functions or business logic - anything not directly tied to the frontend.
+
+The `styles/` dir of a projects holds scoped CSS for elements. Code in `styles/Button.css` will only apply to markup in `elements/Button.spall` or `pages/Button.Spall`.
 
 When an app is built, files are created in the `build/` directory, which can then be used in a regular server like Apache.
 

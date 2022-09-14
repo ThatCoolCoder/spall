@@ -5,6 +5,7 @@ mod errs;
 mod logging;
 mod parser;
 mod project_compiler;
+mod scoped_css_compiler;
 mod tag_attribute;
 mod tag_type;
 mod tokeniser;
