@@ -34,10 +34,11 @@ fn compilation_settings_from_args(
             0 => compilation_settings::CompilationLogLevel::Minimal,
             1 => compilation_settings::CompilationLogLevel::Brief,
             2 => compilation_settings::CompilationLogLevel::PerStep,
-            _ => panic!("Max verbosity is 2"),
+            other => panic!("Max verbosity is 2 (you said {other})"),
         },
         debug_tokens: args.debug_tokens,
         minify_files: !args.do_not_minify,
+        preserve_html_comments: args.preserve_html_comments,
     }
 }
 

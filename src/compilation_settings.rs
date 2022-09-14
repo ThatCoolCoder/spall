@@ -2,6 +2,7 @@ pub struct CompilationSettings {
     pub log_level: CompilationLogLevel,
     pub minify_files: bool,
     pub debug_tokens: bool,
+    pub preserve_html_comments: bool,
 }
 
 #[allow(dead_code)]

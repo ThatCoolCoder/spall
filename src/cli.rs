@@ -7,6 +7,7 @@ pub struct Options {
     pub debug_tokens: bool,
     pub do_not_minify: bool,
     pub project_path: String,
+    pub preserve_html_comments: bool,
 }
 
 pub fn parse_args() -> Options {
@@ -15,6 +16,7 @@ pub fn parse_args() -> Options {
         debug_tokens: false,
         do_not_minify: false,
         project_path: "".to_string(),
+        preserve_html_comments: false,
     };
 
     {
@@ -39,6 +41,13 @@ pub fn parse_args() -> Options {
             argparse::Store,
             "Path to project to compile",
         );
+        parser
+            .refer(&mut options.preserve_html_comments)
+            .add_option(
+                &["-c", "--comments"],
+                argparse::StoreTrue,
+                "Preserve HTML comments in final markup",
+            );
         parser.parse_args_or_exit();
     }
     options
