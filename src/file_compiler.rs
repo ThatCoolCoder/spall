@@ -57,6 +57,7 @@ pub fn compile_element_file(
     file_path: &Path,
     compilation_settings: &CompilationSettings,
     element_type: ElementType,
+    element_id: i32,
 ) -> Result<CompiledElement, errs::FileCompilationError> {
     // todo: if is not a .spall file: crash
 
@@ -70,6 +71,7 @@ pub fn compile_element_file(
         &element_name,
         compilation_settings,
         element_type,
+        element_id,
     )
 }
 
@@ -87,6 +89,7 @@ pub fn compile_element(
     element_name: &str,
     compilation_settings: &CompilationSettings,
     element_type: ElementType,
+    element_id: i32,
 ) -> Result<CompiledElement, errs::FileCompilationError> {
     // Preparation
 

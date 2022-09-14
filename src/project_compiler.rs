@@ -76,15 +76,18 @@ pub fn compile_project(
         "Compiling elements and pages",
         compilation_settings.log_level,
     );
+    let mut last_element_id = 0;
     let mut compiled_files = compile_elements(
         &project_paths.elements_dir,
         &compilation_settings,
         file_compiler::ElementType::Basic,
+        &mut last_element_id,
     )?;
     compiled_files.extend(compile_elements(
         &project_paths.pages_dir,
         &compilation_settings,
         file_compiler::ElementType::Page,
+        &mut last_element_id,
     )?);
 
     check_root_element_exists(&compiled_files)?;
@@ -249,13 +252,17 @@ fn compile_elements(
     element_directory: &Path,
     compilation_settings: &CompilationSettings,
     element_types: file_compiler::ElementType,
+    last_element_id: &mut i32,
 ) -> Result<Vec<file_compiler::CompiledElement>, errs::CompilationError> {
-    // Compile all the elements in the folder as element_types elements
+    // Compile all the elements in the folder as element_types elements.
+    // last_element_id is an out parameter, perhaps this is bad
+    // but it makes the calling function's code simpler
 
     let element_files = fs::read_dir(element_directory).unwrap();
     let mut compiled_elements = vec![];
 
     for entry in element_files {
+        *last_element_id += 1;
         let p = &entry.unwrap().path();
         let file_name = p.as_path();
         compiled_elements.push(
@@ -263,7 +270,9 @@ fn compile_elements(
                 file_name,
                 compilation_settings,
                 element_types.clone(),
+                *last_element_id,
             )
+            // Convert FileCompilationErrors to CompilationErrors
             .or_else(|e| {
                 Err(errs::CompilationError::File {
                     file_name: file_name.to_string_lossy().to_string(),
