@@ -37,7 +37,9 @@ impl fmt::Display for ProjectCompilationError {
                 write!(f, "Could not find elements/ directory")
             }
             ProjectCompilationError::NoMetaDirectory => write!(f, "Could not find meta/ directory"),
-            ProjectCompilationError::NoRootElement => write!(f, "No root element defined"),
+            ProjectCompilationError::NoRootElement => {
+                write!(f, "No root element (elements/Root.spall) defined.")
+            }
             ProjectCompilationError::NoMetaIndex => write!(f, "No index.html defined in meta/ dir"),
         }
     }

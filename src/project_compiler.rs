@@ -86,10 +86,15 @@ pub fn compile_project(
         &compilation_settings,
         file_compiler::ElementType::Page,
     )?);
-    compiled_files.extend(compile_common_files(&project_paths));
+
+    check_root_element_exists(&compiled_files)?;
+
+    let mut compiled_file_contents: Vec<String> =
+        compiled_files.iter().map(|x| x.content.clone()).collect();
+    compiled_file_contents.extend(compile_common_files(&project_paths));
 
     logging::log_brief("Bundling application", compilation_settings.log_level);
-    let mut bundle = bundle_compiled_files(&compiled_files);
+    let mut bundle = bundle_compiled_files(&compiled_file_contents);
     if compilation_settings.minify_files {
         bundle = minifier::js::minify(&bundle).to_string();
     }
@@ -244,11 +249,11 @@ fn compile_elements(
     element_directory: &Path,
     compilation_settings: &CompilationSettings,
     element_types: file_compiler::ElementType,
-) -> Result<Vec<String>, errs::CompilationError> {
+) -> Result<Vec<file_compiler::CompiledElement>, errs::CompilationError> {
     // Compile all the elements in the folder as element_types elements
 
     let element_files = fs::read_dir(element_directory).unwrap();
-    let mut compiled_elements = Vec::new();
+    let mut compiled_elements = vec![];
 
     for entry in element_files {
         let p = &entry.unwrap().path();
@@ -281,6 +286,21 @@ fn compile_common_files(project_paths: &ProjectPaths) -> Vec<String> {
             .collect()
     } else {
         vec![]
+    }
+}
+
+fn check_root_element_exists(
+    compiled_elements: &Vec<file_compiler::CompiledElement>,
+) -> Result<(), errs::CompilationError> {
+    if compiled_elements
+        .iter()
+        .any(|e| e.element_name == "SpallRootElement")
+    {
+        Ok(())
+    } else {
+        Err(errs::CompilationError::Project(
+            errs::ProjectCompilationError::NoRootElement,
+        ))
     }
 }
 

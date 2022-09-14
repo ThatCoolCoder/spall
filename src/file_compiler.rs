@@ -47,11 +47,17 @@ struct ElementParameter {
                       // although when they are put into the structure the ! is stripped
 }
 
+pub struct CompiledElement {
+    pub content: String,
+    pub element_name: String,
+    pub compiled_element_name: String,
+}
+
 pub fn compile_element_file(
     file_path: &Path,
     compilation_settings: &CompilationSettings,
     element_type: ElementType,
-) -> Result<String, errs::FileCompilationError> {
+) -> Result<CompiledElement, errs::FileCompilationError> {
     // todo: if is not a .spall file: crash
 
     let file_content = fs::read_to_string(file_path).expect(&format!(
@@ -81,7 +87,7 @@ pub fn compile_element(
     element_name: &str,
     compilation_settings: &CompilationSettings,
     element_type: ElementType,
-) -> Result<String, errs::FileCompilationError> {
+) -> Result<CompiledElement, errs::FileCompilationError> {
     // Preparation
 
     logging::log_brief(
@@ -139,13 +145,14 @@ pub fn compile_element(
                     }
                 };
             });
-            format!(r#"
+            format!(
+                r#"
             generateTitle() {{
                 return `{page_title}`;
-            }}"#)
+            }}"#
+            )
         }
     };
-    
     let mut result = format!(
         r#"
         class {compiled_element_name} extends {base_class} {{
@@ -184,7 +191,11 @@ pub fn compile_element(
         result += &compile_all_page_routes(&page_routes, &compiled_element_name);
     }
 
-    Ok(result)
+    Ok(CompiledElement {
+        content: result,
+        element_name: compiled_element_name.to_string(),
+        compiled_element_name: compiled_element_name.to_string(),
+    })
 }
 
 fn generate_compiled_element_name(element_name: &str) -> String {
@@ -481,10 +492,14 @@ fn renderables_to_string(renderables: &Vec<Renderable>) -> String {
 }
 
 fn compile_all_page_routes(raw_page_routes: &Vec<String>, element_name: &str) -> String {
-    raw_page_routes.iter().map(|route| {
-        let compiled_route = compile_page_route(route);
-        format!("SpallRouter.routeList.push([{compiled_route},{element_name}]);")
-    }).collect::<Vec<String>>().join("\n")
+    raw_page_routes
+        .iter()
+        .map(|route| {
+            let compiled_route = compile_page_route(route);
+            format!("SpallRouter.routeList.push([{compiled_route},{element_name}]);")
+        })
+        .collect::<Vec<String>>()
+        .join("\n")
 }
 
 fn compile_page_route(raw_route: &str) -> String {

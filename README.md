@@ -101,6 +101,8 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
 - Allow subdirectories of elements + pages, something namespace-like
 - Data binding/two-way parameters
 - Scoped CSS
+    - Will require interfering with `class=""` attributes of elements to map the names of classes
+    - Alternately, could transform css to use selectors such as `__sp123 x`. The outer selector would be applied to the `<span>` containing the element.
 - Make requests to non-index directories still lead to the SPA (is this possible without writing a custom server?)
 - Make project-template-creater (similar to `dotnet new`)
 - Make custom dev server with file watching (similar to `dotnet watch run`)
@@ -112,7 +114,7 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
     - This would likely be easier in typescript with generics
 - Support for comments in HTML parser
     - Should they be included in the final markup? Let's add a compilation option for that, by default it will be no.
-- Raise NoRootElement compilation error
+- (not really about the project, just a self-reminder). Get rustfmt enabled with rust-analyser extension
 
 #### Internal changes
 
