@@ -116,7 +116,8 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
     - This would likely be easier in typescript with generics
 - Support for comments in HTML parser
     - Should they be included in the final markup? Let's add a compilation option for that, by default it will be no.
-- (not really about the project, just a self-reminder). Get rustfmt enabled with rust-analyser extension
+- Give a warning when multiple pages have the same route.
+    - Add this and some other summary information to the page-compilation result struct.
 
 #### Internal changes
 
