@@ -11,6 +11,7 @@ use crate::compilation_settings::*;
 use crate::element_compiler;
 use crate::errs;
 use crate::logging;
+use crate::scoped_css;
 
 #[allow(dead_code)]
 struct ProjectPaths {
@@ -104,6 +105,11 @@ pub fn compile_project(
         bundle = minifier::js::minify(&bundle).to_string();
     }
     save_bundle(&project_paths, &bundle);
+
+    logging::log_brief("Compiling scoped css", compilation_settings.log_level);
+    let scoped_css_files = compile_scoped_css_files(&project_paths, &compilation_settings)?;
+    let scoped_css_bundle = bundle_scoped_css_files(&scoped_css_files);
+    save_scoped_css_bundle(&project_paths, scoped_css_bundle);
 
     Ok(())
 }
@@ -319,4 +325,43 @@ fn bundle_compiled_files(compiled_files: &Vec<String>) -> String {
 fn save_bundle(project_paths: &ProjectPaths, bundle: &str) {
     let target_file = project_paths.build_scripts_dir.join("bundle.js");
     fs::write(target_file, bundle).expect("Failed saving bundle");
+}
+
+fn compile_scoped_css_files(
+    project_paths: &ProjectPaths,
+    compilation_settings: &CompilationSettings,
+) -> Result<Vec<String>, errs::CompilationError> {
+    if project_paths.scoped_css_dir.exists() {
+        let css_files = fs::read_dir(&project_paths.scoped_css_dir).unwrap();
+        let mut compiled_files = vec![];
+        for file in css_files {
+            let p = &file.unwrap().path();
+            let compiled_file = scoped_css::compiler::compile_scoped_css_file(p).or_else(|e| {
+                Err(errs::CompilationError::File {
+                    file_name: p.to_string_lossy().to_string(),
+                    inner_error: e,
+                })
+            })?;
+            compiled_files.push(compiled_file);
+        }
+        Ok(compiled_files)
+    } else {
+        logging::log_brief(
+            "Scoped css directory is not present.",
+            compilation_settings.log_level,
+        );
+        Ok(vec![])
+    }
+}
+
+fn bundle_scoped_css_files(scoped_css_files: &Vec<String>) -> String {
+    scoped_css_files.join("\n\n")
+}
+
+fn save_scoped_css_bundle(project_paths: &ProjectPaths, bundled_scoped_css: String) {
+    fs::write(
+        project_paths.build_static_dir.join("bundle.css"),
+        bundled_scoped_css,
+    )
+    .expect("Failed writing scoped css bundle");
 }

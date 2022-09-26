@@ -7,6 +7,7 @@ use std::fmt;
 
 use derive_more::Display;
 
+use crate::misc::tokeniser_utils;
 use crate::tag_attribute::TagAttribute;
 use crate::tag_type::TagType;
 
@@ -101,7 +102,7 @@ fn read_html_tag(markup: &str) -> (TagToken, usize) {
 
     // Read tag name
     while idx < markup.len() {
-        let char = get_char_unwrap(markup, idx);
+        let char = tokeniser_utils::get_char_unwrap(markup, idx);
         match char {
             ' ' => {
                 idx += 1;
@@ -135,7 +136,7 @@ fn read_html_tag(markup: &str) -> (TagToken, usize) {
         idx += len;
 
         while idx < markup.len() {
-            let char = get_char_unwrap(&markup, idx);
+            let char = tokeniser_utils::get_char_unwrap(&markup, idx);
             idx += 1;
             match char {
                 '/' => {
@@ -165,10 +166,10 @@ fn read_tag_attributes(data: &str) -> (Vec<TagAttribute>, usize) {
     let mut tag_attributes = vec![];
     while idx < data.len() {
         // skip forward if there are any spaces
-        idx += read_whitespace(&data[idx..]).len();
+        idx += tokeniser_utils::read_whitespace(&data[idx..]).len();
 
         // check if we are at end of tag
-        let char = get_char_unwrap(data, idx);
+        let char = tokeniser_utils::get_char_unwrap(data, idx);
         if char == '/' || char == '>' {
             break;
         }
@@ -193,7 +194,7 @@ fn read_tag_attribute(data: &str) -> (TagAttribute, usize) {
     }
 
     while idx < data.len() {
-        let char = get_char_unwrap(&data, idx);
+        let char = tokeniser_utils::get_char_unwrap(&data, idx);
         if char == ' ' || char == '=' {
             break;
         } else {
@@ -202,13 +203,17 @@ fn read_tag_attribute(data: &str) -> (TagAttribute, usize) {
         idx += 1;
     }
 
-    idx += read_whitespace(&data[idx..]).len();
+    idx += tokeniser_utils::read_whitespace(&data[idx..]).len();
     // if idx > len: err(you messed up)
     idx += 1; // jump over equals sign
               // if idx > len: err(you messed up)
-    idx += read_whitespace(&data[idx..]).len();
+    idx += tokeniser_utils::read_whitespace(&data[idx..]).len();
 
-    let mut attribute_value = read_string(get_char_unwrap(data, idx), '\\', &data[idx..]);
+    let mut attribute_value = tokeniser_utils::read_string(
+        tokeniser_utils::get_char_unwrap(data, idx),
+        '\\',
+        &data[idx..],
+    );
     idx += attribute_value.len();
     attribute_value.pop();
     attribute_value.remove(0);
@@ -220,10 +225,6 @@ fn read_tag_attribute(data: &str) -> (TagAttribute, usize) {
         },
         idx,
     )
-}
-
-fn get_char_unwrap(data: &str, idx: usize) -> char {
-    data.chars().nth(idx).unwrap()
 }
 
 fn read_tag_content(markup: &str) -> String {
@@ -273,7 +274,7 @@ fn read_javascript(data: &str) -> String {
         }
 
         if quotes.contains(&char) {
-            let string = read_string(char, '\\', &data[char_idx..]);
+            let string = tokeniser_utils::read_string(char, '\\', &data[char_idx..]);
             result += &string;
             char_idx += string.len();
         } else {
@@ -310,54 +311,6 @@ fn read_inline_javascript(markup: &str) -> (InlineJavascriptToken, usize) {
         },
         length,
     )
-}
-
-fn read_string(quote_char: char, escape_char: char, data: &str) -> String {
-    // Generic method for reading a string.
-    // Presumes data starts with quote char, returned data includes start and end quote
-
-    let mut result = "".to_string();
-    let mut quotes_found = 0;
-    let mut last_char_is_escape = false;
-    for char in data.chars() {
-        result.push(char);
-
-        if char == quote_char && !last_char_is_escape {
-            quotes_found += 1;
-        }
-        // 2 quotes = 1 start, 1 end
-        if quotes_found == 2 {
-            break;
-        }
-
-        if char == escape_char && !last_char_is_escape {
-            last_char_is_escape = true;
-        } else {
-            last_char_is_escape = false;
-        }
-    }
-    result
-}
-
-fn read_whitespace(data: &str) -> String {
-    // Read whitespace until another character occurs.
-    // Currently counts spaces, tabs and newlines as whitespace
-
-    let mut idx: usize = 0;
-    let mut result = "".to_string();
-    while idx < data.len() {
-        let char = get_char_unwrap(data, idx);
-        match char {
-            ' ' | '\t' | '\n' | '\r' => {
-                result.push(char);
-            }
-            _ => {
-                break;
-            }
-        }
-        idx += 1;
-    }
-    result
 }
 
 #[cfg(test)]
@@ -441,23 +394,5 @@ mod tests {
         data = read_inline_javascript("~var x = 5\n");
         assert_eq!(data.0.value, "var x = 5");
         assert_eq!(data.1, 11);
-    }
-
-    #[test]
-    fn test_read_string() {
-        assert_eq!(
-            read_string('\'', '\\', "'this in quotes' end"),
-            "'this in quotes'"
-        );
-        assert_eq!(
-            read_string('\'', '\\', r#"'Hello world, don\'t \\' end"#),
-            r#"'Hello world, don\'t \\'"#
-        );
-    }
-
-    #[test]
-    fn test_read_whitespace() {
-        assert_eq!(read_whitespace("      hello"), "      ");
-        assert_eq!(read_whitespace("      \t\n  hello"), "      \t\n  ");
     }
 }

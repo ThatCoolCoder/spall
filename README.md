@@ -105,6 +105,10 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
 - Scoped CSS
     - Will require interfering with `class=""` attributes of elements to map the names of classes
     - Alternately, could transform css to use selectors such as `__sp123 userdefinedclass`. The outer selector would be applied to the `<span>` containing the element.
+    - Improve tokeniser
+    - Make it write to a `css/` subdirectory of the build dir.
+    - Switch to using element id instead of element name
+    - Make changes to runtime so that the css will be applied
 - Make requests to non-index directories still lead to the SPA (is this possible without writing a custom server?)
 - Make project-template-creater (similar to `dotnet new`)
 - Make custom dev server with file watching (similar to `dotnet watch run`)

@@ -49,6 +49,7 @@ impl fmt::Display for ProjectCompilationError {
 pub enum FileCompilationError {
     InvalidElementName { name: String },
     NoPageRoutes,
+    CssSyntaxError(CssSyntaxError),
     MarkupSyntaxError(MarkupSyntaxError),
 }
 
@@ -61,7 +62,21 @@ impl fmt::Display for FileCompilationError {
             FileCompilationError::NoPageRoutes => {
                 write!(f, "No page route was defined")
             }
+            FileCompilationError::CssSyntaxError(e) => e.fmt(f),
             FileCompilationError::MarkupSyntaxError(e) => e.fmt(f),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum CssSyntaxError {
+    UnexpectedEndOfFile,
+}
+
+impl fmt::Display for CssSyntaxError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            CssSyntaxError::UnexpectedEndOfFile => write!(f, "Unexpected end of file"),
         }
     }
 }
