@@ -101,13 +101,24 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
 - Move to typescript, attach some sort of package manager
     - Build a standard library of components
 - Allow subdirectories of elements + pages, something namespace-like
+    - Expand this to allow auto-deriving page name from folder and file structure
+        - Still provide ways of adding a) custom last part of url; and b) custom entire url.
 - Data binding/two-way parameters
 - Scoped CSS
-    - Will require interfering with `class=""` attributes of elements to map the names of classes
-    - Alternately, could transform css to use selectors such as `__sp123 userdefinedclass`. The outer selector would be applied to the `<span>` containing the element.
     - Improve tokeniser
+        - Make it not remove comments
+        - Make it more resilient to odd styling and also have more descriptive errors
+    - Minify the scoped css and add command line flag to not do that
+        - Should the flag be the same as the Javascript minify flag or different?
+    - (Future) potentially add an option/insistence to use a CSS preprocessor
+        - Depending on the preprocessor this would actually make it a whole lot easier to do it as they support nested rules so all we'd need to do is put a big rule over the top instead of tokenising.
+        - But this would also require people to install more dependencies, which is annoying for them.
     - Make it write to a `css/` subdirectory of the build dir.
+    - When we add subdirectories 
     - Switch to using element id instead of element name
+        - Requires compiling the CSS after so that
+        - Will allow us to give errors like complaining that a scoped css file doesn't have a matching element
+            - This would require making `FileCompilationError` work for multiple types of files more easily.
     - Make changes to runtime so that the css will be applied
 - Make requests to non-index directories still lead to the SPA (is this possible without writing a custom server?)
 - Make project-template-creater (similar to `dotnet new`)
@@ -116,7 +127,7 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
 - Prioritise direct route matches compared to parameter matches. Eg we can have a page `/users/me/` and a page `/users/{userId}` and if both match the first one is picked.
     - Can create a system of specificity that also works for wildcards.
     - Perhaps should treat wildcards and parameters in the same way
-- Add support for types in route parameters is - currently it's all strings and you'll have to convert them yourself
+- Add support for types in route parameters - currently it's all strings and you'll have to convert them yourself
     - This would likely be easier in typescript with generics
 - Support for comments in HTML parser
     - Should they be included in the final markup? Let's add a compilation option for that, by default it will be no.
@@ -127,9 +138,26 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
 
 - Rewrite tokeniser to make tokens smaller. For example one token would be a single `<` instead of a whole tag. This makes it way easier to add consistent special chars.
     - Add an intermediate step to form individual tokens into stuff like tags.
+        - I think that's called lexing
 - Restructure runtime stuff so that multiple Spall apps can live on one page (currently uses statics)
     - Would be very difficult due to the slightly hacky way we give context for callbacks.
 - Potentially move to a more object-oriented approach where tokens decide to compile themselves
 - Maybe don't even bother rendering markup if it matches what was written before (actually, sounds hard). Would be desirable if adding auto-render after callbacks 
-- Increase robustness of route parsing in rust (see associated functions in `file_compiler.rs` for details)
+- Increase robustness of route parsing in rust (see associated functions in `element_compiler.rs` for details)
 - Did we make pages missing be resilient?
+- Get a proper system of ids for precompiled/special elements
+    - Perhaps switch element ids to be based on a hash of the element name and subdirectory
+    - or GUID
+- Make the `.spall` format not be the focus of everything - have a project compiler which does a number of tasks, only one of which is compiling the `.spall` files. Makes it easier to add more processing
+    - Generally improve the error hierarchy to suppport this
+- Comment code
+- Proper documentation of the different data structures, terms, concepts and processes used.
+- Generally split stuff up into more files which are each more focused.
+- `SpallUtils.fatalRendererError` should not be part of `SpallUtils` but part of `SpallRenderer`. It's a wrapper of an existing function so it's not hard.
+- Make `SpallUtils.fatalError` indent the error text to be all the same or something
+    - Would make it easier to have sub-types of errors displayed with a good visual hierarchy
+- Annoyingly there appear to be 2 other programs with the name Spall (even though I searched on Github before choosing the name!) so this name may just have to be a working one.
+    - One of them is a MIDI player written in Ruby, and is of no concern
+    - The other one is a `WASM flamegraph tracing renderer` written in Odin, which is of more concern because it's related to the web.
+    - Potentially the name Spalljs/Spall.js is sufficiently unique.
+    - At the end of the day I'm not building this for the purpose of being used so it doesn't matter than much

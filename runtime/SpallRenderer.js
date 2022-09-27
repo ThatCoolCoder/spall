@@ -45,37 +45,46 @@ class SpallRenderer {
         var createdElements = [];
 
         for (var renderable of renderables) {
+            // If it's HTML then just append to markup
             if (renderable instanceof SpallMarkupRenderable) {
                 finalHtml += renderable.markup;
                 this._logger.logAddMarkup(renderable.markup);
             }
+            // Else if its an element that needs to be instantiated
             else {
+                // Instantiate the element
                 var path = this._idToPath[element.id] + '/' + renderable.relativePath;
                 var child = new renderable.elementClass(this._newElementId(), element.id, this.spallApp, path);
 
+                // Add an element to the dom that will contain the element and that we can lookup later to inject the content.
                 var id = "__sp" + child.id;
                 var className = `_sp${child.elementName}`;
                 finalHtml += `<span style="display: contents" class="${className}" id="${id}"></span>`;
 
+                // Bunch of registering/logging
                 createdElements.push({htmlId: id, child: child, parameters: renderable.parameters});
                 this._registerElement(child, child.path);
-
                 this._logger.logCreatedElement(child);
 
             }
         }
+        // Put the HTML into the container
         container.innerHTML = finalHtml;
 
+        // Render the created elements now that the initial HTML has been created.
         for (var toRender of createdElements) {
+            // Find where we need to inject
             var childContainer = document.getElementById(toRender.htmlId);
 
             this._idToHtml[toRender.child.id] = childContainer;
             toRender.child.onInitialized();
 
+            // Set parameters
             for (var parameterName in toRender.parameters) {
                 toRender.child[parameterName] = toRender.parameters[parameterName]();
             }
 
+            // Actually inject the HTML into the DOM
             this.renderElement(toRender.child, childContainer);
         }
         

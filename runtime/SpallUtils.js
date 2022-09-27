@@ -19,6 +19,7 @@ class SpallUtils {
 
     static abstractNotOverridden() {
         // Put this in your abstract methods so it throws if it's not overridden.
+        // Automatically figures out what the name of the function that called this is, for easy debugging.
         var functionName = new Error().stack.split('\n')[1].split('@')[0];
         throw new Error(`Abstract function "${functionName}" not overridden`);
     }

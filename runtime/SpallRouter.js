@@ -1,7 +1,11 @@
 class SpallRouter {
     // Handles switching between "pages" I guess.
     // Most of the work is done in the element, this just links everything together and adds a nice interface
-    // Currently routes are just strings with no slashes in them. Proper urls will come when I add namespaces
+    // There are three-ish types of routes: string, parsed, and templates.
+    // - String routes are just a string like "/myapp/hello/"
+    // - Parsed routes are string routes that have been split at the slashes and cleaned to form something like ["myapp", "hello"]
+    // - Template routes (also called routeSections, distinct from stringRouteSections) are a list of SpallStringRouteSections or SpallPropertyRouteSections.
+    //      They are linked to a page and can be determined whether it matches the route that the user wants to navigate to.
 
     constructor(spallApp=null) {
         this.spallApp = spallApp;
@@ -19,6 +23,7 @@ class SpallRouter {
         this.defaultTitle = title;
     }
 
+    // Navigate to a route 
     navigateTo(route) {
         this.crntRoute = route;
         history.pushState("", "", `/${this.crntRoute}`);
@@ -26,6 +31,7 @@ class SpallRouter {
         this.spallApp.renderer.renderPage();
     }
 
+    // Whether
     stringMatchesRoute(stringRouteSections, routeSections) {
         if (stringRouteSections.length != routeSections.length) return false;
 
@@ -39,6 +45,7 @@ class SpallRouter {
         return true;
     }
 
+    //
     stringRoutesMatch(route1, route2) {
         var route1Sections = this.parseStringRoute(route1);
         var route2Sections = this.parseStringRoute(route2);
@@ -54,6 +61,7 @@ class SpallRouter {
         return true;
     }
 
+    // 
     parseStringRoute(stringRoute) {
         // Parse a string route into a list of sections
         return stringRoute.split('/').filter(x => x.length > 0);

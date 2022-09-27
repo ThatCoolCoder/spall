@@ -20,6 +20,7 @@ class SpallElement {
         SpallUtils.abstractNotOverridden();
     }
 
+    // Call when you want to update state or whatever
     needsRender() {
         this.spallApp.renderer.renderElement(this, this.spallApp.renderer.getElementContainer(this.id));
     }
