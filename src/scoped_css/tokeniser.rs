@@ -3,7 +3,6 @@
 
 // Current limitations:
 // - Does not read comments
-// - Does not work at all
 
 use crate::errs;
 use crate::misc::tokeniser_utils;
@@ -58,8 +57,10 @@ fn read_selectors(css: &str) -> Result<(Vec<CssToken>, usize), errs::CssSyntaxEr
         // if is comma: add token, +1 idx
         if found_char == ',' {
             result.push(CssToken::Comma);
+            idx += 1;
         } else {
             result.push(CssToken::BlockStart);
+            idx += 1;
             break;
         }
     }
@@ -95,18 +96,17 @@ fn read_css_property(css: &str) -> Result<(Vec<CssToken>, usize), errs::CssSynta
     if !found_colon {
         Err(errs::CssSyntaxError::UnexpectedEndOfFile)?
     }
-
     chars_read += property_name.len() + 1; // +1 to account for the colon token that we add just below
     result.push(CssToken::PropertyName(property_name.trim().to_string()));
     result.push(CssToken::Colon);
 
     let (property_value, found_semicolon) =
-        tokeniser_utils::read_until_char(&css[..chars_read], ';');
+        tokeniser_utils::read_until_char(&css[chars_read..], ';');
     if !found_semicolon {
         Err(errs::CssSyntaxError::UnexpectedEndOfFile)?
     }
 
-    chars_read += property_value.len();
+    chars_read += property_value.len() + 1; // +1 to account for semicolon token
     result.push(CssToken::PropertyValue(property_value.trim().to_string()));
     result.push(CssToken::Semicolon);
 
@@ -118,7 +118,36 @@ mod tests {
     use super::*;
     #[test]
     fn test_read_selectors() {
-        let selectors = read_selectors(".main, .big {").unwrap();
-        println!("{selectors:?}");
+        let (tokens, len) = read_selectors(".main, .big {").unwrap();
+        assert_eq!(tokens.len(), 4);
+        assert_eq!(len, 13);
+
+        let (tokens, _) = read_selectors("{").unwrap();
+        assert_eq!(tokens.len(), 1);
+
+        let result = read_selectors(".main, .big");
+        assert_eq!(result.is_err(), true);
+    }
+
+    #[test]
+    fn test_read_all_css_properties() {
+        let (tokens, len) = read_all_css_properties("}aaaa").unwrap();
+        assert_eq!(tokens.len(), 1);
+        assert_eq!(len, 1);
+
+        let (tokens, len) = read_all_css_properties("color: red; }aaa").unwrap();
+        assert_eq!(tokens.len(), 5);
+        assert_eq!(len, 13);
+
+        let (tokens, len) = read_all_css_properties("color: red; background: blue; }aaa").unwrap();
+        assert_eq!(tokens.len(), 9);
+        assert_eq!(len, 31);
+    }
+
+    #[test]
+    fn test_read_css_property() {
+        let (tokens, len) = read_css_property("color: red; ").unwrap();
+        assert_eq!(tokens.len(), 4);
+        assert_eq!(len, 11);
     }
 }

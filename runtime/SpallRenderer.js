@@ -54,7 +54,8 @@ class SpallRenderer {
                 var child = new renderable.elementClass(this._newElementId(), element.id, this.spallApp, path);
 
                 var id = "__sp" + child.id;
-                finalHtml += `<span style="display: contents" id="${id}"></span>`;
+                var className = `_sp${child.elementName}`;
+                finalHtml += `<span style="display: contents" class="${className}" id="${id}"></span>`;
 
                 createdElements.push({htmlId: id, child: child, parameters: renderable.parameters});
                 this._registerElement(child, child.path);

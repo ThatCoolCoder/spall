@@ -33,7 +33,7 @@ pub fn compile_scoped_css(
             CssToken::Semicolon => ";\n".to_string(),
 
             // This is the special one where we mess with the class names
-            CssToken::Selector(value) => format!("{element_name} {value}"),
+            CssToken::Selector(value) => format!("._sp{element_name} {value}"),
         }
         .as_str();
     }
