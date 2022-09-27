@@ -1,10 +1,6 @@
 class SpallUtils {
     static fatalError(message) {
-        console.error(`Fatal Spall error:\n    ${message}`);
-    }
-
-    static fatalRenderError(message) {
-        this.fatalError(`Fatal renderer error:\n        ${message}`)
+        console.error(`Fatal Spall error:\n${this.indentText(message, this.errorIndent)}`);
     }
 
     static addChildAtIndex(element, child, index) {
@@ -17,6 +13,11 @@ class SpallUtils {
         }
     }
 
+    static indentText(text, numSpaces) {
+        var indent = ' '.repeat(numSpaces);
+        return text.split('\n').map(x => indent + x).join('\n');
+    }
+
     static abstractNotOverridden() {
         // Put this in your abstract methods so it throws if it's not overridden.
         // Automatically figures out what the name of the function that called this is, for easy debugging.
@@ -24,3 +25,6 @@ class SpallUtils {
         throw new Error(`Abstract function "${functionName}" not overridden`);
     }
 }
+
+// I don't think safari likes static variables so just do it the dumb way
+SpallUtils.errorIndent = 4;

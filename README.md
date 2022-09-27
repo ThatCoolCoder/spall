@@ -153,8 +153,6 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
 - Comment code
 - Proper documentation of the different data structures, terms, concepts and processes used.
 - Generally split stuff up into more files which are each more focused.
-- `SpallUtils.fatalRendererError` should not be part of `SpallUtils` but part of `SpallRenderer`. It's a wrapper of an existing function so it's not hard.
-- Make `SpallUtils.fatalError` indent the error text to be all the same or something
     - Would make it easier to have sub-types of errors displayed with a good visual hierarchy
 - Annoyingly there appear to be 2 other programs with the name Spall (even though I searched on Github before choosing the name!) so this name may just have to be a working one.
     - One of them is a MIDI player written in Ruby, and is of no concern

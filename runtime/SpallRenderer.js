@@ -20,7 +20,7 @@ class SpallRenderer {
 
     renderPage() {
         this._throwIfRendering();
-        if (this.spallApp == null) SpallUtils.fatalError("SpallRenderer.spallApp was not provided");
+        if (this.spallApp == null) this._fatalRendererError("SpallRenderer.spallApp was not provided");
         var root = new __SpallCompiledRoot(this._lastUsedId, -1, this);
         this._idToHtml[root.id] = this.spallApp.appContainer;
 
@@ -30,7 +30,7 @@ class SpallRenderer {
             this.renderElement(root, this.spallApp.appContainer);
         }
         catch (e) {
-            SpallUtils.fatalRenderError(`General exception: ${e}\nStack trace: ${e.stack}`);
+            this._fatalRenderError(`General exception: ${e}\nStack trace: ${e.stack}`);
         }
     }
 
@@ -145,5 +145,9 @@ class SpallRenderer {
             crntElement = crntElement.children[parseInt(section)];
         }
         return crntElement;
+    }
+
+    _fatalRenderError(message) {
+        SpallUtils.fatalError(`Fatal renderer error:\n${SpallUtils.indentText(message, SpallUtils.errorIndent)}`)
     }
 }
