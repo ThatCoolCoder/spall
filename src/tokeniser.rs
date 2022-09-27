@@ -1,6 +1,8 @@
-// WIP new tokeniser that actually parses things well.
+// Tokeniser for .spall files
 // The previous implementation used iterators and lambdas but I've decided to use plain for-loops this time,
-// as the iterators became too complex when implementing complex patterns
+// as the iterators became too complex when implementing complex patterns.
+// A lot of the functions in this file return a tuple of a Vec<Token> and usize -
+// the usize is how many characters were consumed by that function so we can update the counter in the parent function
 
 use std::collections::HashMap;
 use std::fmt;
@@ -57,6 +59,8 @@ pub struct InlineJavascriptToken {
 }
 
 pub fn read_element(markup: &str) -> Vec<Token> {
+    // Entry point to tokenisation, reads a string into a vec of tokens
+
     let mut remaining = markup.to_string();
     let mut inside_script_tag = false;
     let mut result = vec![];
@@ -129,6 +133,7 @@ fn read_html_tag(markup: &str) -> (TagToken, usize) {
 
     tag_name = tag_name.trim().to_string();
 
+    // Read tag attributes
     let mut tag_attributes = vec![];
     if !found_end_tag {
         let (_tag_attributes, len) = read_tag_attributes(&markup[idx..]);
@@ -149,6 +154,8 @@ fn read_html_tag(markup: &str) -> (TagToken, usize) {
             }
         }
     }
+
+    // Generate token
     (
         TagToken {
             name: tag_name,
@@ -193,6 +200,7 @@ fn read_tag_attribute(data: &str) -> (TagAttribute, usize) {
         idx += 1;
     }
 
+    // Read all of attribute name
     while idx < data.len() {
         let char = tokeniser_utils::get_char_unwrap(&data, idx);
         if char == ' ' || char == '=' {
@@ -209,6 +217,7 @@ fn read_tag_attribute(data: &str) -> (TagAttribute, usize) {
               // if idx > len: err(you messed up)
     idx += tokeniser_utils::read_whitespace(&data[idx..]).len();
 
+    // Read attribute value
     let mut attribute_value = tokeniser_utils::read_string(
         tokeniser_utils::get_char_unwrap(data, idx),
         '\\',
@@ -217,6 +226,8 @@ fn read_tag_attribute(data: &str) -> (TagAttribute, usize) {
     idx += attribute_value.len();
     attribute_value.pop();
     attribute_value.remove(0);
+
+    // Prepare data for returning
     (
         TagAttribute {
             name: attribute_name,

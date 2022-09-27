@@ -2,6 +2,7 @@
 
 use argparse;
 
+// Serves as an intermediate step between command line and CompilationSettings, since a direct mapping would not be suitable or flexible
 pub struct Options {
     pub verbosity: i32,
     pub debug_tokens: bool,
@@ -11,6 +12,9 @@ pub struct Options {
 }
 
 pub fn parse_args() -> Options {
+    // Convert command line args into an Options struct
+
+    // Init default options
     let mut options = Options {
         verbosity: 0,
         debug_tokens: false,
@@ -19,6 +23,7 @@ pub fn parse_args() -> Options {
         preserve_html_comments: false,
     };
 
+    // Set up argparser and use it
     {
         let mut parser = argparse::ArgumentParser::new();
         parser.refer(&mut options.verbosity).add_option(

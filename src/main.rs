@@ -12,6 +12,7 @@ mod tag_type;
 mod tokeniser;
 
 fn main() {
+    // Parse args and modify them as needed
     let args = cli::parse_args();
     let settings = compilation_settings_from_args(&args);
     let final_path = &std::env::current_dir()

@@ -21,13 +21,17 @@ pub enum CssToken {
 }
 
 pub fn tokenise_css(css: &str) -> Result<Vec<CssToken>, errs::CssSyntaxError> {
+    // Convert a css stream into a vec of tokens
+
     let mut tokens = vec![];
     let mut idx: usize = 0;
     while idx < css.len() {
+        // Read selectors until we get to the start of the properties
         let (selector_tokens, chars_read) = read_selectors(&css[idx..])?;
         idx += chars_read;
         tokens.extend(selector_tokens);
 
+        // Read properties until we get to the end of those
         let (property_tokens, chars_read) = read_all_css_properties(&css[idx..])?;
         idx += chars_read;
         tokens.extend(property_tokens);
@@ -74,6 +78,7 @@ fn read_all_css_properties(css: &str) -> Result<(Vec<CssToken>, usize), errs::Cs
     let mut result = vec![];
     let mut idx: usize = 0;
     while idx < css.len() {
+        // Skip whitespace so we can see if we're at block close
         idx += tokeniser_utils::read_whitespace(&css[idx..]).len();
         if tokeniser_utils::get_char_unwrap(css, idx) == '}' {
             result.push(CssToken::BlockEnd);
@@ -81,6 +86,7 @@ fn read_all_css_properties(css: &str) -> Result<(Vec<CssToken>, usize), errs::Cs
             break;
         }
 
+        // If we're not then read a property.
         let (new_tokens, chars_read) = read_css_property(&css[idx..])?;
         idx += chars_read;
         result.extend(new_tokens);
@@ -92,6 +98,7 @@ fn read_css_property(css: &str) -> Result<(Vec<CssToken>, usize), errs::CssSynta
     let mut chars_read: usize = 0;
     let mut result = vec![];
 
+    // Read up until the colon separating name from value
     let (property_name, found_colon) = tokeniser_utils::read_until_char(css, ':');
     if !found_colon {
         Err(errs::CssSyntaxError::UnexpectedEndOfFile)?
@@ -100,6 +107,7 @@ fn read_css_property(css: &str) -> Result<(Vec<CssToken>, usize), errs::CssSynta
     result.push(CssToken::PropertyName(property_name.trim().to_string()));
     result.push(CssToken::Colon);
 
+    // Read up until the semicolon at end of line
     let (property_value, found_semicolon) =
         tokeniser_utils::read_until_char(&css[chars_read..], ';');
     if !found_semicolon {

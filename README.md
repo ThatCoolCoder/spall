@@ -161,3 +161,10 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
     - The other one is a `WASM flamegraph tracing renderer` written in Odin, which is of more concern because it's related to the web.
     - Potentially the name Spalljs/Spall.js is sufficiently unique.
     - At the end of the day I'm not building this for the purpose of being used so it doesn't matter than much
+- Probably need to clean build dir before compilation
+    - Static dir already is cleaned
+- Test what happens if there is a circular dependency between runtime files.
+    - See if we need to do something to warn about that
+    - Not huge priority because it will always happen on the dev's machine, it's not dependent on client project (therefore should be easily spotted in testing)
+- Refactor `.spall` tokeniser to use some of the tokenisation util functions that I added for the CSS tokeniser
+- Add more tests, especially to tokenisers

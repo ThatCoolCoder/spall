@@ -1,4 +1,4 @@
-// use std::rc::Rc;
+// Big file to convert list of tokens into AST-like thing. Includes custom tree implementation because ones on crates.io were lacking.
 
 use crate::errs;
 use crate::tag_attribute::TagAttribute;

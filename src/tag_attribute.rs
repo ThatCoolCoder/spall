@@ -1,5 +1,6 @@
 use std::fmt;
 
+// Attribute (like style) that goes on a HTML tag
 #[derive(Clone)]
 pub struct TagAttribute {
     pub name: String,
