@@ -90,7 +90,10 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
 #### Public changes
 
 - Auto-render after callbacks
-- Distinguish between `!` callbacks and `!` parameters. 
+- Distinguish between `!` callbacks and `!` parameters.
+    - Do it by determining if it is an event?
+        - Would work but would also be annoying if you want to bind an event to a lambda variable? 
+            - People can work around that by making a function to do that so I think it's not a problem.
 - Maybe a namespace/build/import system for `common/` files?
     - Perhaps this should be left until we get a proper bundler
 - Some sort of system for passing what Blazor calls render fragments - allows templating of tables and stuff
