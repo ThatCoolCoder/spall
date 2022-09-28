@@ -108,6 +108,8 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
         - Still provide ways of adding a) custom last part of url; and b) custom entire url.
 - Data binding/two-way parameters
 - Scoped CSS
+    - Put scoped css files in the same directories as markup files
+        - Would be a great excuse to get a better method of finding the files to compile, and decentralizing from .spall files.
     - Improve tokeniser
         - Make it not remove comments
         - Make it more resilient to odd styling and also have more descriptive errors
@@ -117,9 +119,10 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
         - Depending on the preprocessor this would actually make it a whole lot easier to do it as they support nested rules so all we'd need to do is put a big rule over the top instead of tokenising.
         - But this would also require people to install more dependencies, which is annoying for them.
     - Make it write to a `css/` subdirectory of the build dir.
-    - When we add subdirectories 
-    - Switch to using element id instead of element name
-        - Requires compiling the CSS after so that
+    - When we add subdirectories, make sure to make scope names include subdirectories
+    - Alternately switch to using element id instead of element name
+        - Requires compiling the CSS after so that element id is known
+            - Except actually not 
         - Will allow us to give errors like complaining that a scoped css file doesn't have a matching element
             - This would require making `FileCompilationError` work for multiple types of files more easily.
     - Make changes to runtime so that the css will be applied
@@ -127,7 +130,7 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
 - Make project-template-creater (similar to `dotnet new`)
 - Make custom dev server with file watching (similar to `dotnet watch run`)
 - Add resilience for when JS lines don't end in a semicolon (they are broken by minifier)
-- Prioritise direct route matches compared to parameter matches. Eg we can have a page `/users/me/` and a page `/users/{userId}` and if both match the first one is picked.
+- Prioritise direct route matches compared to parameter matches. Eg we can have a page `/users/me/` and a page `/users/{userId}/` and if both match the first one is picked.
     - Can create a system of specificity that also works for wildcards.
     - Perhaps should treat wildcards and parameters in the same way
 - Add support for types in route parameters - currently it's all strings and you'll have to convert them yourself
@@ -136,6 +139,7 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
     - Should they be included in the final markup? Let's add a compilation option for that, by default it will be no.
 - Give a warning when multiple pages have the same route.
     - Add this and some other summary information to the page-compilation result struct.
+        - Would possibly require improvement of route parsing and comparison in compiler, as currently all it does is convert straight to JS.
 
 #### Internal changes
 
