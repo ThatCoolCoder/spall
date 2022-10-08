@@ -24,7 +24,9 @@ The `styles/` dir of a projects holds scoped CSS for elements. Code in `styles/B
 
 When an app is built, files are created in the `build/` directory, which can then be used in a regular server like Apache.
 
-The `runtime/` dir of the repo contains the stuff that runs in the browser. It contains multiple files which are bundled into the Rust executable and built using a custom import system. See inside one of the files to see how to import other files. `build.rs` makes the project rebuild if these are changed.
+The `spallcomp/runtime/` dir of the repo contains the stuff that runs in the browser. It contains multiple files which are bundled into the Rust executable and built using a custom import system. See inside one of the files to see how to import other files. `build.rs` makes the project rebuild if these are changed.
+
+The project for the compiler is located in `spallcomp/` and preparations are underway to create a project for a server. Currently the projects are separate binaries, in future I am to convert them into libraries and create a single binary with several subcommands (although this would require an argument parser supporting subcommands);
 
 #### .spall markup format
 
