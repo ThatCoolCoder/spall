@@ -1,9 +1,9 @@
 mod cli;
+mod common;
 mod compilation_settings;
 mod element_compiler;
 mod errs;
 mod logging;
-mod misc;
 mod parser;
 mod project_compiler;
 mod scoped_css;

@@ -4,8 +4,8 @@
 // Current limitations:
 // - Does not read comments
 
+use crate::common::tokeniser_utils;
 use crate::errs;
-use crate::misc::tokeniser_utils;
 
 #[derive(Debug)]
 pub enum CssToken {

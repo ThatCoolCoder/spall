@@ -9,7 +9,7 @@ use std::fmt;
 
 use derive_more::Display;
 
-use crate::misc::tokeniser_utils;
+use crate::common::tokeniser_utils;
 use crate::tag_attribute::TagAttribute;
 use crate::tag_type::TagType;
 
