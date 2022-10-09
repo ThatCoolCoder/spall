@@ -146,6 +146,7 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
 #### Internal changes
 
 - Update hyper to only use required features.
+- spallserve: use cache
 - Rewrite tokeniser to make tokens smaller. For example one token would be a single `<` instead of a whole tag. This makes it way easier to add consistent special chars.
     - Add an intermediate step to form individual tokens into stuff like tags.
         - I think that's called lexing
