@@ -23,6 +23,10 @@ class SpallRouter {
         this.defaultTitle = title;
     }
 
+    autoDetectRoute() {
+        this.crntRoute = window.location.pathname;
+    }
+
     // Navigate to a route 
     navigateTo(route) {
         this.crntRoute = route;
@@ -31,7 +35,6 @@ class SpallRouter {
         this.spallApp.renderer.renderPage();
     }
 
-    // Whether
     stringMatchesRoute(stringRouteSections, routeSections) {
         if (stringRouteSections.length != routeSections.length) return false;
 
@@ -45,7 +48,6 @@ class SpallRouter {
         return true;
     }
 
-    //
     stringRoutesMatch(route1, route2) {
         var route1Sections = this.parseStringRoute(route1);
         var route2Sections = this.parseStringRoute(route2);

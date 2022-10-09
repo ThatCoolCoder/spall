@@ -46,6 +46,7 @@ class SpallApp {
 
     run() {
         this.running = true;
+        this.router.autoDetectRoute();
         this.renderer.renderPage();
     }
 }

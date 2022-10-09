@@ -26,7 +26,8 @@ When an app is built, files are created in the `build/` directory, which can the
 
 The `spallcomp/runtime/` dir of the repo contains the stuff that runs in the browser. It contains multiple files which are bundled into the Rust executable and built using a custom import system. See inside one of the files to see how to import other files. `build.rs` makes the project rebuild if these are changed.
 
-The project for the compiler is located in `spallcomp/` and preparations are underway to create a project for a server. Currently the projects are separate binaries, in future I am to convert them into libraries and create a single binary with several subcommands (although this would require an argument parser supporting subcommands);
+The project for the compiler is located in `spallcomp/` and the project for the server of build apps is `spallserve` Currently the projects are separate binaries, in future I am to convert them into libraries and create a single binary with several subcommands (although this would require an argument parser supporting subcommands).
+
 
 #### .spall markup format
 
@@ -128,9 +129,8 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
         - Will allow us to give errors like complaining that a scoped css file doesn't have a matching element
             - This would require making `FileCompilationError` work for multiple types of files more easily.
     - Make changes to runtime so that the css will be applied
-- Make requests to non-index directories still lead to the SPA (is this possible without writing a custom server?)
 - Make project-template-creater (similar to `dotnet new`)
-- Make custom dev server with file watching (similar to `dotnet watch run`)
+- Make a file watcher that runs spallcomp and spallserve 
 - Add resilience for when JS lines don't end in a semicolon (they are broken by minifier)
 - Prioritise direct route matches compared to parameter matches. Eg we can have a page `/users/me/` and a page `/users/{userId}/` and if both match the first one is picked.
     - Can create a system of specificity that also works for wildcards.
@@ -147,6 +147,7 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
 
 - Update hyper to only use required features.
 - spallserve: use cache
+- spallserve: favicon causes internal server error
 - Rewrite tokeniser to make tokens smaller. For example one token would be a single `<` instead of a whole tag. This makes it way easier to add consistent special chars.
     - Add an intermediate step to form individual tokens into stuff like tags.
         - I think that's called lexing
