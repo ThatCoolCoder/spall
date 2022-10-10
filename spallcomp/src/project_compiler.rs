@@ -44,7 +44,7 @@ impl ProjectPaths {
     }
 }
 
-const FRAMEWORK_RUNTIME_FILES: Dir = include_dir!("runtime");
+const FRAMEWORK_RUNTIME_FILES: Dir = include_dir!("spallcomp/runtime");
 
 pub fn compile_project(
     project_dir: &Path,

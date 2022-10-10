@@ -11,9 +11,9 @@ mod tag_attribute;
 mod tag_type;
 mod tokeniser;
 
-fn main() {
+pub fn compile_project(raw_args: &Vec<String>) {
     // Parse args and modify them as needed
-    let args = cli::parse_args();
+    let args = cli::parse_args(raw_args);
     let settings = compilation_settings_from_args(&args);
     let final_path = &std::env::current_dir()
         .unwrap()
@@ -24,6 +24,7 @@ fn main() {
     let result = project_compiler::compile_project(final_path, settings);
     if let Err(e) = result {
         handle_compilation_error(e);
+        std::process::exit(1);
     } else {
         println!("Done!");
     }

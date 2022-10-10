@@ -26,7 +26,7 @@ When an app is built, files are created in the `build/` directory, which can the
 
 The `spallcomp/runtime/` dir of the repo contains the stuff that runs in the browser. It contains multiple files which are bundled into the Rust executable and built using a custom import system. See inside one of the files to see how to import other files. `build.rs` makes the project rebuild if these are changed.
 
-The project for the compiler is located in `spallcomp/` and the project for the server of build apps is `spallserve` Currently the projects are separate binaries, in future I am to convert them into libraries and create a single binary with several subcommands (although this would require an argument parser supporting subcommands).
+Spall is structured as a single executable with multiple subcommands such as `build, serve, run`. In terms of code, this means a single binary project and a local library (like `spallcomp`) corresponding to every major subcommand.
 
 
 #### .spall markup format
@@ -38,7 +38,7 @@ It's pretty similar to HTML and uses the same element names. It aims to be as si
 To interpolate/template values just do it like Javascript template literals: `<p>The value is ${Math.random()}</p>`. Interopolated values are evaluated in the context of one of the element's functions.
 
 You can do conditionals and loops like this:
-```
+```html
 ~if (Math.random() > 0.5) {~
     <p>It's a big number</p>
 ~} else {~
@@ -82,7 +82,7 @@ Specify route parameters using regular JS templating syntax. For example if you 
 
 Wildcards can be used in page routes. Eg `<pageroute>animals/*</pageroute>` will be found if you navigate to both `animals/dogs` and `animals/cats`. It has the same lack of matching rules as a route parameter except that the value is not stored.
 
-You can create multiple routes leading to the same page by simply specifying multiple `<pageroute>` tags.
+You can create multiple routes leading to the same page by simply adding multiple `<pageroute>` tags.
 
 Bad things may happen if you have multiple pages with the same route, so don't do that.
 
@@ -130,7 +130,9 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
             - This would require making `FileCompilationError` work for multiple types of files more easily.
     - Make changes to runtime so that the css will be applied
 - Make project-template-creater (similar to `dotnet new`)
-- Make a file watcher that runs spallcomp and spallserve 
+- Make a file watcher that runs spallrun
+- Perhaps switch away from command line flags to a config file with sections for each subcommand
+    - Would make it easier to make more complex subcommands such as `watch`.
 - Add resilience for when JS lines don't end in a semicolon (they are broken by minifier)
 - Prioritise direct route matches compared to parameter matches. Eg we can have a page `/users/me/` and a page `/users/{userId}/` and if both match the first one is picked.
     - Can create a system of specificity that also works for wildcards.

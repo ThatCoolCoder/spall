@@ -28,11 +28,18 @@ async fn serve_route(
     let path = Path::new(req.uri().path());
     let requested_item = determine_requested_item(&path);
 
-    let response = match requested_item {
+    let mut response = match requested_item {
         RequestedItem::SPA => serve_spa(&*app_root),
         RequestedItem::StaticFile(file_path) => serve_static_file(file_path, &*app_root),
         RequestedItem::Invalid => serve_invalid_request(),
     };
+    // Advertising
+    let headers = response.headers_mut();
+    headers.append(
+        "Server",
+        hyper::header::HeaderValue::from_str("SpallServe (powered by hyper)").unwrap(),
+    );
+
     Ok(response)
 }
 
@@ -128,8 +135,7 @@ pub async fn serve(options: ServerOptions) {
     }
     .canonicalize()
     .unwrap();
-    println!("Serving app from {}", app_root_path.to_string_lossy());
-    let app_root = Arc::new(app_root_path);
+    let app_root = Arc::new(app_root_path.clone());
 
     let make_svc = make_service_fn(move |_| {
         let app_root = app_root.clone();
@@ -143,9 +149,19 @@ pub async fn serve(options: ServerOptions) {
         }
     });
 
-    let server = Server::bind(&addr)
-        .serve(make_svc)
-        .with_graceful_shutdown(shutdown_signal());
+    let server = match Server::try_bind(&addr) {
+        Ok(v) => v.serve(make_svc).with_graceful_shutdown(shutdown_signal()),
+        Err(e) => {
+            println!("Failed to set up server: {e}. Make sure you have the required permissions to use this port");
+            return;
+        }
+    };
+
+    println!(
+        "Serving app from {} on port {}",
+        app_root_path.to_string_lossy(),
+        options.port
+    );
 
     if let Err(e) = server.await {
         eprintln!("server error: {}", e);

@@ -11,7 +11,7 @@ pub struct Options {
     pub preserve_html_comments: bool,
 }
 
-pub fn parse_args() -> Options {
+pub fn parse_args(args: &Vec<String>) -> Options {
     // Convert command line args into an Options struct
 
     // Init default options
@@ -41,8 +41,8 @@ pub fn parse_args() -> Options {
             argparse::StoreTrue,
             "Whether to disable minifying of the final bundle for debugging purposes",
         );
-        parser.refer(&mut options.project_path).add_option(
-            &["-p", "--project"],
+        parser.refer(&mut options.project_path).add_argument(
+            "project",
             argparse::Store,
             "Path to project to compile",
         );
@@ -53,7 +53,12 @@ pub fn parse_args() -> Options {
                 argparse::StoreTrue,
                 "Preserve HTML comments in final markup",
             );
-        parser.parse_args_or_exit();
+        let result = parser.parse(args.clone(), &mut std::io::stdout(), &mut std::io::stderr());
+        if let Err(err_code) = result {
+            println!("");
+            std::process::exit(err_code);
+            // parser.print_usage("spallcomp", &mut std::io::stdout());
+        }
     }
     options
 }

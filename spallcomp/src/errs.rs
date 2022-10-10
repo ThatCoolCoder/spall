@@ -34,9 +34,9 @@ impl fmt::Display for ProjectCompilationError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             ProjectCompilationError::NoElementsDirectory => {
-                write!(f, "Could not find elements/ directory")
+                write!(f, "Could not find elements/ directory, are you sure there is a spall project located here?")
             }
-            ProjectCompilationError::NoMetaDirectory => write!(f, "Could not find meta/ directory"),
+            ProjectCompilationError::NoMetaDirectory => write!(f, "Could not find meta/ directory, are you sure there is a spall project located here?"),
             ProjectCompilationError::NoRootElement => {
                 write!(f, "No root element (elements/Root.spall) defined.")
             }
