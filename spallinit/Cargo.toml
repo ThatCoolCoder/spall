@@ -1,13 +1,9 @@
 [package]
-name = "spall"
+name = "spallinit"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-spallcomp = { path = "spallcomp" }
-spallinit = { path = "spallinit" }
-spallserve = { path = "spallserve" }
-
-argparse = "0.2.2"
+include_dir = { version = "0.7.2", features = ["glob"] }

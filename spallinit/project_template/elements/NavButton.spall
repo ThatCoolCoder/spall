@@ -1,0 +1,22 @@
+~if (this.selected) {
+    <a class="nav-button nav-button-selected">${this.title}</a>
+~}
+~ else {
+    <a class="nav-button" !onclick="this.visitLink()">${this.title}</a>
+~}
+
+<script>
+    onInitialized() {
+        this.route = 'unrouted';
+        this.routeMatchTemplate = '';
+        this.title = 'Untitled';
+    }
+
+    get selected() {
+        return this.spallApp.router.stringRoutesMatch(window.location.pathname, this.routeMatchTemplate || this.route)
+    }
+
+    visitLink() {
+        this.spallApp.router.navigateTo(this.route);
+    }
+</script>

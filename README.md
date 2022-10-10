@@ -130,6 +130,7 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
             - This would require making `FileCompilationError` work for multiple types of files more easily.
     - Make changes to runtime so that the css will be applied
 - Make project-template-creater (similar to `dotnet new`)
+- spallinit: add option for path to directory
 - Make a file watcher that runs spallrun
 - Perhaps switch away from command line flags to a config file with sections for each subcommand
     - Would make it easier to make more complex subcommands such as `watch`.

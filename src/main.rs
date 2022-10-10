@@ -10,6 +10,7 @@ enum Command {
     build,
     serve,
     run,
+    init,
 }
 
 impl FromStr for Command {
@@ -19,6 +20,7 @@ impl FromStr for Command {
             "build" => Ok(Command::build),
             "serve" => Ok(Command::serve),
             "run" => Ok(Command::run),
+            "init" => Ok(Command::init),
             _ => Err(()),
         };
     }
@@ -46,5 +48,6 @@ fn main() {
         Command::build => spallcomp::compile_project(&args),
         Command::serve => spallserve::serve_project(&args),
         Command::run => spallrun::run_project(&args),
+        Command::init => spallinit::initialize_project(),
     }
 }
