@@ -145,6 +145,7 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
 - Give a warning when multiple pages have the same route.
     - Add this and some other summary information to the page-compilation result struct.
         - Would possibly require improvement of route parsing and comparison in compiler, as currently all it does is convert straight to JS.
+- Spallcomp: css parser crashes on empty rule
 
 #### Internal changes
 

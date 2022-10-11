@@ -13,7 +13,7 @@
     }
 
     get selected() {
-        return this.spallApp.router.stringRoutesMatch(window.location.pathname, this.routeMatchTemplate || this.route)
+        return this.spallApp.router.stringRoutesMatch(window.location.pathname, this.routeMatchTemplate || this.route);
     }
 
     visitLink() {

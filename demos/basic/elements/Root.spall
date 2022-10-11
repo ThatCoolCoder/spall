@@ -4,7 +4,7 @@
         <NavButton title="Home" route="" />
         <NavButton title="Counter World" route="counterworld" />
         <NavButton title="Weather" route="weather" />
-        <NavButton title="Route Parameters" route="rparam/Munich/products/all/" routeMatchTemplate="rparam/*/products/*" />
+        <NavButton title="Route Parameters" route="rparam/Munich/products/all/" routeMatchTemplate="/rparam/*/products/*" />
     </div>
 </div>
 

@@ -29,8 +29,9 @@ class SpallRouter {
 
     // Navigate to a route 
     navigateTo(route) {
+        if (route[0] != '/') route = '/' + route;
         this.crntRoute = route;
-        history.pushState("", "", `/${this.crntRoute}`);
+        history.pushState("", "", this.crntRoute);
         if (this.spallApp == null) SpallUtils.fatalError("SpallRouter.attachApp() has not been called");
         this.spallApp.renderer.renderPage();
     }

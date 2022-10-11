@@ -16,7 +16,7 @@ pub async fn serve_project_async(raw_args: &Vec<String>) {
 
 fn parse_args(raw_args: &Vec<String>) -> server_options::ServerOptions {
     let mut options = server_options::ServerOptions {
-        app_root: "".to_string(),
+        app_root: "build/".to_string(),
         port: 8000,
     };
     // Set up argparser and use it
