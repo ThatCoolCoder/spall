@@ -128,7 +128,6 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
             - Except actually not 
         - Will allow us to give errors like complaining that a scoped css file doesn't have a matching element
             - This would require making `FileCompilationError` work for multiple types of files more easily.
-    - Make changes to runtime so that the css will be applied
 - Make project-template-creater (similar to `dotnet new`)
 - spallinit: add option for path to directory
 - Make a file watcher that runs spallrun
@@ -146,6 +145,8 @@ You can specify the title of a page within a `<title>` tag. Regular `${}` templa
     - Add this and some other summary information to the page-compilation result struct.
         - Would possibly require improvement of route parsing and comparison in compiler, as currently all it does is convert straight to JS.
 - Spallcomp: css parser crashes on empty rule
+- Spallcomp: allow having element and page with the same name
+    - Is this desirable though?
 
 #### Internal changes
 

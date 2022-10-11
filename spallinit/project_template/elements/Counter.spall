@@ -1,0 +1,17 @@
+<p><button !onclick="this.updateCount()">Click me!</button> Clicked ${this.count} times</p>
+
+<script>
+    onInitialized() {
+        this.count = 0;
+    }
+
+    updateCount() {
+        this.count ++;
+
+        this.needsRender();
+
+        if (this.count >= 10) {
+            alert("Stop clicking please");
+        }
+    }
+</script>

@@ -1,0 +1,14 @@
+<pageroute>/counter/</pageroute>
+
+<h2>Counter</h2>
+
+<Counter />
+
+~ for (var i = 0; i < 300; i ++) {
+    <br />
+~ }
+
+<p>Thanks for scrolling down this far! Here are some more counters as a reward:</p>
+~ for (var i = 0; i < 5; i ++) {
+    <Counter />
+~ }

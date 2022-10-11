@@ -13,3 +13,7 @@ html, body {
     margin: 0px;
     background-color: #ddd;
 }
+
+.main {
+    padding: 10px;
+}

@@ -2,5 +2,9 @@
 <div class="navbar">
     <h1>My Spall App</h1>
     <NavButton route="/" title="Home"></NavButton>
-    <NavButton route="/dice" title="Dice Game"></NavButton>
+    <NavButton route="/counter" title="Counter"></NavButton>
+</div>
+
+<div class="main">
+    <RoutedApp></RoutedApp>
 </div>
