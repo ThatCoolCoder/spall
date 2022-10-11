@@ -1,5 +1,6 @@
-<h1>My awesome spall app</h1>
 
-<div>
+<div class="navbar">
+    <h1>My Spall App</h1>
     <NavButton route="/" title="Home"></NavButton>
+    <NavButton route="/dice" title="Dice Game"></NavButton>
 </div>

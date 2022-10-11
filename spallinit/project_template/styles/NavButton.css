@@ -1,20 +1,21 @@
 .nav-button {
     padding: 4px 2px;
+    margin-left: 10px;
+    border: 1px solid #333;
 }
 
 .nav-button, .nav-button * {
     cursor: pointer;
     transition: 0.5s;
-    color: white;
     background-color: none;
     border-radius: 5px;
     text-decoration: none;
 }
 
 .nav-button:hover {
-    background-color: var(--theme-main-4);
+    background-color: #999;
 }
 
 .nav-button-selected {
-    background-color: var(--theme-main-3);
+    background-color: #bbb;
 }

@@ -1,14 +1,15 @@
-:root {
-    --theme-main-1: #213c5f;
-    --theme-main-2: #2f5588;
-    --theme-main-3: #3e70b1;
-    --theme-main-4: #4479be;
-    --theme-main: #4780ca;
-    --theme-main-6: #5684c0;
-    --theme-main-6: #7394be;
-    --theme-main-7: #849fc2;
-}
-
 * {
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+html, body {
+    margin: 0px;
+    padding: 0px;
+}
+
+.navbar {
+    display: block;
+    padding: 5px;
+    margin: 0px;
+    background-color: #ddd;
 }
