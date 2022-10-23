@@ -22,12 +22,20 @@ The `common/` dir of a project holds Javascript files that can be accessed from 
 
 The `styles/` dir of a projects holds scoped CSS for elements. Code in `styles/Button.css` will only apply to markup in `elements/Button.spall` or `pages/Button.Spall`.
 
-When an app is built, files are created in the `build/` directory, which can then be used in a regular server like Apache.
+When an app is built, files are created in the `build/` directory, which can then be used served by `spallserve` (see section on the spall executable).
 
 The `spallcomp/runtime/` dir of the repo contains the stuff that runs in the browser. It contains multiple files which are bundled into the Rust executable and built using a custom import system. See inside one of the files to see how to import other files. `build.rs` makes the project rebuild if these are changed.
 
-Spall is structured as a single executable with multiple subcommands such as `build, serve, run`. In terms of code, this means a single binary project and a local library (like `spallcomp`) corresponding to every major subcommand.
+#### Spall executable
 
+Spall is structured as a single executable with multiple subcommands. In terms of code, this means a single binary project and a local library (like `spallcomp`) corresponding to every major subcommand. List of subcommands:
+
+- `build` - compile a spall project
+- `serve` - serve that compiled project
+- `run` - easier way to build then serve a project (intended for development)
+- `init` - Work in progress to initialize a template project in a given directory.
+
+For more information on subcommands run `spall --help` and `spall [SUBCOMMAND] --help`.
 
 #### .spall markup format
 
