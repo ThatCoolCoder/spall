@@ -33,7 +33,7 @@ Spall is structured as a single executable with multiple subcommands. In terms o
 - `build` - compile a spall project
 - `serve` - serve that compiled project
 - `run` - easier way to build then serve a project (intended for development)
-- `init` - Work in progress to initialize a template project in a given directory.
+- `init` - Work in progress, initializes a template project in a given directory.
 
 For more information on subcommands run `spall --help` and `spall [SUBCOMMAND] --help`.
 
