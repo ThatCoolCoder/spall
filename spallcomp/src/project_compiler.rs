@@ -8,7 +8,7 @@ use itertools::Itertools;
 use minifier;
 
 use crate::compilation_settings::*;
-use crate::element_compiler;
+use crate::spall_markup::{self, element_compiler};
 use crate::errs;
 use crate::logging;
 use crate::scoped_css;
@@ -85,13 +85,13 @@ pub fn compile_project(
     let mut compiled_files = compile_elements(
         &project_paths.elements_dir,
         &compilation_settings,
-        element_compiler::ElementType::Basic,
+        spall_markup::ElementType::Basic,
         &mut last_element_id,
     )?;
     compiled_files.extend(compile_elements(
         &project_paths.pages_dir,
         &compilation_settings,
-        element_compiler::ElementType::Page,
+        spall_markup::ElementType::Page,
         &mut last_element_id,
     )?);
 
@@ -276,7 +276,7 @@ fn write_framework_runtime(project_paths: &ProjectPaths, framework_runtime: &str
 fn compile_elements(
     element_directory: &Path,
     compilation_settings: &CompilationSettings,
-    element_types: element_compiler::ElementType,
+    element_types: spall_markup::ElementType,
     last_element_id: &mut i32,
 ) -> Result<Vec<element_compiler::CompiledElement>, errs::CompilationError> {
     // Compile all the elements in the folder as element_types elements.

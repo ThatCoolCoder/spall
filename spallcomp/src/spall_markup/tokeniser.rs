@@ -10,8 +10,8 @@ use std::fmt;
 use derive_more::Display;
 
 use crate::common::tokeniser_utils;
-use crate::tag_attribute::TagAttribute;
-use crate::tag_type::TagType;
+use super::tag_attribute::TagAttribute;
+use super::tag_type::TagType;
 
 // Root token class
 pub enum Token {

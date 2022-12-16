@@ -1,9 +1,9 @@
 // Big file to convert list of tokens into AST-like thing. Includes custom tree implementation because ones on crates.io were lacking.
 
 use crate::errs;
-use crate::tag_attribute::TagAttribute;
-use crate::tag_type::TagType;
-use crate::tokeniser;
+use super::tag_attribute::TagAttribute;
+use super::tag_type::TagType;
+use super::tokeniser;
 
 // Spans are not used to contain the inner text of these tags
 static SPANLESS_INNER_TEXTS: [&'static str; 3] = ["script", "title", "pageroute"];

@@ -1,15 +1,11 @@
 mod cli;
 mod common;
 mod compilation_settings;
-mod element_compiler;
 mod errs;
 mod logging;
-mod parser;
 mod project_compiler;
 mod scoped_css;
-mod tag_attribute;
-mod tag_type;
-mod tokeniser;
+mod spall_markup;
 
 pub fn compile_project(raw_args: &Vec<String>) {
     // Parse args and modify them as needed
