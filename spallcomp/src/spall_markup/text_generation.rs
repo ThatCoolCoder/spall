@@ -12,11 +12,14 @@ pub fn compile_tree(compilation_settings: &CompilationSettings, metadata: &Eleme
     tree: &parser::Tree) -> Result<String, errs::FileCompilationError> {
     logging::log_per_step("Actually compiling", compilation_settings.log_level);
 
+    // main fn of mod - convert tree to compiled javascript text
+
     let chunks = tree_analysis::create_compile_chunks(tree);
     let class_body = find_class_body(&tree).unwrap_or("".to_string());
     let compiled_render_func = compile_chunks(&chunks);
 
     let extra_methods = compile_extra_methods(&metadata.element_type, &tree);
+    // Create main body
     let mut result = format!(
         r#"
         class {compiled_element_name} extends {element_base_class} {{
@@ -62,6 +65,8 @@ pub fn compile_tree(compilation_settings: &CompilationSettings, metadata: &Eleme
 
 
 fn compile_chunks(chunks: &Vec<CompileChunk>) -> String {
+    // Actually compile the compilation chunks
+
     // The var name is made special because we don't want someone to call their variable "renderables" then break everything.
     let mut result = "var __spallRenderables = [];\n".to_string();
 
@@ -83,10 +88,14 @@ fn compile_chunks(chunks: &Vec<CompileChunk>) -> String {
 
 
 fn simplify_renderables(renderables: &Vec<Renderable>) -> Vec<Renderable> {
+    // Perform some simplifications on the renderables. Very basic now, but could be expanded to optimise the code
+    
     join_successive_markup_renderables(renderables)
 }
 
 fn join_successive_markup_renderables(renderables: &Vec<Renderable>) -> Vec<Renderable> {
+    // Join consecutive markup renderables together, EG going from ['<p>', '</p>'] to ['<p></p>']
+
     let mut new_renderables = vec![];
     let mut crnt_markup_string = "".to_string();
     for renderable in renderables {
@@ -122,6 +131,8 @@ fn join_successive_markup_renderables(renderables: &Vec<Renderable>) -> Vec<Rend
 
 
 fn compile_renderables(renderables: &Vec<Renderable>) -> String {
+    // Convert a set of renderables (EG from a compile chunk) to a string
+
     let mut stringified_renderables = vec![];
     for renderable in renderables {
         let string_val = match renderable {
@@ -153,7 +164,7 @@ fn compile_renderables(renderables: &Vec<Renderable>) -> String {
     stringified_renderables.join(", ")
 }
 
-// PAGE STUFF, WILL GET RID OF
+// PAGE STUFF, SHOULD GET RID OF
 
 fn compile_all_page_routes(raw_page_routes: &Vec<String>, element_name: &str) -> String {
     raw_page_routes
@@ -212,6 +223,8 @@ fn compile_extra_methods(element_type: &ElementType, tree: &parser::Tree) -> std
 }
 
 fn find_class_body(tree: &parser::Tree) -> Option<String> {
+    // Find the <script> tag that contains the user-defined body of the element class
+
     let mut result = None;
     tree.depth_first_map(&mut |node, _is_entering| {
         if let parser::NodeData::Markup(inner_data) = &node.data {

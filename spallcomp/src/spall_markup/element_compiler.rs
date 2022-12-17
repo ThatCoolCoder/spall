@@ -39,15 +39,6 @@ pub fn compile_element_file(
     )
 }
 
-// How the general flow of compilation works:
-// First, we do a bit of set up like figuring out the element name and checking it.
-// Then we tokenise the element and then we turn the element into a node tree.
-// We try to extract the class body (main script) from the element.
-// We turn the tree into a group of compile chunks, which are either javascript or renderables.
-// We simplify the chunks since otherwise it's stupidly inneficient.
-// We then compile the chunks into a single string of javascript - javascript chunks are pasted directly in,
-// while renderable chunks are converted into javascript code to generate renderables in the runtime.
-
 pub fn compile_element(
     file_content: &str,
     element_name: &str,
@@ -55,6 +46,8 @@ pub fn compile_element(
     element_type: ElementType,
     element_id: i32,
 ) -> Result<CompiledElement, errs::FileCompilationError> {
+
+    // Housekeeping stuff
     logging::log_brief(
         format!("Compiling element {}", element_name).as_str(),
         compilation_settings.log_level,
@@ -62,6 +55,7 @@ pub fn compile_element(
 
     let metadata = determine_element_metadata(element_name, element_type)?;
 
+    // Analysis part of the process
     logging::log_per_step("Tokenising", compilation_settings.log_level);
     let tokens = tokeniser::read_element(file_content);
     if compilation_settings.debug_tokens {
@@ -73,6 +67,7 @@ pub fn compile_element(
     let tree = parser::parse_element(&tokens)
         .or_else(|e| Err(errs::FileCompilationError::MarkupSyntaxError(e)))?;
 
+    // Compilation part of the process
     let compiled_element_text = text_generation::compile_tree(compilation_settings, &metadata, &tree)?;
 
     Ok(CompiledElement {
@@ -83,6 +78,8 @@ pub fn compile_element(
 }
 
 fn check_token_syntax(tokens: &Vec<tokeniser::Token>) -> Result<(), errs::MarkupSyntaxError> {
+    // Perform some basic checks on token syntax. (should probably expand later)
+
     for token in tokens {
         if let tokeniser::Token::Tag(tag) = token {
             if tag.tag_type == TagType::End && tag.attributes.len() > 0 {
@@ -96,6 +93,8 @@ fn check_token_syntax(tokens: &Vec<tokeniser::Token>) -> Result<(), errs::Markup
 }
 
 fn debug_tokens(tokens: &Vec<tokeniser::Token>) {
+    // Print the tokens in a human readable format, for debugging.
+
     let data = tokens
         .iter()
         .map(|token| match token {

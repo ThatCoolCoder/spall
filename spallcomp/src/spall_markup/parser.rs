@@ -11,6 +11,8 @@ static SPANLESS_INNER_TEXTS: [&'static str; 3] = ["script", "title", "pageroute"
 pub type NodeIndex = usize;
 
 pub struct Node {
+    // Node of the syntax tree
+
     // The inner text of a node goes before its children when it is rendered.
     // If you want to intersperse text and children then you can just use spans as children to hold the text.
     pub data: NodeData,
@@ -19,11 +21,12 @@ pub struct Node {
 }
 
 pub enum NodeData {
+    // Payload of a node
+
     Markup(NodeMarkupData),
     InlineJavascript(NodeInlineJavascriptData),
 }
 
-// We can't pass specific enum variants around so just make structs that the enum wraps
 pub struct NodeMarkupData {
     pub tag_name: String,
     pub tag_attributes: Vec<TagAttribute>,
@@ -41,7 +44,10 @@ pub struct Tree {
 
 #[allow(dead_code)]
 impl Tree {
+    // Class representing syntax tree of the markup nodes
+
     pub fn new() -> Tree {
+        // Create
         let node = Node {
             data: NodeData::Markup(NodeMarkupData {
                 tag_name: "".to_string(),
@@ -59,6 +65,8 @@ impl Tree {
     }
 
     pub fn add_node(&mut self, parent: NodeIndex, mut node: Node) -> NodeIndex {
+        // Add a node to a given other node, returning the index of the node
+
         let index = self.nodes.len();
         let parent_node = &mut self.nodes[parent];
         parent_node.children.push(index);
@@ -105,12 +113,14 @@ impl Tree {
 }
 
 pub fn parse_element(tokens: &Vec<tokeniser::Token>) -> Result<Tree, errs::MarkupSyntaxError> {
-    // Arrange tokens in a hierarchy.
+    // Convert tokens into a syntax tree - main fn of mod
+
     // The root-most node is not a real node in the element, but is just there to hold all of the children
     let mut tree = Tree::new();
 
     let mut node_stack: Vec<NodeIndex> = vec![tree.root];
 
+    // Go through the tokens and delegate to functions for each of the possible tokens
     for token in tokens {
         match token {
             tokeniser::Token::Tag(inner_token) => {
@@ -227,14 +237,17 @@ fn read_content_token(
 ) -> Result<(), errs::MarkupSyntaxError> {
     // Transform a content token into a span node
 
-    let mut wrap_in_span = true;
     let parent_idx = *node_stack
-        .last()
-        .ok_or(errs::MarkupSyntaxError::OrphanedNode)?;
+    .last()
+    .ok_or(errs::MarkupSyntaxError::OrphanedNode)?;
     let parent = tree.get_node_mut(parent_idx);
+    
+    // Certain nodes should have their inner text injected directly into them instead of having a span inside - look out for those here
+    let mut wrap_in_span = true;
     if let NodeData::Markup(inner_data) = &parent.data {
         wrap_in_span = !SPANLESS_INNER_TEXTS.contains(&inner_data.tag_name.as_str())
     }
+
     if wrap_in_span {
         tree.add_node(
             parent_idx,

@@ -35,7 +35,18 @@ pub struct ElementParameter {
                       // although when they are put into the structure the ! is stripped
 }
 
+
+
+// A note on the structure of the output:
+// The output consists of compile chunks, which correspond to sections of the Javascript output.
+// Chunks can be interpolated javascript (which is pasted directly into the output), or lists of renderables
+// Renderables correspond to the javascript class of the same name - they are something that is handed off the framework from the compiled element, processed, then injected into the DOM.
+// A renderable instruct either to generate markup (raw HTML), or to instantiate a spall element
+// Note that part of generating markup renderables involves compiling the node into text - this isn't *really* considered text generation so it's in this module
+
 pub fn create_compile_chunks(tree: &parser::Tree) -> Vec<CompileChunk> {
+    // main fn of mod - convert node tree into list of chunks, ready for final compilation
+
     let chunks = compile_chunks_from_tree(&tree);
     concat_successive_compile_chunks(&chunks)
 }

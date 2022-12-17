@@ -43,6 +43,8 @@ fn element_name_valid(element_name: &str) -> bool {
 }
 
 fn find_element_base_class(element_type: &ElementType, element_name: &str) -> String {
+    // Find the JS class that the element should extend from
+
     if *element_type == ElementType::Basic {
         if element_name == ROOT_ELEMENT_NAME {
             "SpallRootElement".to_string()
