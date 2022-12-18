@@ -14,6 +14,8 @@ An app is made up of elements, which are stored in the `elements/` directory. Th
 
 The `pages/` dir of a project holds pages. Pages are just elements that correspond to a "route". Bad things will happen if a page and an element have the same name See the Routing section for more information.
 
+Together, the `elements/` and `pages/` directories are known as View directories - since they hold the views of the app, as opposed to services.
+
 The `meta/` dir of a project contains stuff that is not the app itself. `index.html` is the entry point into the app and is plain html. You should put stuff like linking to the renderer in there.
 
 The `static/` dir of a project holds static files that can be accessed in the built app from `static/`.

@@ -25,6 +25,7 @@ impl fmt::Display for CompilationError {
 #[derive(Debug)]
 pub enum ProjectCompilationError {
     NoElementsDirectory,
+    ErrorIndexingDirectory { directory: String, reason: String },
     NoMetaDirectory,
     NoRootElement,
     NoMetaIndex,
@@ -35,6 +36,9 @@ impl fmt::Display for ProjectCompilationError {
         match self {
             ProjectCompilationError::NoElementsDirectory => {
                 write!(f, "Could not find elements/ directory, are you sure there is a spall project located here?")
+            }
+            ProjectCompilationError::ErrorIndexingDirectory { directory, reason } => {
+                write!(f, "Error indexing {}: {}", directory, reason)
             }
             ProjectCompilationError::NoMetaDirectory => write!(f, "Could not find meta/ directory, are you sure there is a spall project located here?"),
             ProjectCompilationError::NoRootElement => {

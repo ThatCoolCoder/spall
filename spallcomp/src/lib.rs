@@ -4,7 +4,7 @@ mod compilation_settings;
 mod errs;
 mod logging;
 mod project_compiler;
-mod project_compiler_new;
+mod project_compiler_old;
 mod scoped_css;
 mod spall_markup;
 
