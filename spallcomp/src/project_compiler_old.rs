@@ -8,10 +8,10 @@ use itertools::Itertools;
 use minifier;
 
 use crate::compilation_settings::*;
-use crate::spall_markup::{self, element_compiler};
 use crate::errs;
 use crate::logging;
 use crate::scoped_css;
+use crate::spall_markup::{self, element_compiler};
 
 #[allow(dead_code)]
 struct ProjectPaths {

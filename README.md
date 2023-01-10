@@ -14,7 +14,7 @@ An app is made up of elements, which are stored in the `elements/` directory. Th
 
 The `pages/` dir of a project holds pages. Pages are just elements that correspond to a "route". Bad things will happen if a page and an element have the same name See the Routing section for more information.
 
-Together, the `elements/` and `pages/` directories are known as View directories - since they hold the views of the app, as opposed to services.
+Together, the `elements/` and `pages/` directories are known as view directories - since they hold the views of the app, as opposed to services.
 
 The `meta/` dir of a project contains stuff that is not the app itself. `index.html` is the entry point into the app and is plain html. You should put stuff like linking to the renderer in there.
 
@@ -45,7 +45,7 @@ This will change a lot in the future but this should be correct for some time:
 
 It's pretty similar to HTML and uses the same element names. It aims to be as similar to HTML/JS as possible, reusing familiar symbols/concepts.
 
-To interpolate/template values just do it like Javascript template literals: `<p>The value is ${Math.random()}</p>`. Interopolated values are evaluated in the context of one of the element's functions.
+To interpolate/template values just do it like Javascript template literals: `<p>The value is ${Math.random()}</p>`. Interopolated values are evaluated in the context of one of the element's methods.
 
 You can do conditionals and loops like this:
 ```html

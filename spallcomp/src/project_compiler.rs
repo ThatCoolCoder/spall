@@ -28,6 +28,7 @@ struct ProjectPaths {
     build_dir: PathBuf,
     build_static_dir: PathBuf,
     build_scripts_dir: PathBuf,
+    build_css_dir: PathBuf,
 }
 
 impl ProjectPaths {
@@ -42,7 +43,8 @@ impl ProjectPaths {
 
             build_dir: project_dir.join("build"),
             build_static_dir: project_dir.join("build/static"),
-            build_scripts_dir: project_dir.join("build/scripts"),
+            build_scripts_dir: project_dir.join("build/static/js"),
+            build_css_dir: project_dir.join("build/static/css"),
         }
     }
 }
@@ -63,15 +65,72 @@ pub fn compile_project(
 
     let index = indexing::index_project(&compilation_settings, &project_paths);
 
-    logging::log_brief("Executing modules:", compilation_settings.log_level);
-    logging::log_brief(
-        "Initializing build directory",
+    {
+        // Execute modules
+        logging::log_brief("Executing modules", compilation_settings.log_level);
+        setup_build_directory(&compilation_settings, &project_paths)?;
+    }
+
+    Ok(())
+}
+
+fn setup_build_directory(
+    compilation_settings: &CompilationSettings,
+    project_paths: &ProjectPaths,
+) -> Result<(), errs::CompilationError> {
+    // Perform miscellanious tasks required to set up the build directory
+
+    logging::log_brief("Setting up build directory", compilation_settings.log_level);
+
+    logging::log_per_step("Creating build directory", compilation_settings.log_level);
+    if !project_paths.build_dir.is_dir() {
+        fs::create_dir(&project_paths.build_dir).expect("Failed to create build directory");
+    }
+
+    logging::log_per_step(
+        "Creating build scripts directory",
         compilation_settings.log_level,
     );
-    logging::log_brief(
-        "Initializing build directory",
+    if !project_paths.build_scripts_dir.is_dir() {
+        fs::create_dir(&project_paths.build_scripts_dir)
+            .expect("Failed creating build scripts dir");
+    }
+
+    logging::log_per_step(
+        "Creating build css directory",
         compilation_settings.log_level,
     );
+    if !project_paths.build_css_dir.is_dir() {
+        fs::create_dir(&project_paths.build_css_dir).expect("Failed creating build css dir");
+    }
+
+    logging::log_per_step(
+        "Cleaning build static directory",
+        compilation_settings.log_level,
+    );
+    if project_paths.build_static_dir.exists() {
+        (if project_paths.build_static_dir.is_dir() {
+            fs::remove_dir_all(&project_paths.build_static_dir)
+        } else {
+            fs::remove_file(&project_paths.build_static_dir)
+        })
+        .expect("Failed to delete old static directory");
+    }
+
+    logging::log_per_step(
+        "Copying over static directory",
+        compilation_settings.log_level,
+    );
+    let mut options = fs_extra::dir::CopyOptions::new();
+    options.copy_inside = true;
+    fs_extra::dir::copy(
+        &project_paths.static_dir,
+        &project_paths.build_static_dir,
+        &options,
+    )
+    .expect("Failed copying static directory");
+
+    logging::log_per_step("Copying index file", compilation_settings.log_level);
 
     Ok(())
 }
@@ -81,7 +140,7 @@ mod indexing {
 
     // note: view directory = directory containing markup files + scoped css files (so pages/ and elements/)
 
-    pub type RecursiveDirectoryIndex = HashMap<PathLikeObject, String>;
+    pub type RecursiveDirectoryIndex = HashMap<SPath, String>;
 
     #[derive(Default)]
     pub struct ProjectIndex {
@@ -96,7 +155,20 @@ mod indexing {
         pub scoped_css_files: RecursiveDirectoryIndex,
     }
 
-    pub type PathLikeObject = Vec<String>;
+    // "spall path" - I don't know what to call it, it's just a thing representing a path within a namespace system
+    pub type SPath = Vec<String>;
+    // Macro for constructing a spall path in code.
+    macro_rules! spath {
+        ( $( $x:expr ),* ) => {
+            {
+                let mut temp = SPath::new();
+                $(
+                    temp.push($x.to_string());
+                )*
+                temp
+            }
+        };
+    }
 
     pub(super) fn index_project(
         compilation_settings: &CompilationSettings,
@@ -107,16 +179,20 @@ mod indexing {
         let mut project_index = ProjectIndex::default();
 
         logging::log_per_step("Indexing element directory", compilation_settings.log_level);
-        project_index.element_directory = index_view_directory(&project_paths.elements_dir)?;
+        project_index.element_directory =
+            index_view_directory(&project_paths.elements_dir, spath!("Elements"))?;
         logging::log_per_step("Indexing page directory", compilation_settings.log_level);
-        project_index.element_directory = index_view_directory(&project_paths.pages_dir)?;
+        project_index.element_directory =
+            index_view_directory(&project_paths.pages_dir, spath!("Pages"))?;
         logging::log_per_step("Indexing common directory", compilation_settings.log_level);
+        project_index.common_directory = index_common_directory(&project_paths.common_dir)?;
 
         Ok(project_index)
     }
 
     fn index_view_directory(
         view_directory_path: &Path,
+        base_spath: SPath,
     ) -> Result<ViewDirectoryIndex, errs::ProjectCompilationError> {
         // Index one of the view directories
 
@@ -133,30 +209,33 @@ mod indexing {
                 }
 
                 if let Some(insert_into) = insert_into {
-                    let path_sections: Vec<_> = path
-                        .components()
-                        .map(|c| match c {
-                            std::path::Component::Prefix(_) => None,
-                            std::path::Component::RootDir => None,
-                            std::path::Component::CurDir => None,
-                            std::path::Component::ParentDir => None,
-                            std::path::Component::Normal(val) => {
-                                Some(val.to_string_lossy().to_string())
-                            }
-                        })
-                        .filter(|x| x.is_some())
-                        .map(|x| x.unwrap())
-                        .collect();
-
-                    insert_into.insert(path_sections, path.to_string_lossy().to_string());
+                    let mut spath = path_to_spath(&path);
+                    let mut full_path = base_spath.clone();
+                    full_path.append(&mut spath);
+                    insert_into.insert(full_path, path.to_string_lossy().to_string());
                 }
             }
-        });
+        })?;
 
         Ok(index)
     }
 
-    fn index_common_directory() {}
+    fn index_common_directory(
+        common_directory_path: &Path,
+    ) -> Result<RecursiveDirectoryIndex, errs::ProjectCompilationError> {
+        let mut index = RecursiveDirectoryIndex::default();
+        index_directory(common_directory_path, &mut |path| {
+            if let Some(extension) = path.extension() {
+                if extension.to_string_lossy() == ".js" {
+                    let mut spath = path_to_spath(&path);
+                    let mut full_path = spath!("Common");
+                    full_path.append(&mut spath);
+                    index.insert(full_path, path.to_string_lossy().to_string());
+                }
+            }
+        })?;
+        Ok(index)
+    }
 
     fn index_directory(
         directory_path: &Path,
@@ -179,5 +258,20 @@ mod indexing {
             }
         }
         Ok(())
+    }
+
+    fn path_to_spath(path: &Path) -> SPath {
+        // Generate an spath based on the components of a path, useful for namespacing
+        path.components()
+            .map(|c| match c {
+                std::path::Component::Prefix(_) => None,
+                std::path::Component::RootDir => None,
+                std::path::Component::CurDir => None,
+                std::path::Component::ParentDir => None,
+                std::path::Component::Normal(val) => Some(val.to_string_lossy().to_string()),
+            })
+            .filter(|x| x.is_some())
+            .map(|x| x.unwrap())
+            .collect()
     }
 }
