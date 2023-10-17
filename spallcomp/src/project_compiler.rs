@@ -3,7 +3,6 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use fs_extra;
-use include_dir::{include_dir, Dir, DirEntry};
 use itertools::Itertools;
 use minifier;
 
@@ -44,8 +43,6 @@ impl ProjectPaths {
     }
 }
 
-const FRAMEWORK_RUNTIME_FILES: Dir = include_dir!("$CARGO_MANIFEST_DIR/runtime");
-
 pub fn compile_project(
     project_dir: &Path,
     compilation_settings: CompilationSettings,
@@ -64,17 +61,6 @@ pub fn compile_project(
     setup_build_dir(&project_paths);
     copy_index_file(&project_paths)?;
     copy_static_files(&project_paths);
-
-    // Build JSruntime (should not do this every compilation but it's easier than writing it in macros)
-    logging::log_per_step(
-        "Building and saving runtime",
-        compilation_settings.log_level,
-    );
-    let mut runtime = build_framework_runtime();
-    if compilation_settings.minify_files {
-        runtime = minifier::js::minify(&runtime).to_string();
-    }
-    write_framework_runtime(&project_paths, &runtime);
 
     // Compile elements and pages
     logging::log_brief(
@@ -182,97 +168,6 @@ fn copy_static_files(project_paths: &ProjectPaths) {
     }
 }
 
-fn build_framework_runtime() -> String {
-    // Yes I know it's not efficient to build it each time, but it would be very painful to do this all through macros.
-    // Admittedly pretty shoddy, especially the dependency order part
-
-    // Read files from binary, turn them into a map of name to content.
-    let file_map: HashMap<String, String> = FRAMEWORK_RUNTIME_FILES
-        .find("**/*.js")
-        .unwrap()
-        .filter_map(|entry| match entry {
-            DirEntry::File(f) => Some((
-                f.path().to_string_lossy().to_string(),
-                f.contents_utf8().unwrap().to_string(),
-            )),
-            _ => None,
-        })
-        .collect();
-
-    // Part 1 of determining the order in which the files should be appended to make sure dependencies are fulfilled
-    let mut file_order: Vec<String> = vec![];
-    for tuple in &file_map {
-        let deps = parse_framework_file_dependencies(&tuple.1);
-        add_dependencies_for_file(&deps, &file_map, &mut file_order);
-        file_order.push(tuple.0.to_string());
-    }
-
-    // Part 2 of determining them - remove duplicates.
-    // Then processing them to remove the require, and concatenating.
-    file_order
-        .iter()
-        .unique()
-        .map(|x| remove_require_statement(file_map.get(x).unwrap()))
-        .collect::<Vec<String>>()
-        .join("\n")
-}
-
-fn parse_framework_file_dependencies(file_content: &str) -> Vec<String> {
-    // Returns a list of files it depends on and returns a copy of the file with require statement removed
-    if file_content.starts_with("requires(") {
-        let requirements: Vec<String> = file_content
-            .lines()
-            .next()
-            .unwrap()
-            .replacen("requires(", "", 1)
-            .replace(");", "")
-            .split(",")
-            .map(|x| x.trim().to_string())
-            .collect();
-        requirements
-    } else {
-        vec![]
-    }
-}
-
-fn add_dependencies_for_file(
-    file_dependencies: &Vec<String>,
-    file_map: &HashMap<String, String>,
-    dependency_accumulator: &mut Vec<String>,
-) {
-    // Recursive function to find the dependencies for a file and add them to the accumulator before then adding the file itself.
-
-    for file in file_dependencies {
-        if !file_map.contains_key(file) {
-            panic!("Could not find file {}", file);
-        }
-        add_dependencies_for_file(
-            &parse_framework_file_dependencies(file_map.get(file).unwrap()),
-            file_map,
-            dependency_accumulator,
-        );
-        dependency_accumulator.push(file.to_string());
-    }
-}
-
-fn remove_require_statement(text: &str) -> String {
-    // Remove the requires() statement from the first line of a framework file if it has one
-    if text.starts_with("requires(") {
-        text.lines().skip(1).collect::<Vec<&str>>().join("\n")
-    } else {
-        text.to_string()
-    }
-}
-
-fn write_framework_runtime(project_paths: &ProjectPaths, framework_runtime: &str) {
-    // Write compiled framework runtime to where it belongs in the build dir
-
-    fs::write(
-        project_paths.build_dir.join("scripts/framework.js"),
-        framework_runtime,
-    )
-    .expect("Error copying framework scripts");
-}
 fn compile_elements(
     element_directory: &Path,
     compilation_settings: &CompilationSettings,
